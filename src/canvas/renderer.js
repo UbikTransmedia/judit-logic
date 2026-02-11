@@ -269,11 +269,21 @@ export class WorldRenderer {
     resizeCanvas() {
         const oldW = this.canvas.width;
         const oldH = this.canvas.height;
+        const dpr = window.devicePixelRatio || 1;
 
-        this.canvas.width = this.canvas.parentElement.clientWidth;
-        this.canvas.height = this.canvas.parentElement.clientHeight;
+        const displayW = this.canvas.parentElement.clientWidth;
+        const displayH = this.canvas.parentElement.clientHeight;
 
-        // Preserve center point
+        // Set CSS display size
+        this.canvas.style.width = displayW + 'px';
+        this.canvas.style.height = displayH + 'px';
+
+        // Set buffer size to match CSS pixels (not physical pixels)
+        // This keeps a 1:1 mapping between CSS pixels and canvas coordinates
+        this.canvas.width = displayW;
+        this.canvas.height = displayH;
+
+        // Preserve center point on resize
         if (oldW > 0 && oldH > 0) {
             this.offsetX += (this.canvas.width - oldW) / 2;
             this.offsetY += (this.canvas.height - oldH) / 2;
@@ -480,12 +490,8 @@ export class WorldRenderer {
 
     getMousePos(e) {
         const rect = this.canvas.getBoundingClientRect();
-        // Handle mismatch between CSS size and Buffer size
-        const scaleX = this.canvas.width / rect.width;
-        const scaleY = this.canvas.height / rect.height;
-
-        const screenX = (e.clientX - rect.left) * scaleX;
-        const screenY = (e.clientY - rect.top) * scaleY;
+        const screenX = e.clientX - rect.left;
+        const screenY = e.clientY - rect.top;
 
         // Transform to world coords
         return {
