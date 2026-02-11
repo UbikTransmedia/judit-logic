@@ -1,0 +1,30 @@
+{
+  "name": "judit-formal-logic",
+  "version": "1.0.0",
+  "description": "JUDIT — Interactive Formal Logic Explorer: Kripke Models, Modal Logic, Lambda Calculus & Curry-Howard",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "build-grammar": "nearleyc src/parser/grammar.ne -o src/parser/grammar.js && sed -i '3d' src/parser/grammar.js && sed -i '/if (typeof module !==/,/})();/d' src/parser/grammar.js && echo 'export default grammar;' >> src/parser/grammar.js"
+  },
+  "keywords": [
+    "logic",
+    "kripke",
+    "modal-logic",
+    "lambda-calculus",
+    "curry-howard",
+    "formal-systems"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "vite": "^7.3.1"
+  },
+  "dependencies": {
+    "moo": "^0.5.2",
+    "nearley": "^2.20.1"
+  }
+}

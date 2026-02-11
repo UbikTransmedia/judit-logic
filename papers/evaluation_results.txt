@@ -1,0 +1,11 @@
+JUDIT Evaluation Results
+Formula: p
+Date: 2/11/2026, 1:54:07 AM
+
+World	Value
+-----	-----
+w1	FALSE
+w2	FALSE
+w3	TRUE
+w4	FALSE
+w5	TRUE

@@ -1,0 +1,1853 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JUDIT Logos Canvas - Logic Simulator</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      background-color: #1a1a1a;
+      color: #fff;
+      overflow: hidden;
+    }
+
+    #app {
+      display: flex;
+      flex-direction: column;
+      /* Changed to column to stack Tabs + Content */
+      height: 100vh;
+    }
+
+    /* TABS */
+    #main-tabs {
+      display: flex;
+      background: #222;
+      border-bottom: 1px solid #333;
+      height: 40px;
+      align-items: center;
+      padding: 0 10px;
+      flex-shrink: 0;
+    }
+
+    .tab-btn {
+      padding: 0 15px;
+      height: 100%;
+      background: transparent;
+      border: none;
+      color: #aaa;
+      font-size: 0.9em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .tab-btn:hover {
+      color: #fff;
+      background: #2a2a2a;
+    }
+
+    .tab-btn.active {
+      color: #4a90e2;
+      border-bottom: 2px solid #4a90e2;
+      background: #252a30;
+    }
+
+    .tab-content {
+      display: none;
+      /* Hidden by default */
+      flex-grow: 1;
+      overflow: hidden;
+      position: relative;
+      height: 100%;
+      /* Take remaining height */
+    }
+
+    .tab-content.active {
+      display: flex;
+      /* Flex to support existing layout inside */
+    }
+
+    /* Lessons Specific */
+    .lesson-link {
+      padding: 12px 20px;
+      cursor: pointer;
+      color: #888;
+      font-size: 0.9em;
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+    }
+
+    .lesson-link:hover {
+      background: rgba(255, 255, 255, 0.03);
+      color: #eee;
+    }
+
+    .lesson-link.active {
+      color: #4a90e2;
+      background: rgba(74, 144, 226, 0.08);
+      border-left: 3px solid #4a90e2;
+      font-weight: 500;
+    }
+
+    .lesson-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 40px;
+      border-radius: 16px;
+      margin-bottom: 40px;
+      line-height: 1.8;
+      font-size: 1.1em;
+      color: #dfdfdf;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+
+    .lesson-card h2 {
+      color: #fff;
+      margin-top: 0;
+      font-size: 2.2em;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #fff 0%, #4a90e2 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 30px;
+    }
+
+    .lesson-card h3 {
+      color: #4a90e2;
+      margin-top: 35px;
+      font-size: 1.4em;
+      border-left: 4px solid #4a90e2;
+      padding-left: 20px;
+      margin-bottom: 20px;
+    }
+
+    .lesson-card p {
+      margin-bottom: 20px;
+    }
+
+    .lesson-card code {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 3px 8px;
+      border-radius: 6px;
+      color: #4cd964;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.9em;
+      border: 1px solid rgba(76, 217, 100, 0.2);
+    }
+
+    .lesson-quote {
+      font-style: italic;
+      color: #aaa;
+      border-left: 2px solid #555;
+      padding-left: 20px;
+      margin: 30px 0;
+      font-size: 1.2em;
+      line-height: 1.6;
+    }
+
+    .lesson-example {
+      background: rgba(74, 144, 226, 0.08);
+      border-left: 4px solid #4a90e2;
+      padding: 20px 25px;
+      border-radius: 4px 12px 12px 4px;
+      margin: 30px 0;
+    }
+
+    .lesson-tip {
+      background: rgba(76, 217, 100, 0.05);
+      border: 1px solid rgba(76, 217, 100, 0.2);
+      padding: 15px 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+      font-size: 0.95em;
+    }
+
+    .lesson-warning {
+      background: rgba(226, 74, 74, 0.05);
+      border: 1px solid rgba(226, 74, 74, 0.2);
+      padding: 15px 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+      font-size: 0.95em;
+    }
+
+    .lesson-tip strong {
+      color: #4cd964 !important;
+    }
+
+    .lesson-warning strong {
+      color: #e24a4a !important;
+    }
+
+    .next-lesson-btn {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+    }
+
+    .next-lesson-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(74, 144, 226, 0.5);
+      background: #5fa4f3 !important;
+    }
+
+    /* Lessons Specific */
+    .lesson-link {
+      padding: 12px 20px;
+      cursor: pointer;
+      color: #888;
+      font-size: 0.9em;
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+    }
+
+    .lesson-link:hover {
+      background: rgba(255, 255, 255, 0.03);
+      color: #eee;
+    }
+
+    .lesson-link.active {
+      color: #4a90e2;
+      background: rgba(74, 144, 226, 0.08);
+      border-left: 3px solid #4a90e2;
+      font-weight: 500;
+    }
+
+    .lesson-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 25px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      line-height: 1.7;
+    }
+
+    .lesson-card h2 {
+      color: #4a90e2;
+      margin-top: 0;
+    }
+
+    .lesson-card h3 {
+      color: #f5a623;
+    }
+
+    .lesson-card code {
+      background: #000;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #4cd964;
+    }
+
+    /* Helper for full-screen tabs */
+    .fs-tab {
+      flex-direction: column;
+      padding: 20px;
+      background: #1a1a1a;
+      overflow-y: auto;
+      color: #ddd;
+    }
+
+    #canvas-container {
+      flex-grow: 1;
+      position: relative;
+      background: #121212;
+    }
+
+    canvas {
+      display: block;
+    }
+
+    #bottom-panel {
+      height: 150px;
+      background: #222;
+      border-top: 1px solid #333;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .toolbar-item {
+      margin-bottom: 10px;
+      cursor: pointer;
+      padding: 8px;
+      background: #333;
+      border-radius: 4px;
+      text-align: center;
+    }
+
+    .toolbar-item:hover {
+      background: #444;
+    }
+
+    #formula-input {
+      width: 100%;
+      padding: 10px;
+      background: #333;
+      border: 1px solid #444;
+      color: #fff;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+    }
+
+    #sidebar {
+      width: 260px;
+      background: #222;
+      border-right: 1px solid #333;
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+      overflow: hidden;
+    }
+
+    #sidebar h2 {
+      margin: 0;
+      color: #4a90e2;
+    }
+
+    /* TOOTLIP */
+    #tooltip {
+      position: absolute;
+      background: rgba(40, 40, 45, 0.95);
+      border: 1px solid #4a90e2;
+      color: #fff;
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      pointer-events: none;
+      z-index: 9999;
+      max-width: 300px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(5px);
+      display: none;
+      line-height: 1.4;
+      text-align: left;
+    }
+
+    #tooltip strong {
+      color: #4a90e2;
+      display: block;
+      margin-bottom: 4px;
+      font-size: 0.9em;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+
+<body>
+  <script>
+    window.onerror = function (message, source, lineno, colno, error) {
+      alert(`Global Error: ${message}\nSource: ${source}:${lineno}:${colno}`);
+    };
+    window.onunhandledrejection = function (event) {
+      alert(`Unhandled Promise Rejection: ${event.reason}`);
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const tooltip = document.getElementById('tooltip');
+      document.addEventListener('mouseover', (e) => {
+        const target = e.target.closest('[data-tooltip]');
+        if (target) {
+          tooltip.innerHTML = target.getAttribute('data-tooltip');
+          tooltip.style.display = 'block';
+        } else {
+          tooltip.style.display = 'none';
+        }
+      });
+      document.addEventListener('mousemove', (e) => {
+        if (tooltip.style.display === 'block') {
+          const x = e.pageX + 15;
+          const y = e.pageY + 15;
+          // Keep inside viewport (basic check)
+          tooltip.style.left = Math.min(x, window.innerWidth - 320) + 'px';
+          tooltip.style.top = Math.min(y, window.innerHeight - 100) + 'px';
+        }
+      });
+      document.addEventListener('mouseleave', () => {
+        if (tooltip) tooltip.style.display = 'none';
+      });
+    });
+  </script>
+  <div id="tooltip"></div>
+
+  <!-- Random Generation Config Modal -->
+
+  <div id="app">
+    <!-- Top Navigation Tabs -->
+    <nav id="main-tabs">
+      <span style="font-weight: bold; color: #4a90e2; margin-right: 15px; font-size:1.1em;">JUDIT</span>
+      <button class="tab-btn active" data-tab="tab-editor">🌌 Universe Editor</button>
+
+      <button class="tab-btn" data-tab="tab-lessons">📚 Lessons</button>
+    </nav>
+
+    <!-- TAB 1: Editor (Main View) -->
+    <div id="tab-editor" class="tab-content active" style="flex-direction: column;">
+      <!-- TOP BAR -->
+      <div id="top-bar"
+        style="height: 40px; background: #222; border-bottom: 1px solid #333; display: flex; align-items: center; padding: 0 10px; gap: 10px;">
+        <div style="display:flex; gap:2px; margin-right: 10px;">
+          <button id="top-undo-btn" title="Undo (Ctrl+Z)"
+            style="background:#333; border:1px solid #444; color:#ddd; padding:4px 10px; border-radius:3px 0 0 3px; cursor:pointer; font-size:0.9em;">↩</button>
+          <button id="top-redo-btn" title="Redo (Ctrl+Y)"
+            style="background:#333; border:1px solid #444; color:#ddd; padding:4px 10px; border-radius:0 3px 3px 0; cursor:pointer; font-size:0.9em;">↪</button>
+        </div>
+        <button id="top-random-btn"
+          style="background:#333; border:1px solid #444; color:#ddd; padding:4px 8px; border-radius:3px; cursor:pointer; font-size:0.9em;">Random
+          Model...</button>
+        <button id="top-random-formula-btn"
+          style="background:#333; border:1px solid #444; color:#ddd; padding:4px 8px; border-radius:3px; cursor:pointer; font-size:0.9em;">Random
+          Formula</button>
+        <button id="top-satisfy-btn"
+          style="background:#333; border:1px solid #444; color:#ddd; padding:4px 8px; border-radius:3px; cursor:pointer; font-size:0.9em;">Satisfy
+          Formula</button>
+
+        <!-- Restored Buttons -->
+        <button id="top-presets-btn"
+          style="background:#333; border:1px solid #444; color:#ddd; padding:4px 8px; border-radius:3px; cursor:pointer; font-size:0.9em;">📂
+          Presets</button>
+        <button id="top-translate-btn"
+          style="background:#333; border:1px solid #444; color:#ddd; padding:4px 8px; border-radius:3px; cursor:pointer; font-size:0.9em;">🗣️
+          Translate</button>
+        <button id="top-export-img-btn"
+          style="background:#333; border:1px solid #444; color:#ddd; padding:4px 8px; border-radius:3px; cursor:pointer; font-size:0.9em;">🖼️
+          PNG</button>
+        <button id="top-latex-btn"
+          style="background:#333; border:1px solid #444; color:#ddd; padding:4px 8px; border-radius:3px; cursor:pointer; font-size:0.9em;">📝
+          LaTeX</button>
+        <button id="top-export-res-btn"
+          style="background:#333; border:1px solid #444; color:#ddd; padding:4px 8px; border-radius:3px; cursor:pointer; font-size:0.9em;">📊
+          Results</button>
+      </div>
+      <script>
+        // Dropdown script removed as buttons are back inline
+      </script>
+
+      <div style="display:flex; flex-grow:1; overflow:hidden;">
+        <!-- COLUMN 1: SIDEBAR -->
+        <div id="sidebar"
+          style="display: flex; flex-direction: column; width: 260px; background: #222; border-right: 1px solid #333; padding: 10px; overflow: hidden; flex-shrink: 0;">
+          <h3>Tools</h3>
+          <div class="toolbar-item" draggable="true" data-type="world"
+            data-tooltip="<strong>Create World</strong><br>Drag this onto the canvas to create a new possible world (state). Represents a scenario or state of affairs in the model.">
+            Add World</div>
+          <div class="toolbar-item" draggable="true" data-type="relation"
+            data-tooltip="<strong>Create Relation</strong><br>Drag this for instructions, or hold Shift and drag between worlds to create an accessibility relation (arrow).">
+            Add Relation</div>
+
+          <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+            <button id="export-btn" style="flex: 1; background: #555; border: 1px solid #666;"
+              data-tooltip="<strong>Export Session</strong><br>Save the current model, layout, and history to a JSON file.">Export</button>
+            <button id="import-btn" style="flex: 1; background: #555; border: 1px solid #666;"
+              data-tooltip="<strong>Import Session</strong><br>Load a previously saved JSON model file.">Import</button>
+            <input type="file" id="file-input" style="display: none;" accept=".json,.logos">
+          </div>
+
+          <h3>System</h3>
+          <select id="logic-system" class="toolbar-select"
+            data-tooltip="<strong>Modal Logic System</strong><br>Defines the constraints on relations:<br>• <strong>K</strong>: No constraints (Basic).<br>• <strong>T</strong>: Reflexive (all worlds access themselves). implies □p -> p.<br>• <strong>S4</strong>: Reflexive & Transitive. implies □p -> □□p.<br>• <strong>S5</strong>: Equivalence Relation. implies ◊p -> □◊p."
+            style="width: 100%; padding: 8px; margin-bottom: 10px; background: #333; color: white; border: 1px solid #444; border-radius: 4px;">
+            <option value="K">System K (Standard)</option>
+            <option value="T">System T (Reflexive)</option>
+            <option value="S4">System S4 (Refl+Trans)</option>
+            <option value="S5">System S5 (Equivalence)</option>
+            <option value="Int">Intuitionistic (S4)</option>
+            <option value="GLP">Provability (GLP)</option>
+          </select>
+
+          <h3>Settings</h3>
+          <div style="margin-bottom:10px;">
+            <label style="color:#aaa; font-size:0.8em;">Active Agent (for Relations)</label>
+            <select id="agent-select" class="toolbar-select"
+              style="width:100%; padding:5px; background:#333; color:white; border:1px solid #444; margin-top:3px;">
+              <option value="">✨ Any (Select on Create)</option>
+              <option value="a" style="color:#4a90e2;">Agent a (Blue)</option>
+              <option value="b" style="color:#e24a4a;">Agent b (Red)</option>
+              <option value="c" style="color:#4ae24a;">Agent c (Green)</option>
+              <option value="d" style="color:#e2e24a;">Agent d (Yellow)</option>
+              <option value="u" style="color:#888888;">Agent u (Gray / Universal)</option>
+            </select>
+          </div>
+
+          <div style="margin-bottom: 20px; display:flex; flex-direction:column; gap:5px;">
+            <button id="layout-toggle-btn"
+              style="width: 100%; padding: 8px; background: #333; color: #aaa; border: 1px solid #444; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;"
+              data-tooltip="<strong>Force Layout</strong><br>Enable physics engine to automatically arrange worlds. Nodes will repel each other, and relations will act like springs.">
+              <span id="layout-status-dot"
+                style="width: 8px; height: 8px; background: #555; border-radius: 50%;"></span>
+              Force Layout: <strong>OFF</strong>
+            </button>
+            <div style="display:flex; gap:5px;">
+              <button id="layout-grid-btn"
+                style="flex:1; padding:5px; background:#222; border:1px solid #444; color:#ccc; border-radius:4px; cursor:pointer; font-size:0.8em; transition: background 0.2s;"
+                onmouseover="this.style.background='#333'" onmouseout="this.style.background='#222'"
+                data-tooltip="<strong>Grid Layout</strong><br>Snap all worlds to a clean grid.">Grid</button>
+              <button id="layout-circle-btn"
+                style="flex:1; padding:5px; background:#222; border:1px solid #444; color:#ccc; border-radius:4px; cursor:pointer; font-size:0.8em; transition: background 0.2s;"
+                onmouseover="this.style.background='#333'" onmouseout="this.style.background='#222'"
+                data-tooltip="<strong>Circle Layout</strong><br>Arrange worlds in a perfect circle.">Circle</button>
+              <button id="layout-random-btn"
+                style="flex:1; padding:5px; background:#222; border:1px solid #444; color:#ccc; border-radius:4px; cursor:pointer; font-size:0.8em; transition: background 0.2s;"
+                onmouseover="this.style.background='#333'" onmouseout="this.style.background='#222'"
+                data-tooltip="<strong>Randomize Positions</strong><br>Scatter worlds randomly across the canvas.">Shuffle</button>
+            </div>
+            <button id="layout-center-btn"
+              style="width:100%; padding:8px; background:#222; border:1px solid #444; color:#4a90e2; border-radius:4px; cursor:pointer; font-size:0.9em; transition: background 0.2s; margin-top:2px;"
+              onmouseover="this.style.background='#333'" onmouseout="this.style.background='#222'"
+              data-tooltip="<strong>Center View</strong><br>Auto-zoom and pan to fit the entire graph into view.">
+              📍 Center View
+            </button>
+          </div>
+
+          <div class="toolbox"
+            style="flex-grow: 1; overflow-y: auto; padding-right: 5px; margin-bottom: 10px; border-top: 1px solid #444; padding-top: 10px;">
+            <h3 style="margin-top: 0;">Variables</h3>
+            <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 15px;">
+              <div class="toolbar-item" style="flex:1;" data-type="operator" data-op="var" data-char="p"
+                data-tooltip="<strong>Variable p (Proposition)</strong><br><p>In propositional and modal logic, <em>p</em> is a standard symbol for an atomic proposition. It represents a declarative statement that can be assigned a truth value (True or False) in a given world.</p><strong>Conceptual Use:</strong> It usually denotes the primary fact of interest in a model.</p><strong>Examples:</strong><ul><li>'It is raining.'</li><li>'The switch is ON.'</li><li>'Alice knows the secret.'</li></ul>">
+                p</div>
+              <div class="toolbar-item" style="flex:1;" data-type="operator" data-op="var" data-char="q"
+                data-tooltip="<strong>Variable q (Proposition)</strong><br><p>The variable <em>q</em> is the second standard atomic proposition. It is used to represent a fact distinct from <em>p</em>, often to model consequences, alternative conditions, or independent states.</p><strong>Conceptual Use:</strong> Often used as the consequent in an implication (p → q).</p><strong>Examples:</strong><ul><li>'I carry an umbrella.'</li><li>'The light turns red.'</li><li>'Bob is in the room.'</li></ul>">
+                q</div>
+              <div class="toolbar-item" style="flex:1;" data-type="operator" data-op="var" data-char="r"
+                data-tooltip="<strong>Variable r (Proposition)</strong><br><p>The variable <em>r</em> is the third atomic proposition. It allows for modeling more complex scenarios involving three distinct basic facts.</p><strong>Conceptual Use:</strong> Useful for tertiary conditions or mediating variables.</p><strong>Examples:</strong><ul><li>'The street is wet.'</li><li>'The alarm is sounding.'</li><li>'The message is delivered.'</li></ul>">
+                r</div>
+              <div class="toolbar-item" style="flex:1;" data-type="operator" data-op="var" data-char="s"
+                data-tooltip="<strong>Variable s (Proposition)</strong><br><p>The variable <em>s</em> is the fourth atomic proposition provided in this toolbox. It extends the expressivity of your model to include a fourth independent dimensions.</p><strong>Conceptual Use:</strong> Often used for background conditions or auxiliary states.</p><strong>Examples:</strong><ul><li>'I am late for work.'</li><li>'The system is rebooting.'</li><li>'The battery is low.'</li></ul>">
+                s</div>
+            </div>
+
+            <h3>Logic</h3>
+            <div style="margin-bottom: 15px;">
+              <div class="toolbar-item" data-type="operator" data-op="not" data-char="¬"
+                data-tooltip="<strong>Negation (NOT)</strong><br>True if the formula is false.">¬ Not</div>
+              <div class="toolbar-item" data-type="operator" data-op="and" data-char="∧"
+                data-tooltip="<strong>Conjunction (AND)</strong><br>True if both operands are true.">∧ And</div>
+              <div class="toolbar-item" data-type="operator" data-op="or" data-char="∨"
+                data-tooltip="<strong>Disjunction (OR)</strong><br>True if at least one operand is true.">∨ Or</div>
+              <div class="toolbar-item" data-type="operator" data-op="implies" data-char="→"
+                data-tooltip="<strong>Implication</strong><br>False only if antecedent is true and consequent is false.">
+                →
+                Implies</div>
+              <div class="toolbar-item" data-type="operator" data-op="iff" data-char="↔"
+                data-tooltip="<strong>Biconditional (IFF)</strong><br>True if both operands have the same truth value.">
+                ↔
+                Iff
+              </div>
+              <div class="toolbar-item" data-type="operator" data-op="box" data-char="□"
+                data-tooltip="<strong>Box (Necessity)</strong><br>True if the formula is true in ALL accessible worlds.<br>In Epistemic logic: 'Agent knows that...'">
+                □ Box</div>
+              <div class="toolbar-item" data-type="operator" data-op="diamond" data-char="◊"
+                data-tooltip="<strong>Diamond (Possibility)</strong><br>True if the formula is true in AT LEAST ONE accessible world.<br>In Epistemic logic: 'Agent considers it possible that...'">
+                ◊ Diamond</div>
+              <div class="toolbar-item" data-type="operator" data-op="forall" data-char="∀x "
+                data-tooltip="<strong>Universal Quantifier (First-Order)</strong><br>First-order logic extension (experimental).">
+                ∀ Forall</div>
+              <div class="toolbar-item" data-type="operator" data-op="exists" data-char="∃x "
+                data-tooltip="<strong>Existential Quantifier (First-Order)</strong><br>First-order logic extension (experimental).">
+                ∃ Exists</div>
+              <div class="toolbar-item" data-type="operator" data-op="top" data-char="⊤"
+                data-tooltip="<strong>Top (Verum)</strong><br>Always True.">⊤ True</div>
+              <div class="toolbar-item" data-type="operator" data-op="bot" data-char="⊥"
+                data-tooltip="<strong>Bottom (Falsum)</strong><br>Always False.">⊥ False</div>
+              <div style="display: flex; gap: 5px;">
+                <div class="toolbar-item" style="flex:1;" data-type="operator" data-op="lparen" data-char="("
+                  data-tooltip="<strong>Left Parenthesis</strong><br>Grouping symbol.">(</div>
+                <div class="toolbar-item" style="flex:1;" data-type="operator" data-op="rparen" data-char=")"
+                  data-tooltip="<strong>Right Parenthesis</strong><br>Grouping symbol.">)</div>
+                <div class="toolbar-item" style="flex:1;" data-type="operator" data-op="comma" data-char=","
+                  data-tooltip="<strong>Comma</strong><br>Separator for predicate arguments. e.g. P(a,b)">,</div>
+              </div>
+            </div>
+
+            <h3>Boolean Calculus</h3>
+            <div style="margin-bottom: 15px;">
+              <div style="font-size:0.8em; color:#aaa; margin-bottom:5px;">Partial Derivative (∂f/∂x)</div>
+              <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                <button class="calc-btn" data-var="p"
+                  style="flex:1; background:#333; border:1px solid #444; color:#ddd; padding:4px; border-radius:3px; cursor:pointer;"
+                  title="Differentiate w.r.t p">∂/∂p</button>
+                <button class="calc-btn" data-var="q"
+                  style="flex:1; background:#333; border:1px solid #444; color:#ddd; padding:4px; border-radius:3px; cursor:pointer;"
+                  title="Differentiate w.r.t q">∂/∂q</button>
+                <button class="calc-btn" data-var="r"
+                  style="flex:1; background:#333; border:1px solid #444; color:#ddd; padding:4px; border-radius:3px; cursor:pointer;"
+                  title="Differentiate w.r.t r">∂/∂r</button>
+                <button class="calc-btn" data-var="s"
+                  style="flex:1; background:#333; border:1px solid #444; color:#ddd; padding:4px; border-radius:3px; cursor:pointer;"
+                  title="Differentiate w.r.t s">∂/∂s</button>
+              </div>
+            </div>
+
+            <h3>First-Order Logic (FOL)</h3>
+            <!-- Constants -->
+            <div style="margin-bottom:5px; font-size:0.8em; color:#aaa;">Constants (Objects)</div>
+            <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px;">
+              <div class="toolbar-item" style="flex:1;" data-type="operator" data-op="const" data-char="a"
+                data-tooltip="<strong>Constant 'a'</strong><br><p>Represents a specific object in the domain.</p><strong>Example:</strong> 'Alice', 'Atom A'.<br>Used in predicates: P(a)">
+                a</div>
+              <div class="toolbar-item" style="flex:1;" data-type="operator" data-op="const" data-char="b"
+                data-tooltip="<strong>Constant 'b'</strong><br><p>Represents a second specific object.</p><strong>Example:</strong> 'Bob', 'Ball B'.<br>Used in predicates: R(a,b)">
+                b</div>
+              <div class="toolbar-item" style="flex:1;" data-type="operator" data-op="const" data-char="c"
+                data-tooltip="<strong>Constant 'c'</strong><br><p>Represents a third specific object.</p><strong>Example:</strong> 'Charlie', 'Cat'.">
+                c</div>
+            </div>
+
+            <!-- Variables -->
+            <div style="margin-bottom:5px; margin-top:5px; font-size:0.8em; color:#aaa;">Variables</div>
+            <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px;">
+              <div class="toolbar-item" style="flex:1;" data-type="operator" data-op="var" data-char="x"
+                data-tooltip="<strong>Variable 'x'</strong><br><p>A placeholder for an object, used with quantifiers.</p><strong>Example:</strong> ∀x. P(x) ('Everything is P')">
+                x</div>
+              <div class="toolbar-item" style="flex:1;" data-type="operator" data-op="var" data-char="y"
+                data-tooltip="<strong>Variable 'y'</strong><br><p>A second placeholder variable.</p><strong>Example:</strong> ∃y. R(x,y) ('There exists a y related to x')">
+                y</div>
+              <div class="toolbar-item" style="flex:1;" data-type="operator" data-op="var" data-char="z"
+                data-tooltip="<strong>Variable 'z'</strong><br><p>A third placeholder variable.</p>">z</div>
+            </div>
+
+            <!-- Predicates -->
+            <div style="margin-bottom:5px; margin-top:5px; font-size:0.8em; color:#aaa;">Predicates</div>
+            <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 15px;">
+              <div class="toolbar-item" style="flex:1;" data-type="operator" data-op="pred" data-char="P"
+                data-tooltip="<strong>Predicate P</strong><br><p>Represents a property or relation of objects.</p><strong>Syntax:</strong> P(x) or P(a,b)<br><strong>Example:</strong> P(a) = 'Alice is Polite'">
+                P</div>
+              <div class="toolbar-item" style="flex:1;" data-type="operator" data-op="pred" data-char="Q"
+                data-tooltip="<strong>Predicate Q</strong><br><p>A second predicate symbol.</p><strong>Example:</strong> Q(x) = 'x is Quiet'">
+                Q</div>
+              <div class="toolbar-item" style="flex:1;" data-type="operator" data-op="pred" data-char="R"
+                data-tooltip="<strong>Predicate R</strong><br><p>A third predicate symbol, often used for relations.</p><strong>Example:</strong> R(a,b) = 'a Respects b'">
+                R</div>
+            </div>
+
+            <h3>Domain Editor</h3>
+            <div id="domain-panel" style="background:#333; padding:10px; border-radius:4px; margin-bottom:10px;">
+              <div style="display:flex; gap:5px; margin-bottom:5px;">
+                <input type="text" id="new-object-input" placeholder="New object (e.g. d)"
+                  style="flex:1; padding:5px; width:50px; background:#222; border:1px solid #444; color:white;">
+                <button id="add-object-btn"
+                  style="background:#28a745; color:white; border:none; border-radius:3px; cursor:pointer;">+</button>
+              </div>
+              <div id="domain-list" style="max-height:100px; overflow-y:auto; font-size:0.9em; color:#ddd;">
+                <!-- Domain items will go here -->
+                <div style="font-style:italic; color:#888;">No explicit objects.</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top: auto; padding-top: 20px; display: flex; flex-direction: column; gap: 8px;">
+            <button id="system-insights-btn"
+              style="width: 100%; padding: 8px; background: #4a90e2; border: none; color: white; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;"
+              data-tooltip="<strong>System Insights</strong><br>View detailed analytics about your logic model and agents.">
+              <span>📊</span> System Insights
+            </button>
+            <button id="help-btn"
+              style="width: 100%; padding: 10px; background: #6c757d; border: none; color: white; cursor: pointer; border-radius: 4px;">?
+              Tutorial / Help</button>
+          </div>
+        </div>
+
+        <!-- COLUMN 2: CANVAS -->
+        <div id="canvas-container">
+          <canvas id="world-canvas"></canvas>
+          <div id="canvas-overlay"
+            style="position: absolute; top: 10px; left: 10px; color: rgba(255,255,255,0.5); pointer-events: none;">
+            Drag 'Add World' here.<br>
+            Shift+Drag to link.
+          </div>
+          <div id="model-description"
+            style="position: absolute; bottom: 10px; left: 10px; max-width: 300px; max-height: 200px; overflow-y: auto; background: rgba(0,0,0,0.8); color: white; padding: 10px; border-radius: 4px; font-family: monospace; font-size: 12px; pointer-events: auto; white-space: pre-wrap; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(5px); z-index: 100;">
+            Model M
+          </div>
+        </div>
+
+        <!-- COLUMN 3: INSPECTOR (Right Side) -->
+        <div id="inspector">
+          <!-- TOP HALF: PROPERTIES -->
+          <div id="world-properties-scroll-container"
+            style="flex: 1; display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden; border-bottom: 1px solid #444; padding-bottom: 10px; margin-bottom: 10px; min-height: 0;">
+            <h3 style="margin-top: 0;">Properties</h3>
+            <div id="properties-panel"
+              style="margin-bottom: 20px; padding: 10px; background: rgba(30, 30, 30, 0.4); border: 1px solid rgba(255,255,255,0.05); border-radius: 4px;">
+              <em>Select a World or Relation to edit properties.</em>
+            </div>
+          </div>
+
+          <!-- BOTTOM HALF: EVALUATION -->
+          <div style="flex: 1; display: flex; flex-direction: column; min-height: 0;">
+            <h3 style="margin-top: 0;">Evaluation</h3>
+            <div id="evaluation-container"
+              style="display: flex; flex-direction: column; gap: 10px; flex-grow: 1; min-height: 0;">
+              <input type="text" id="formula-input" placeholder="Enter formula (e.g. p -> []q)"
+                data-tooltip="<strong>Formula Input</strong><br>Type your modal logic formula here. You can use the buttons on the left or type directly.">
+
+              <div style="display: flex; gap: 5px;">
+                <button id="prove-btn"
+                  style="flex: 1; padding: 8px; background: #007bff; border: none; color: white; cursor: pointer; border-radius: 4px;"
+                  data-tooltip="<strong>Prove Validity</strong><br>Checks if the formula is TRUE in ALL possible models of the selected Logic System.<br>Uses a Tableaux solver.">Prove</button>
+                <button id="satisfy-btn"
+                  style="flex: 1; padding: 8px; background: #555; border: none; color: white; cursor: pointer; border-radius: 4px;"
+                  data-tooltip="<strong>Satisfy Formula</strong><br>Attempts to generate a model that satisfies the given formula (SAT).">Satisfy</button>
+                <button id="announce-btn"
+                  style="flex: 1; padding: 8px; background: #28a745; border: none; color: white; cursor: pointer; border-radius: 4px;"
+                  data-tooltip="<strong>Public Announcement</strong><br>Updates the model by removing all worlds where the formula is currently FALSE.">Announce
+                  !</button>
+              </div>
+
+              <div id="evaluation-result"
+                style="padding: 10px; background: #333; border-radius: 4px; border: 1px solid #444; flex-grow: 1; overflow-y: auto; font-family: monospace;">
+                Entered formula results...
+              </div>
+
+              <div id="prove-result"
+                style="padding: 10px; background: #333; border-radius: 4px; min-height: 40px; word-break: break-all; font-family: monospace; color: #fff; border: 1px solid #444;">
+                Prover results...
+              </div>
+            </div>
+          </div>
+        </div>
+      </div> <!-- Close main flex container -->
+
+      <!-- TURING MACHINE: Collapsible bottom panel, collapsed by default -->
+      <div id="turing-panel"
+        style="flex-shrink:0; border-top:2px solid #333; transition:max-height 0.4s ease-in-out, opacity 0.3s ease; overflow:hidden;">
+        <!-- Header (clickable to collapse/expand) -->
+        <div id="turing-header"
+          style="display:flex; justify-content:space-between; align-items:center; padding:8px 15px; cursor:pointer; user-select:none; background:#1a1a2e;"
+          title="Click to expand or collapse the Turing Machine simulator.">
+          <div style="display:flex; align-items:baseline; gap:10px;">
+            <h3 style="color:#4a90e2; margin:0; font-size:1em;">
+              <span id="turing-toggle-arrow" style="font-size:0.8em; margin-right:4px;">▶</span>⚙️ Turing Machine
+            </h3>
+            <span style="color:#666; font-size:0.72em; font-style:italic;">Simulate a universal computation model —
+              define states, transition rules, and run programs on an infinite tape</span>
+          </div>
+          <button class="help-btn-tab" data-section="automata"
+            style="background:none; border:1px solid #444; color:#aaa; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:0.8em;"
+            title="Open the comprehensive Turing Machine tutorial and reference guide."
+            onclick="event.stopPropagation();">Help?</button>
+        </div>
+
+        <!-- Collapsible body (hidden by default) -->
+        <div id="turing-body"
+          style="max-height:0; overflow:hidden; transition:max-height 0.4s ease-in-out, padding 0.3s ease; padding:0 12px;">
+
+          <!-- TWO-COLUMN LAYOUT: Left (main) + Right (transitions) -->
+          <div style="display:flex; gap:12px; padding-top:10px; padding-bottom:10px;">
+
+            <!-- LEFT COLUMN: Controls + Tape + Log -->
+            <div style="flex:1; display:flex; flex-direction:column; gap:8px; min-width:0; overflow-y:auto;">
+
+              <!-- Control Bar -->
+              <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+                <button id="turing-start-btn"
+                  style="padding:6px 12px; background:#28a745; border:none; color:white; border-radius:4px; cursor:pointer; font-weight:bold; font-size:0.85em;"
+                  title="Start auto-run: the machine executes transitions continuously at the configured speed. Click again to pause.">▶
+                  Start</button>
+                <button id="turing-step-btn"
+                  style="padding:6px 12px; background:#555; border:1px solid #666; color:white; border-radius:4px; cursor:pointer; font-size:0.85em;"
+                  title="Execute a single transition step.">⏯ Step</button>
+                <button id="turing-reset-btn"
+                  style="padding:6px 12px; background:#d9534f; border:none; color:white; border-radius:4px; cursor:pointer; font-size:0.85em;"
+                  title="Reset the machine.">⏹ Reset</button>
+                <div style="width:1px; height:20px; background:#444; margin:0 2px;"></div>
+                <button id="turing-save-btn"
+                  style="padding:6px 12px; background:#4a90e2; border:none; color:white; border-radius:4px; cursor:pointer; font-size:0.85em;"
+                  title="Save configuration as JSON.">💾 Save</button>
+                <button id="turing-load-config-btn"
+                  style="padding:6px 12px; background:#555; border:1px solid #666; color:white; border-radius:4px; cursor:pointer; font-size:0.85em;"
+                  title="Load a saved configuration.">📂 Load</button>
+                <input type="file" id="turing-file-input" style="display:none;" accept=".json,.tm">
+                <div style="width:1px; height:20px; background:#444; margin:0 2px;"></div>
+                <div style="display:flex; align-items:center; gap:4px;" title="Delay (ms) between auto-steps.">
+                  <label style="color:#aaa; font-size:0.75em; white-space:nowrap;">Speed:</label>
+                  <input id="turing-speed" type="range" min="50" max="2000" value="500" step="50"
+                    style="width:70px; accent-color:#4a90e2;">
+                  <span id="turing-speed-label" style="color:#888; font-size:0.7em; min-width:35px;">500ms</span>
+                </div>
+              </div>
+
+              <!-- Tape Input + Cells selector -->
+              <div style="display:flex; gap:8px; align-items:center;">
+                <input id="turing-tape-input" type="text" placeholder="Tape (e.g. 10110)" value="000"
+                  style="padding:6px; background:#333; border:1px solid #444; color:white; border-radius:4px; font-family:monospace; flex-grow:1; font-size:0.9em;"
+                  title="Initial tape content.">
+                <button id="turing-load-btn"
+                  style="padding:6px 10px; background:#555; border:1px solid #666; color:white; border-radius:4px; cursor:pointer; font-size:0.8em;"
+                  title="Write input text onto the tape.">Load Tape</button>
+                <div style="display:flex; align-items:center; gap:4px;" title="Default number of visible tape cells.">
+                  <label style="color:#aaa; font-size:0.75em; white-space:nowrap;">Cells:</label>
+                  <select id="turing-tape-size"
+                    style="padding:4px; background:#333; border:1px solid #444; color:white; border-radius:4px; font-size:0.8em;">
+                    <option value="15">15</option>
+                    <option value="25" selected>25</option>
+                    <option value="35">35</option>
+                    <option value="50">50</option>
+                    <option value="75">75</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- State Info Bar -->
+              <div id="turing-state-info"
+                style="display:flex; gap:12px; padding:6px 12px; background:#222; border:1px solid #333; border-radius:5px; font-family:monospace; font-size:0.8em; align-items:center; flex-wrap:wrap;"
+                title="Live machine status panel.">
+                <span>State: <strong id="turing-current-state" style="color:#4a90e2;">—</strong></span>
+                <span>Head: <strong id="turing-head-pos" style="color:#4cd964;">0</strong></span>
+                <span>Steps: <strong id="turing-step-count" style="color:#f5a623;">0</strong></span>
+                <span>Status: <strong id="turing-status" style="color:#aaa;">IDLE</strong></span>
+                <span id="turing-tape-summary"
+                  style="color:#555; font-size:0.85em; font-family:monospace; margin-left:auto;"></span>
+              </div>
+
+              <!-- Container for Tape + Log (Two Columns) -->
+              <div style="display:flex; gap:12px; height:250px; min-height:0;">
+                <!-- Tape Visualization (Left) -->
+                <div
+                  style="flex:2; background:#1a1a1a; border:1px solid #333; border-radius:5px; padding:8px; overflow-y:auto;"
+                  title="The tape. Each cell shows its position and symbol. ▲ = head position.">
+                  <div id="tape-container" style="display:flex; flex-wrap:wrap; gap:2px; justify-content:center;">
+                    <!-- Tape cells rendered by JS -->
+                  </div>
+                </div>
+
+                <!-- Execution Log (Right) -->
+                <div
+                  style="flex:1; background:#1a1a1a; border:1px solid #333; border-radius:5px; padding:8px; overflow-y:auto; display:flex; flex-direction:column;"
+                  title="Timestamped log of every transition.">
+                  <span
+                    style="color:#888; font-size:0.75em; font-weight:bold; text-transform:uppercase; letter-spacing:1px; flex-shrink:0;">Execution
+                    Log</span>
+                  <div id="turing-log"
+                    style="margin-top:4px; font-family:monospace; font-size:0.8em; color:#aaa; flex-grow:1;">
+                    <div style="color:#555;">Ready. Define states and rules, then press Start or Step.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- RIGHT COLUMN: Presets + Add Rule + Transition Table -->
+            <div style="width:340px; flex-shrink:0; display:flex; flex-direction:column; gap:6px;">
+
+              <!-- Preset Machines -->
+              <div style="background:#222; border:1px solid #333; border-radius:5px; padding:8px;">
+                <select id="turing-presets-select"
+                  style="width:100%; padding:6px; background:#333; border:1px solid #444; color:white; border-radius:4px; font-size:0.8em;"
+                  title="Load a pre-built Turing Machine.">
+                  <option value="">📦 Load a Preset Machine...</option>
+                  <optgroup label="Arithmetic">
+                    <option value="binary_increment">Binary Increment (+1)</option>
+                    <option value="unary_add">Unary Addition (1+1)</option>
+                    <option value="unary_subtract">Unary Subtraction (1-1)</option>
+                    <option value="binary_double">Binary Doubler (×2)</option>
+                    <option value="ones_counter">1s Counter (Unary)</option>
+                  </optgroup>
+                  <optgroup label="Bit Operations">
+                    <option value="binary_complement">Binary Complement (NOT)</option>
+                    <option value="binary_and">Binary AND (2 inputs)</option>
+                    <option value="zero_eraser">Zero Eraser</option>
+                    <option value="left_shift">Left Shift (×2 unsigned)</option>
+                    <option value="right_pad">Right Pad with 0</option>
+                  </optgroup>
+                  <optgroup label="String & Pattern">
+                    <option value="palindrome_check">Palindrome Checker (ab)</option>
+                    <option value="copy_string">String Copier (01)</option>
+                    <option value="symbol_replace">Symbol Replacer (a→b)</option>
+                  </optgroup>
+                  <optgroup label="Classic Theory">
+                    <option value="busy_beaver_2">Busy Beaver (2-state)</option>
+                    <option value="busy_beaver_3">Busy Beaver (3-state)</option>
+                  </optgroup>
+
+                </select>
+              </div>
+
+              <!-- Add Rule Form -->
+              <div style="background:#222; border:1px solid #333; border-radius:5px; padding:8px;"
+                title="Define a transition rule.">
+                <span
+                  style="color:#888; font-size:0.75em; font-weight:bold; text-transform:uppercase; letter-spacing:1px;">Add
+                  Transition Rule</span>
+                <div style="display:flex; gap:4px; margin-top:6px; flex-wrap:wrap;">
+                  <input id="rule-from" type="text" placeholder="From"
+                    style="flex:1; min-width:55px; padding:5px; background:#333; border:1px solid #444; color:white; border-radius:4px; font-family:monospace; font-size:0.8em;"
+                    title="Source state.">
+                  <input id="rule-read-input" type="text" placeholder="R" maxlength="1"
+                    style="width:35px; padding:5px; background:#333; border:1px solid #444; color:white; border-radius:4px; font-family:monospace; font-size:0.8em; text-align:center;"
+                    title="Symbol to read.">
+                  <input id="rule-write-input" type="text" placeholder="W" maxlength="1"
+                    style="width:35px; padding:5px; background:#333; border:1px solid #444; color:white; border-radius:4px; font-family:monospace; font-size:0.8em; text-align:center;"
+                    title="Symbol to write.">
+                  <select id="rule-move-input"
+                    style="width:45px; padding:5px; background:#333; border:1px solid #444; color:white; border-radius:4px; font-size:0.8em;"
+                    title="Head direction.">
+                    <option value="R">R</option>
+                    <option value="L">L</option>
+                    <option value="S">S</option>
+                  </select>
+                  <input id="rule-to" type="text" placeholder="To"
+                    style="flex:1; min-width:55px; padding:5px; background:#333; border:1px solid #444; color:white; border-radius:4px; font-family:monospace; font-size:0.8em;"
+                    title="Target state.">
+                </div>
+                <button id="turing-add-rule-btn"
+                  style="margin-top:6px; width:100%; padding:6px; background:#28a745; border:none; color:white; border-radius:4px; cursor:pointer; font-size:0.8em; font-weight:bold;"
+                  title="Add this transition rule.">+ Add Rule</button>
+              </div>
+
+              <!-- Rules Table -->
+              <div
+                style="background:#1a1a1a; border:1px solid #333; border-radius:5px; padding:8px; flex-grow:1; overflow-y:auto; max-height:200px;"
+                title="All defined transition rules.">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                  <span
+                    style="color:#888; font-size:0.75em; font-weight:bold; text-transform:uppercase; letter-spacing:1px;">Transition
+                    Table</span>
+                  <span id="turing-rule-count" style="color:#555; font-size:0.7em;">0 rules</span>
+                </div>
+                <div id="turing-rules-table" style="font-family:monospace; font-size:0.8em;">
+                  <div style="color:#555; padding:8px; text-align:center;">No rules defined. Add rules above or load a
+                    preset.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LAMBDA PROOF: Collapsible bottom panel -->
+      <div id="lambda-panel"
+        style="flex-shrink:0; border-top:2px solid #333; transition:max-height 0.4s ease-in-out, opacity 0.3s ease; overflow:hidden;">
+        <!-- Header -->
+        <div id="lambda-header"
+          style="display:flex; justify-content:space-between; align-items:center; padding:8px 15px; cursor:pointer; user-select:none; background:#1a1a2e;"
+          title="Click to expand/collapse the Lambda Proof Assistant.">
+          <div style="display:flex; align-items:baseline; gap:10px;">
+            <h3 style="color:#4a90e2; margin:0; font-size:1em;">
+              <span id="lambda-toggle-arrow" style="font-size:0.8em; margin-right:4px;">▶</span>ƛ Lambda Proof Assistant
+            </h3>
+            <span style="color:#666; font-size:0.72em; font-style:italic;">Explore the Curry-Howard Isomorphism —
+              Programs are Proofs, Types are Propositions</span>
+          </div>
+          <button class="help-btn-tab" data-section="lambda"
+            style="background:none; border:1px solid #444; color:#aaa; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:0.8em;"
+            onclick="event.stopPropagation();">Help?</button>
+        </div>
+
+        <!-- Body -->
+        <div id="lambda-body"
+          style="max-height:0; overflow:hidden; transition:max-height 0.4s ease-in-out, padding 0.3s ease; padding:0 12px;">
+          <div
+            style="display: grid; grid-template-columns: 1fr 400px; height: 350px; gap: 15px; padding-top:10px; padding-bottom:10px;">
+            <div style="display: flex; flex-direction: column; gap: 12px; min-width: 0;">
+              <!-- Presets Section -->
+              <div style="display:flex; flex-direction:column; gap:6px;">
+                <label
+                  style="color:#888; font-size:0.75em; font-weight:bold; text-transform:uppercase; letter-spacing:0.5px;">1.
+                  Select Preset</label>
+                <div style="display:flex; gap:8px; align-items:center;">
+                  <select id="lambda-presets"
+                    style="flex:1; padding:8px; background:#1a1a2e; border:1px solid #333; color:white; border-radius:4px; font-size:0.9em; cursor:pointer; outline:none;"
+                    title="Choose a pre-defined lambda expression.">
+                    <option value="">-- Choose a Preset --</option>
+                    <optgroup label="Classic Combinators">
+                      <option value="identity">Identity (I): λx.x</option>
+                      <option value="const">Constant (K): λx.λy.x</option>
+                      <option value="s_comb">S-Combinator: λx.λy.λz.x z (y z)</option>
+                      <option value="omega">Omega: (λx.x x)(λx.x x)</option>
+                    </optgroup>
+                    <optgroup label="Church Booleans">
+                      <option value="true">True: λx.λy.x</option>
+                      <option value="false">False: λx.λy.y</option>
+                      <option value="and">AND: λp.λq.p q p</option>
+                      <option value="or">OR: λp.λq.p p q</option>
+                      <option value="not">NOT: λp.λa.λb.p b a</option>
+                    </optgroup>
+                    <optgroup label="Church Numerals">
+                      <option value="zero">Zero: λf.λx.x</option>
+                      <option value="one">One: λf.λx.f x</option>
+                      <option value="two">Two: λf.λx.f (f x)</option>
+                      <option value="succ">Successor: λn.λf.λx.f (n f x)</option>
+                    </optgroup>
+                  </select>
+                  <div style="display:flex; gap:4px;">
+                    <button id="lambda-save-btn"
+                      style="padding:8px 12px; background:#222; border:1px solid #444; color:#ccc; border-radius:4px; cursor:pointer;"
+                      title="Save expression to file.">💾</button>
+                    <button id="lambda-load-btn"
+                      style="padding:8px 12px; background:#222; border:1px solid #444; color:#ccc; border-radius:4px; cursor:pointer;"
+                      title="Load expression from file.">📂</button>
+                    <button id="lambda-clear-btn"
+                      style="padding:8px 12px; background:#333; border:1px solid #444; color:#aaa; border-radius:4px; cursor:pointer; font-size:0.8em; font-weight:bold;"
+                      title="Clear current expression.">CL</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Input Section -->
+              <div style="display:flex; flex-direction:column; gap:6px; flex:1;">
+                <div style="display:flex; justify-content:space-between; align-items:baseline;">
+                  <label
+                    style="color:#888; font-size:0.75em; font-weight:bold; text-transform:uppercase; letter-spacing:0.5px;">2.
+                    Input Witness (Lambda Term)</label>
+                  <span style="font-size:0.7em; color:#555; font-family:monospace;">Syntax: \x.\y.x y</span>
+                </div>
+                <textarea id="lambda-input"
+                  style="flex: 1; background: #000; color: #4cd964; border: 1px solid #333; border-radius: 4px; padding: 12px; font-family: 'Fira Code', 'Consolas', monospace; font-size:0.95em; line-height:1.4; resize: none; outline:none;"
+                  placeholder="Enter Lambda Expression (e.g. \x.\y.\z. x z (y z))"></textarea>
+              </div>
+              <!-- Type & Goal Section -->
+              <div style="display:flex; gap:10px;">
+                <div style="flex:1; display:flex; flex-direction:column; gap:6px;">
+                  <label
+                    style="color:#888; font-size:0.75em; font-weight:bold; text-transform:uppercase; letter-spacing:0.5px;">
+                    3. Target Goal Formula (Optional)</label>
+                  <input id="lambda-goal-input" type="text"
+                    style="background:#000; color:#4a90e2; border:1px solid #333; border-radius:4px; padding:10px; font-family:'Fira Code', monospace; font-size:0.9em;"
+                    placeholder="e.g. p -> p">
+                </div>
+                <div style="width:120px; display:flex; flex-direction:column; gap:6px;">
+                  <label
+                    style="color:#888; font-size:0.75em; font-weight:bold; text-transform:uppercase; letter-spacing:0.5px;">
+                    Status</label>
+                  <div id="lambda-status-badge"
+                    style="flex:1; background:#222; border:1px solid #333; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:0.8em; font-weight:bold; color:#555;">
+                    IDLE
+                  </div>
+                </div>
+              </div>
+
+              <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                <button id="lambda-infer-btn"
+                  style="flex:1; padding:8px 20px; background:#4a90e2; color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold; font-size:0.9em; transition: background 0.2s;"
+                  title="Infer logic type and verify against goal.">▶ Verify & Infer Proof Witness</button>
+                <input type="file" id="lambda-file-input" style="display:none;" accept=".txt,.lambda">
+              </div>
+            </div>
+            <div
+              style="background: #111; border: 1px solid #222; border-radius: 5px; padding: 15px; overflow-y: auto; display:flex; flex-direction:column; gap:15px;">
+              <div>
+                <h4
+                  style="margin:0 0 10px 0; color:#888; font-size:0.75em; font-weight:bold; text-transform:uppercase; border-bottom:1px solid #222; padding-bottom:5px;">
+                  Inferred Logical Proposition</h4>
+                <div id="lambda-type-output"
+                  style="font-family:'Fira Code', monospace; color:#4cd964; font-size:1.1em; background:#000; padding:12px; border-radius:4px; border:1px solid #333; text-align:center; min-height:40px; display:flex; align-items:center; justify-content:center;">
+                  None</div>
+              </div>
+              <div>
+                <h4
+                  style="margin:0 0 10px 0; color:#888; font-size:0.75em; font-weight:bold; text-transform:uppercase; border-bottom:1px solid #222; padding-bottom:5px;">
+                  Curry-Howard Insight</h4>
+                <div id="lambda-insight" style="font-size:0.82em; color:#888; line-height:1.5; font-style:italic;">
+                  Enter a lambda term to see its corresponding logical formula. In Simply Typed Lambda Calculus,
+                  programs act as witnesses (proofs) for logical propositions (their types).
+                </div>
+              </div>
+              <div style="margin-top:auto;">
+                <button id="lambda-apply-btn"
+                  style="width:100%; padding:10px; background:#111; border:1px solid #4a90e2; color:#4a90e2; border-radius:4px; cursor:pointer; opacity:0.5; font-weight:bold;"
+                  data-tooltip="<strong>TRANS-ISOMORPHISM</strong><br><p>Export the inferred logical proposition to the main Logic Workspace.</p><p>The mapping converts STLC types to Propositional Logic atoms (p, q, r, s).</p>"
+                  disabled>
+                  Apply to Logic Workspace
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- NATURAL DEDUCTION PANEL -->
+      <div id="nd-panel"
+        style="flex-shrink:0; border-top:2px solid #333; transition:max-height 0.4s ease-in-out, opacity 0.3s ease; overflow:hidden;">
+        <div id="nd-header"
+          style="display:flex; justify-content:space-between; align-items:center; padding:8px 15px; cursor:pointer; user-select:none; background:#1a1a2e;"
+          title="Click to expand or collapse the Natural Deduction derivation tree.">
+          <div style="display:flex; align-items:baseline; gap:10px;">
+            <h3 style="color:#4a90e2; margin:0; font-size:1em;">
+              <span id="nd-toggle-arrow" style="font-size:0.8em; margin-right:4px;">▶</span>🌿 Natural Deduction
+            </h3>
+            <span style="font-size:0.75em; color:#555; text-transform:uppercase; letter-spacing:1px; font-weight:bold;">
+              Derivation Tree (STLC)</span>
+          </div>
+          <div id="nd-actions" style="display:none; gap:5px; align-items:center;" onclick="event.stopPropagation();">
+            <button id="nd-export-png" class="nd-action-btn" data-tooltip="Export as PNG 🖼️">PNG</button>
+            <button id="nd-export-svg" class="nd-action-btn" data-tooltip="Export as SVG 📐">SVG</button>
+            <button id="nd-export-txt" class="nd-action-btn" data-tooltip="Export as Text 📄">TXT</button>
+            <button id="nd-export-latex" class="nd-action-btn" data-tooltip="Export as LaTeX 📝">TEX</button>
+          </div>
+        </div>
+        <div id="nd-body" style="padding:15px; background:#0a0a0a; display:none;">
+          <div id="nd-tree-container"
+            style="width:100%; min-height:200px; max-height:400px; overflow:auto; background:#000; border:1px solid #222; border-radius:4px; padding:20px; display:flex; justify-content:center; align-items:flex-end; font-family:'Fira Code', monospace; font-size:0.9em;">
+            <div style="color:#444; font-style:italic;">No witness provided. Enter a lambda term in the panel above to
+              see its derivation.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCRIPTING PANEL: Collapsible bottom panel -->
+      <div id="scripting-panel"
+        style="flex-shrink:0; border-top:2px solid #333; transition:max-height 0.4s ease-in-out, opacity 0.3s ease; overflow:hidden;">
+        <!-- Header (clickable to collapse/expand) -->
+        <div id="scripting-header"
+          style="display:flex; justify-content:space-between; align-items:center; padding:8px 15px; cursor:pointer; user-select:none; background:#1a1a2e;"
+          title="Click to expand or collapse the Scripting interface.">
+          <div style="display:flex; align-items:baseline; gap:10px;">
+            <h3 style="color:#4a90e2; margin:0; font-size:1em;">
+              <span id="scripting-toggle-arrow" style="font-size:0.8em; margin-right:4px;">▶</span>💻 Scripting
+            </h3>
+            <span style="color:#666; font-size:0.72em; font-style:italic;">Write JavaScript to manipulate the universe
+              programmatically</span>
+          </div>
+          <button class="help-btn-tab" data-section="scripting"
+            style="background:none; border:1px solid #444; color:#aaa; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:0.8em;"
+            title="Open the Scripting API reference." onclick="event.stopPropagation();">Help?</button>
+        </div>
+
+        <!-- Collapsible body (hidden by default) -->
+        <div id="scripting-body"
+          style="max-height:0; overflow:hidden; transition:max-height 0.4s ease-in-out, padding 0.3s ease; padding:0 12px;">
+
+          <div style="padding-top:10px; padding-bottom:10px; display:flex; flex-direction:column; gap:10px;">
+            <!-- Toolbar -->
+            <div style="display:flex; gap:10px; align-items:center;">
+              <select id="script-snippets"
+                style="padding:6px; background:#333; border:1px solid #444; color:white; border-radius:4px; font-family:sans-serif; flex-grow:1; font-size:0.9em;">
+                <option value="">-- Load Snippet --</option>
+                <option value="clear">Clear Universe</option>
+                <option value="grid">Generate 5x5 Grid</option>
+                <option value="tree">Generate Binary Tree</option>
+                <option value="circle">Generate Circle (Graph)</option>
+                <option value="random_walk">Generar Camino Aleatorio</option>
+                <option value="star">Topología de Estrella</option>
+                <option value="kripke_symmetric">Añadir Simetría (B/S5)</option>
+                <option value="bipartite">Grafo Bipartito (K3,3)</option>
+                <option value="full_tree">Árbol Binario Completo</option>
+                <option value="ring">Anillo de Mundos (Anillo)</option>
+                <option value="self_loops">Añadir Bucles Reflexivos (Auto-lazos)</option>
+                <option value="turing">Setup Turing Machine (Binary Increment)</option>
+              </select>
+              <button id="run-script-btn" class="toolbar-item"
+                style="padding:6px 12px; background:#28a745; border:none; color:white; font-weight:bold; border-radius:4px; cursor:pointer;">▶
+                Run Script</button>
+              <button id="save-script-btn" class="toolbar-item"
+                style="padding:6px 12px; background:#4a90e2; border:none; color:white; border-radius:4px; cursor:pointer;">💾
+                Save</button>
+              <button id="load-script-btn" class="toolbar-item"
+                style="padding:6px 12px; background:#555; border:none; color:white; border-radius:4px; cursor:pointer;">📂
+                Load</button>
+            </div>
+
+            <div style="display:flex; gap:15px; height:350px;">
+              <!-- Editor -->
+              <div style="flex:2; display:flex; flex-direction:column;">
+                <textarea id="script-console"
+                  style="flex:1; background:#1e1e1e; color:#dcdcdc; font-family:'Fira Code', 'Consolas', monospace; padding:15px; border:1px solid #444; border-radius:4px; font-size:14px; line-height:1.5; tab-size:4; resize:none;"
+                  spellcheck="false"
+                  placeholder="// Write JavaScript here to manipulate the 'model' object..."></textarea>
+              </div>
+
+              <!-- Output + API -->
+              <div style="flex:1; display:flex; flex-direction:column; gap:10px;">
+                <!-- STDOUT -->
+                <div id="script-stdout-container"
+                  style="display:flex; flex-direction:column; gap:5px; flex:1; min-height:0;">
+                  <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <label style="font-size:0.8em; color:#888; font-weight:bold;">STDOUT / OUTPUT</label>
+                    <button id="clear-stdout-btn"
+                      style="background:none; border:none; color:#555; cursor:pointer; font-size:0.8em;">Clear</button>
+                  </div>
+                  <div id="script-stdout"
+                    style="flex:1; background:#000; color:#4cd964; font-family:'Fira Code', monospace; padding:10px; border:1px solid #333; border-radius:4px; font-size:12px; overflow-y:auto; line-height:1.4;">
+                    > Ready.
+                  </div>
+                </div>
+
+                <!-- API Hint -->
+                <div
+                  style="background:#222; padding:10px; border-radius:4px; font-size:0.85em; color:#bbb; border:1px solid #333; height:140px; overflow-y:auto;">
+                  <strong style="color:#4a90e2; display:block; margin-bottom:5px;">API Quick Ref:</strong>
+                  <ul style="padding-left:20px; color:#888; margin:0;">
+                    <li><code>model.addWorld(new World(id, x, y))</code></li>
+                    <li><code>model.addRelation(src, tgt, agent)</code></li>
+                    <li><code>model.worlds.clear()</code></li>
+                    <li><code>model.relations = []</code></li>
+                    <li><code>turing.loadTape("101")</code></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div> <!-- Close tab-editor -->
+
+
+
+    <!-- TAB: Lessons -->
+    <div id="tab-lessons" class="tab-content fs-tab" style="padding: 0; overflow: hidden; flex-direction: row;">
+      <!-- Sidebar: Lesson Index -->
+      <aside id="lesson-sidebar"
+        style="width: 280px; height: 100%; background: #1a1a1f; border-right: 1px solid #333; display: flex; flex-direction: column; flex-shrink: 0; overflow: hidden;">
+        <div style="padding: 20px; border-bottom: 1px solid #333; background: rgba(74, 144, 226, 0.05);">
+          <h3 style="margin: 0; font-size: 1.1em; color: #4a90e2; display: flex; align-items: center; gap: 10px;">
+            <span>📖</span> Course Index
+          </h3>
+          <p style="margin: 5px 0 0; font-size: 0.75em; color: #777; text-transform: uppercase; letter-spacing: 0.5px;">
+            Progressive Tutorial</p>
+        </div>
+        <nav id="lesson-index" style="flex-grow: 1; overflow-y: auto; padding: 10px 0;">
+          <!-- Index items will be injected by JS -->
+        </nav>
+      </aside>
+
+      <!-- Main Content Area -->
+      <main id="lesson-content-area"
+        style="flex-grow: 1; height: 100%; overflow-y: auto; padding: 40px; background: radial-gradient(circle at top right, #1e1e24 0%, #121214 100%); position: relative; scroll-behavior: smooth;">
+        <div id="lesson-body" style="max-width: 800px; margin: 0 auto;">
+          <div id="lesson-viewer-placeholder" style="text-align: center; padding-top: 100px; color: #555;">
+            <span style="font-size: 4em; display: block; margin-bottom: 20px;">🎓</span>
+            Select a lesson from the sidebar to begin your journey into formal systems.
+          </div>
+        </div>
+      </main>
+    </div>
+
+
+
+  </div> <!-- End #app -->
+
+  <!-- GLOBAL MODALS & POPUPS (End of Body) -->
+
+  <!-- Random Generation Config Modal -->
+  <div id="random-modal"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center;">
+    <div
+      style="background: #2a2a2a; padding: 20px; border-radius: 8px; width: 300px; color: #eee; border: 1px solid #444;">
+      <h3 style="margin-top:0; color:#4a90e2;">Random Model Config</h3>
+      <div style="margin-bottom:10px;">
+        <label style="display:block; font-size:0.9em; margin-bottom:5px;">Number of Worlds:</label>
+        <input type="number" id="rnd-worlds" value="5" min="1" max="20"
+          style="width:100%; padding:5px; background:#333; border:1px solid #444; color:white;">
+      </div>
+      <div style="margin-bottom:10px;">
+        <label style="display:block; font-size:0.9em; margin-bottom:5px;">Relation Probability (0-1):</label>
+        <input type="number" id="rnd-rel-prob" value="0.3" min="0" max="1" step="0.1"
+          style="width:100%; padding:5px; background:#333; border:1px solid #444; color:white;">
+      </div>
+      <div style="margin-bottom:10px;">
+        <label style="display:block; font-size:0.9em; margin-bottom:5px;">Atom Probability (0-1):</label>
+        <input type="number" id="rnd-atom-prob" value="0.5" min="0" max="1" step="0.1"
+          style="width:100%; padding:5px; background:#333; border:1px solid #444; color:white;">
+      </div>
+      <div style="margin-bottom:10px;">
+        <label style="display:block; font-size:0.9em; margin-bottom:5px;">Link Distribution:</label>
+        <select id="rnd-dist" style="width:100%; padding:5px; background:#333; border:1px solid #444; color:white;">
+          <option value="uniform">Uniform (Erdős-Rényi)</option>
+          <option value="scale-free">Scale-Free (Hubs / Power Law)</option>
+          <option value="balanced">Balanced (Social / Regular)</option>
+        </select>
+      </div>
+      <div style="margin-bottom:10px;">
+        <label style="display:block; font-size:0.9em; margin-bottom:5px;">Include Agents:</label>
+        <div style="display:flex; gap:10px;">
+          <label><input type="checkbox" id="rnd-agent-a" checked> <span style="color:#4a90e2">a</span></label>
+          <label><input type="checkbox" id="rnd-agent-b"> <span style="color:#e24a90">b</span></label>
+          <label><input type="checkbox" id="rnd-agent-c"> <span style="color:#4ae290">c</span></label>
+          <label><input type="checkbox" id="rnd-agent-d"> <span style="color:#f5a623">d</span></label>
+        </div>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+        <button id="rnd-cancel-btn"
+          style="padding:5px 10px; background:#555; border:none; color:white; border-radius:3px; cursor:pointer;">Cancel</button>
+        <button id="rnd-generate-btn"
+          style="padding:5px 10px; background:#007bff; border:none; color:white; border-radius:3px; cursor:pointer;">Generate</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Export Modal -->
+  <div id="export-modal"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center;">
+    <div
+      style="background: #2a2a2a; padding: 20px; border-radius: 8px; width: 500px; color: #eee; border: 1px solid #444; display:flex; flex-direction:column;">
+      <h3 style="margin-top:0; color:#4a90e2;">Export Result</h3>
+      <textarea id="export-textarea"
+        style="width: 100%; height: 200px; background: #333; color: #fff; border: 1px solid #444; padding: 10px; font-family: monospace; resize: vertical; margin-bottom:10px;"
+        readonly></textarea>
+      <div style="display:flex; justify-content:flex-end; gap:10px;">
+        <button id="export-copy-btn"
+          style="padding:5px 10px; background:#007bff; border:none; color:white; border-radius:3px; cursor:pointer;">Copy
+          to Clipboard</button>
+        <button id="export-close-btn"
+          style="padding:5px 10px; background:#555; border:none; color:white; border-radius:3px; cursor:pointer;">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tutorial / Help Modal -->
+  <div id="tutorial-modal"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 3000; justify-content: center; align-items: center;">
+    <div
+      style="background: #2a2a2a; padding: 30px; border-radius: 10px; max-width: 900px; width:90%; max-height: 90vh; overflow-y: auto; color: #eee; border: 1px solid #444; box-shadow: 0 10px 40px rgba(0,0,0,0.6);">
+      <h2 style="margin-top: 0; border-bottom: 2px solid #4a90e2; padding-bottom: 12px; color: #4a90e2;">📘 JUDIT — Help
+        & Reference</h2>
+
+      <div id="tutorial-body" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+
+        <!-- 1. Interface Basics -->
+        <div style="background:#222; padding:15px; border-radius:8px; border:1px solid #333;">
+          <h3 style="color: #4a90e2; margin-top:0;">1. Interface Basics</h3>
+          <ul style="padding-left: 18px; line-height: 1.7; font-size:0.9em;">
+            <li><strong>Canvas:</strong> The central area where you build your Kripke model visually.</li>
+            <li><strong>Add World:</strong> Drag from the sidebar, or double-click the canvas to create a new possible
+              world (node).</li>
+            <li><strong>Add Relation:</strong> Hold <code
+                style="background:#333; padding:2px 5px; border-radius:3px;">Shift</code> and drag from one world to
+              another to create an accessibility relation (arrow).</li>
+            <li><strong>Select:</strong> Click a world or arrow to view/edit its properties in the Inspector panel.</li>
+            <li><strong>Multi-select:</strong> Hold <code
+                style="background:#333; padding:2px 5px; border-radius:3px;">Ctrl</code> and click to select multiple
+              elements.</li>
+            <li><strong>Delete:</strong> Select an element and press <code
+                style="background:#333; padding:2px 5px; border-radius:3px;">Delete</code> or <code
+                style="background:#333; padding:2px 5px; border-radius:3px;">Backspace</code>.</li>
+            <li><strong>Pan:</strong> Middle-click drag or hold <code
+                style="background:#333; padding:2px 5px; border-radius:3px;">Space</code> + drag.</li>
+            <li><strong>Zoom:</strong> Scroll wheel to zoom in/out.</li>
+          </ul>
+        </div>
+
+        <!-- 2. Logic Operators -->
+        <div style="background:#222; padding:15px; border-radius:8px; border:1px solid #333;">
+          <h3 style="color: #4a90e2; margin-top:0;">2. Logic Operators</h3>
+          <p style="font-size:0.85em; color:#aaa; margin-bottom:10px;">Use the toolbar buttons or type directly:</p>
+          <table style="width:100%; border-collapse:collapse; font-size:0.85em;">
+            <tr style="border-bottom:1px solid #444;">
+              <th style="text-align:left; padding:4px 8px; color:#888;">Symbol</th>
+              <th style="text-align:left; padding:4px 8px; color:#888;">Name</th>
+              <th style="text-align:left; padding:4px 8px; color:#888;">Type</th>
+            </tr>
+            <tr>
+              <td style="padding:3px 8px; font-family:monospace; color:#4cd964;">¬</td>
+              <td style="padding:3px 8px;">Negation</td>
+              <td style="padding:3px 8px; color:#888;">NOT</td>
+            </tr>
+            <tr>
+              <td style="padding:3px 8px; font-family:monospace; color:#4cd964;">∧</td>
+              <td style="padding:3px 8px;">Conjunction</td>
+              <td style="padding:3px 8px; color:#888;">AND</td>
+            </tr>
+            <tr>
+              <td style="padding:3px 8px; font-family:monospace; color:#4cd964;">∨</td>
+              <td style="padding:3px 8px;">Disjunction</td>
+              <td style="padding:3px 8px; color:#888;">OR</td>
+            </tr>
+            <tr>
+              <td style="padding:3px 8px; font-family:monospace; color:#4cd964;">→</td>
+              <td style="padding:3px 8px;">Implication</td>
+              <td style="padding:3px 8px; color:#888;">IF...THEN</td>
+            </tr>
+            <tr>
+              <td style="padding:3px 8px; font-family:monospace; color:#4cd964;">↔</td>
+              <td style="padding:3px 8px;">Biconditional</td>
+              <td style="padding:3px 8px; color:#888;">IFF</td>
+            </tr>
+            <tr style="border-top:1px solid #444;">
+              <td style="padding:3px 8px; font-family:monospace; color:#f5a623;">□</td>
+              <td style="padding:3px 8px;">Box (Necessity)</td>
+              <td style="padding:3px 8px; color:#888;">ALL worlds</td>
+            </tr>
+            <tr>
+              <td style="padding:3px 8px; font-family:monospace; color:#f5a623;">◊</td>
+              <td style="padding:3px 8px;">Diamond (Possibility)</td>
+              <td style="padding:3px 8px; color:#888;">SOME world</td>
+            </tr>
+            <tr>
+              <td style="padding:3px 8px; font-family:monospace; color:#f5a623;">K<sub>a</sub></td>
+              <td style="padding:3px 8px;">Agent Knowledge</td>
+              <td style="padding:3px 8px; color:#888;">Agent a knows</td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- 3. Kripke Semantics -->
+        <div style="background:#222; padding:15px; border-radius:8px; border:1px solid #333;">
+          <h3 style="color: #4a90e2; margin-top:0;">3. Kripke Semantics</h3>
+          <p style="font-size:0.88em; line-height:1.6;">
+            A <strong>Kripke Model</strong> <em>M = (W, R, V)</em> consists of:
+          </p>
+          <ul style="padding-left: 18px; line-height: 1.7; font-size:0.88em;">
+            <li><strong>W</strong> — Set of <em>possible worlds</em> (nodes on the canvas).</li>
+            <li><strong>R</strong> — <em>Accessibility relation</em> (arrows between worlds). Can be per-agent.</li>
+            <li><strong>V</strong> — <em>Valuation function</em>: assigns propositions (p, q, r…) to each world.</li>
+          </ul>
+          <p style="font-size:0.85em; color:#aaa; line-height:1.5;">
+            <code style="background:#333; padding:2px 5px; border-radius:3px;">□φ</code> is true at world <em>w</em> iff
+            φ is true at <strong>all</strong> worlds accessible from <em>w</em>.<br>
+            <code style="background:#333; padding:2px 5px; border-radius:3px;">◊φ</code> is true at world <em>w</em> iff
+            φ is true at <strong>some</strong> world accessible from <em>w</em>.
+          </p>
+        </div>
+
+        <!-- 4. Formula Syntax -->
+        <div style="background:#222; padding:15px; border-radius:8px; border:1px solid #333;">
+          <h3 style="color: #4a90e2; margin-top:0;">4. Formula Syntax</h3>
+          <p style="font-size:0.85em; color:#aaa; margin-bottom:8px;">Examples you can type in the formula input:</p>
+          <div
+            style="font-family:monospace; font-size:0.88em; background:#1a1a1a; padding:10px; border-radius:4px; line-height:1.8;">
+            <div><span style="color:#4cd964;">p → q</span> <span style="color:#666;">// implication</span></div>
+            <div><span style="color:#4cd964;">□(p → q)</span> <span style="color:#666;">// necessary implication</span>
+            </div>
+            <div><span style="color:#4cd964;">◊p ∧ ◊¬p</span> <span style="color:#666;">// contingency</span></div>
+            <div><span style="color:#4cd964;">¬□p → ◊¬p</span> <span style="color:#666;">// duality</span></div>
+            <div><span style="color:#4cd964;">K_a(p) → p</span> <span style="color:#666;">// knowledge axiom T</span>
+            </div>
+            <div><span style="color:#4cd964;">K_a(p → q) → (K_a(p) → K_a(q))</span> <span style="color:#666;">// axiom
+                K</span></div>
+          </div>
+        </div>
+
+        <!-- 5. Evaluation Tools -->
+        <div style="background:#222; padding:15px; border-radius:8px; border:1px solid #333;">
+          <h3 style="color: #4a90e2; margin-top:0;">5. Evaluation & Tools</h3>
+          <ul style="padding-left: 18px; line-height: 1.7; font-size:0.88em;">
+            <li><strong style="color:#007bff;">Prove:</strong> Checks if a formula is <em>valid</em> (true in ALL
+              models) using a Tableaux solver.</li>
+            <li><strong style="color:#888;">Satisfy:</strong> Generates a model that satisfies the formula (SAT solver).
+            </li>
+            <li><strong style="color:#28a745;">Announce!:</strong> Public announcement — removes worlds where the
+              formula is false (dynamic epistemic logic).</li>
+            <li><strong>Logic Systems:</strong> Choose from K, T, S4, S5 — each enforces different constraints on the
+              accessibility relation (reflexivity, transitivity, etc.).</li>
+            <li><strong>Save/Load:</strong> Export your model as JSON and reload it later.</li>
+          </ul>
+        </div>
+
+        <!-- 6. Keyboard Shortcuts -->
+        <div style="background:#222; padding:15px; border-radius:8px; border:1px solid #333;">
+          <h3 style="color: #4a90e2; margin-top:0;">6. Keyboard Shortcuts</h3>
+          <table style="width:100%; border-collapse:collapse; font-size:0.85em;">
+            <tr>
+              <td style="padding:4px 8px;"><code
+                  style="background:#333; padding:2px 6px; border-radius:3px;">Shift + Drag</code></td>
+              <td style="padding:4px 8px; color:#aaa;">Create relation (arrow)</td>
+            </tr>
+            <tr>
+              <td style="padding:4px 8px;"><code
+                  style="background:#333; padding:2px 6px; border-radius:3px;">Delete / Backspace</code></td>
+              <td style="padding:4px 8px; color:#aaa;">Delete selected element</td>
+            </tr>
+            <tr>
+              <td style="padding:4px 8px;"><code
+                  style="background:#333; padding:2px 6px; border-radius:3px;">Ctrl + Click</code></td>
+              <td style="padding:4px 8px; color:#aaa;">Multi-select</td>
+            </tr>
+            <tr>
+              <td style="padding:4px 8px;"><code
+                  style="background:#333; padding:2px 6px; border-radius:3px;">Scroll Wheel</code></td>
+              <td style="padding:4px 8px; color:#aaa;">Zoom in/out</td>
+            </tr>
+            <tr>
+              <td style="padding:4px 8px;"><code
+                  style="background:#333; padding:2px 6px; border-radius:3px;">Double-click</code></td>
+              <td style="padding:4px 8px; color:#aaa;">Add new world</td>
+            </tr>
+            <tr>
+              <td style="padding:4px 8px;"><code
+                  style="background:#333; padding:2px 6px; border-radius:3px;">Escape</code></td>
+              <td style="padding:4px 8px; color:#aaa;">Deselect / Close modal</td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- 7. Turing Machine -->
+        <div id="help-turing" style="background:#222; padding:15px; border-radius:8px; border:1px solid #333;">
+          <h3 style="color: #4a90e2; margin-top:0;">7. Turing Machine (Detailed Guide)</h3>
+          <p style="font-size:0.88em; line-height:1.6;">
+            A powerful single-tape Turing Machine simulator integrated into the graph. Define complex state machines
+            visually or via the editor.
+          </p>
+
+          <h4 style="color:#ddd; margin:10px 0 5px 0;">Defining Transition Rules</h4>
+          <p style="font-size:0.85em; color:#aaa; margin-bottom:8px;">
+            Rules govern the machine's behavior:
+            <code>(State, Read Symbol) → (Write Symbol, Move Direction, Next State)</code>.
+          </p>
+          <div style="background:#1a1a1a; padding:10px; border-radius:5px; margin-bottom:10px;">
+            <strong style="color:#4cd964; font-size:0.9em;">Method 1: The Rule Editor (Best for Precision)</strong>
+            <p style="font-size:0.85em; color:#ccc; margin-top:5px; line-height:1.5;">
+              1. Open the <strong>Transition Rules</strong> panel (right side of Turing tab).<br>
+              2. Click the <strong>Add Rule +</strong> button.<br>
+              3. Select <strong>Source State</strong> (Start World) and <strong>Target State</strong> (Next World).<br>
+              4. Enter <strong>Read</strong> (symbol on tape) and <strong>Write</strong> (symbol to replace it
+              with).<br>
+              5. Choose <strong>Move</strong> (Left, Right, Stay). Click <strong>Add</strong>.
+            </p>
+          </div>
+          <div style="background:#1a1a1a; padding:10px; border-radius:5px; margin-bottom:15px;">
+            <strong style="color:#4cd964; font-size:0.9em;">Method 2: Visual Logic</strong>
+            <p style="font-size:0.85em; color:#ccc; margin-top:5px; line-height:1.5;">
+              Rules appear as relations (arrows) between worlds. An arrow labeled <code>1 → 0, R</code> represents a
+              transition that reads '1', writes '0', and moves Right.
+            </p>
+          </div>
+
+          <h4 style="color:#ddd; margin:10px 0 5px 0;">Execution Controls</h4>
+          <table style="width:100%; border-collapse:collapse; font-size:0.85em; margin-bottom:15px;">
+            <tr style="border-bottom:1px solid #444;">
+              <th style="text-align:left; padding:4px; color:#4a90e2;">Command</th>
+              <th style="padding:4px; color:#ddd;">Function</th>
+            </tr>
+            <tr>
+              <td style="padding:4px; font-weight:bold;">Step</td>
+              <td style="padding:4px; color:#aaa;">Execute exactly one transition. Perfect for debugging logic or
+                tracing execution paths step-by-step.</td>
+            </tr>
+            <tr>
+              <td style="padding:4px; font-weight:bold;">Run</td>
+              <td style="padding:4px; color:#aaa;">Auto-execute steps continuously. Use the <strong>Speed
+                  Slider</strong> to adjust from 50ms (fast) to 2000ms (slow) delay.</td>
+            </tr>
+            <tr>
+              <td style="padding:4px; font-weight:bold;">Reset</td>
+              <td style="padding:4px; color:#aaa;">Rewinds the machine state, resets step count, and reloads the tape
+                from the initial input string.</td>
+            </tr>
+          </table>
+
+          <p style="font-size:0.85em; color:#f5a623; border-top:1px solid #333; padding-top:10px;">
+            <strong>Tip:</strong> The machine halts automatically (status: HALTED) if no rule matches the current
+            combination of State and Tape Symbol.
+          </p>
+        </div>
+
+        <!-- 8. Scripting API -->
+        <div id="help-scripting" style="background:#222; padding:15px; border-radius:8px; border:1px solid #333;">
+          <h3 style="color: #4a90e2; margin-top:0;">8. Scripting API (JS)</h3>
+          <p style="font-size:0.88em; line-height:1.6;">
+            A full JavaScript environment with access to the engine internals. Build procedural worlds, simulate
+            cellular automata, or automate testing via code.
+          </p>
+
+          <h4 style="color:#ddd; margin:10px 0 5px 0;">What Can You Do?</h4>
+          <ul style="padding-left: 18px; line-height: 1.6; font-size:0.88em; color:#ccc;">
+            <li><strong>Procedural Generation:</strong> Use loops to generate massive grids, trees, or fractal
+              structures instantly.</li>
+            <li><strong>Custom Simulation:</strong> Write your own loop calling <code>turing.step()</code> to implement
+              custom update rules or non-deterministic behavior.</li>
+            <li><strong>Graph Analysis:</strong> Iterate over `model.worlds` to compute custom metrics like connectivity
+              or clustering.</li>
+          </ul>
+
+          <h4 style="color:#ddd; margin:10px 0 5px 0;">Core API Reference</h4>
+          <div
+            style="font-family:monospace; font-size:0.8em; background:#1a1a1a; padding:10px; border-radius:4px; line-height:1.6; color:#ccc;">
+            <div style="margin-bottom:8px; color:#f5a623;">// 1. Create Worlds</div>
+            <div style="margin-bottom:4px;">let w = model.addWorld(100, 200);</div>
+            <div style="margin-bottom:12px;">w.name = "start_node"; w.color = "#ff0000";</div>
+
+            <div style="margin-bottom:8px; color:#f5a623;">// 2. Define Rules (Relations)</div>
+            <div style="margin-bottom:4px; color:#666;">// Syntax: addRelation(id1, id2, label, data)</div>
+            <div style="margin-bottom:12px;">model.addRelation(w.id, "target_id", "1", { read:"1", write:"0", move:"R"
+              });</div>
+
+            <div style="margin-bottom:8px; color:#f5a623;">// 3. Control Machine</div>
+            <div style="margin-bottom:4px;">turing.loadTape("1101");</div>
+            <div style="margin-bottom:4px;">turing.setStartWorld(w.id);</div>
+            <div style="margin-bottom:4px;">if (turing.step()) console.log("Stepped!");</div>
+          </div>
+        </div>
+
+
+
+        <!-- 10. Lambda Calculus & Logic -->
+        <div id="help-lambda" style="background:#222; padding:15px; border-radius:8px; border:1px solid #333;">
+          <h3 style="color: #4a90e2; margin-top:0;">10. Lambda Calculus & Logic</h3>
+          <p style="font-size:0.88em; line-height:1.6;">
+            The <strong>Lambda Proof Assistant</strong> uses the <strong>Curry-Howard Isomorphism</strong> to connect
+            programs (lambda terms) to proofs (logical formulas).
+          </p>
+
+          <h4 style="color:#ddd; margin:10px 0 5px 0;">Basic Syntax</h4>
+          <ul style="padding-left: 18px; line-height: 1.6; font-size:0.88em; color:#ccc;">
+            <li><strong>Variable:</strong> <code>x</code>, <code>y</code>, <code>z</code></li>
+            <li><strong>Abstraction (Function):</strong> <code>\x. term</code> (shorthand for λx. term)</li>
+            <li><strong>Application:</strong> <code>x y</code> or <code>(f x)</code></li>
+          </ul>
+
+          <h4 style="color:#ddd; margin:10px 0 5px 0;">Logic Mapping</h4>
+          <p style="font-size:0.85em; color:#aaa; margin-bottom:8px;">
+            The system infers the <strong>Simply Typed Lambda Calculus (STLC)</strong> type:
+          </p>
+          <div
+            style="background:#1a1a1a; padding:10px; border-radius:5px; margin-bottom:10px; font-family:monospace; font-size:0.9em;">
+            <div style="color:#4cd964;">\x.\y.x → P1 → (P2 → P1)</div>
+            <div style="color:#888;">// A program that takes two inputs and returns the first</div>
+            <div style="color:#888;">// is a proof of the logical tautology A → (B → A).</div>
+          </div>
+
+          <p style="font-size:0.85em; color:#aaa;">
+            <strong>Proof Verification:</strong> Enter a target formula in the <strong>Goal Formula</strong> box. If
+            your lambda term's inferred type matches the goal exactly, the status will show <span
+              style="color:#4cd964">VALID</span>.
+          </p>
+          <p style="font-size:0.85em; color:#aaa;">
+            <strong>Natural Deduction:</strong> The system now automatically generates a <strong>Derivation
+              Tree</strong> for every valid lambda term. This shows the underlying proof steps (Axioms, Implication
+            Intro/Elim) used to infer the type.
+          </p>
+          <p style="font-size:0.85em; color:#aaa;">
+            <strong>Variables:</strong> Type variables <code>T1, T2, T3, T4</code> are automatically mapped to JUDIT's
+            constants <code>p, q, r, s</code> for seamless integration with the main workspace.
+          </p>
+        </div>
+
+        <!-- 11. Tips & Tricks -->
+        <div id="help-tips" style="background:#222; padding:15px; border-radius:8px; border:1px solid #333;">
+          <h3 style="color: #4a90e2; margin-top:0;">11. Tips & Tricks</h3>
+          <ul style="padding-left: 18px; line-height: 1.7; font-size:0.88em;">
+            <li>Use <strong>System Insights</strong> for in-depth analytics about your model's structure and agents.
+            </li>
+            <li>The <strong>Scripting</strong> panel lets you write custom JS code with full API access.</li>
+            <li>Hover over any button or input for a <strong>tooltip</strong> explaining its function.</li>
+
+            <li>Propositions in a world can be edited in the <strong>Properties</strong> panel (Inspector).</li>
+            <li>Right-click a relation arrow to edit its agent and direction.</li>
+          </ul>
+        </div>
+
+      </div>
+
+      <button id="close-tutorial"
+        style="margin-top: 20px; padding: 10px 24px; background: #4a90e2; border: none; color: white; cursor: pointer; border-radius: 6px; float: right; font-weight: bold; font-size:0.95em;">Close
+        Help</button>
+    </div>
+  </div>
+
+  <!-- Relation Editor Modal -->
+  <div id="relation-modal"
+    style="display: none; position: absolute; z-index: 2000; background: #222; border: 1px solid #444; padding: 12px; border-radius: 6px; box-shadow: 0 4px 15px rgba(0,0,0,0.6); min-width: 180px; color: #fff;">
+    <h4
+      style="margin: 0 0 10px 0; font-size: 0.9em; border-bottom: 1px solid #444; padding-bottom: 5px; color:#4a90e2;">
+      Edit Relation</h4>
+    <div style="margin-bottom: 10px;">
+      <label style="display:block; font-size: 0.8em; color:#aaa; margin-bottom:3px;">Agent:</label>
+      <div style="font-weight:bold; font-size:1.1em; margin-bottom:5px;">Agent <span id="rel-agent">a</span></div>
+    </div>
+    <div style="margin-bottom: 12px;">
+      <label style="display:block; font-size: 0.8em; color:#aaa; margin-bottom:3px;">Direction:</label>
+      <select id="rel-direction"
+        style="width:100%; padding:5px; background:#333; border:1px solid #555; color:white; border-radius:4px;">
+        <option value="forward">Forward (Source → Target)</option>
+        <option value="backward">Backward (Target → Source)</option>
+        <option value="bidirectional">Bidirectional (↔)</option>
+      </select>
+    </div>
+    <div style="display:flex; gap:5px; justify-content:flex-end;">
+      <button id="rel-delete-btn"
+        style="padding:5px 10px; background:#d9534f; border:none; color:white; border-radius:4px; cursor:pointer; font-size:0.85em;">Delete</button>
+      <button id="rel-save-btn"
+        style="padding:5px 10px; background:#28a745; border:none; color:white; border-radius:4px; cursor:pointer; font-size:0.85em;">Save</button>
+      <button id="relation-close-btn"
+        style="padding:5px 10px; background:#555; border:none; color:white; border-radius:4px; cursor:pointer; font-size:0.85em;">&times;</button>
+    </div>
+  </div>
+
+  <!-- Insights Modal -->
+  <div id="insights-modal"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 3000; justify-content: center; align-items: center;">
+    <div
+      style="background: #1a1a1f; border: 1px solid #444; border-radius: 12px; width: min(840px, 95vw); max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.6); position: relative;">
+      <div
+        style="padding: 15px; border-bottom: 1px solid #444; display: flex; justify-content: space-between; align-items: center; background: #2a2a2a;">
+        <h3 style="margin: 0; font-size: 1.1em; color: #fff;">📊 System Insights</h3>
+        <button id="insights-close-btn"
+          style="background: none; border: none; color: #888; font-size: 1.5em; cursor: pointer;">&times;</button>
+      </div>
+      <div id="insights-content"
+        style="padding: 25px; overflow-y: auto; color: #eee; font-size: 0.95em; line-height: 1.6; background: rgba(20, 20, 25, 0.7); backdrop-filter: blur(15px);">
+        <div id="net-classification-card"
+          style="background:rgba(74, 144, 226, 0.1); border: 1px solid rgba(74, 144, 226, 0.3); border-radius: 8px; padding: 15px; margin-bottom: 25px;">
+          <div id="net-classification" style="font-weight: bold; color: #4a90e2; font-size: 1.3em;">System Topology:
+            Analyzing...</div>
+          <div id="net-summary" style="margin-top: 8px; color: #aaa; font-size: 0.9em; font-style: italic;">Detailed
+            system analysis will appear here once the model is processed.</div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 15px;">
+          <section class="insight-card"
+            style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 15px; border-radius: 8px;">
+            <h4
+              style="color:#4cd964; text-transform:uppercase; font-size:0.75em; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px; margin-bottom: 12px; display:flex; align-items:center; gap:8px;">
+              <span>🔄</span> Feedback Loops
+            </h4>
+            <div id="wiener-analysis"></div>
+          </section>
+
+          <section class="insight-card"
+            style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 15px; border-radius: 8px;">
+            <h4
+              style="color:#f5a623; text-transform:uppercase; font-size:0.75em; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px; margin-bottom: 12px; display:flex; align-items:center; gap:8px;">
+              <span>⚛️</span> Ashby's Variety
+            </h4>
+            <div id="ashby-analysis"></div>
+          </section>
+
+          <section class="insight-card"
+            style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 15px; border-radius: 8px;">
+            <h4
+              style="color:#ba68c8; text-transform:uppercase; font-size:0.75em; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px; margin-bottom: 12px; display:flex; align-items:center; gap:8px;">
+              <span>🕋</span> Markov State
+            </h4>
+            <div id="markov-analysis"></div>
+          </section>
+
+          <section class="insight-card"
+            style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 15px; border-radius: 8px;">
+            <h4
+              style="color:#e57373; text-transform:uppercase; font-size:0.75em; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px; margin-bottom: 12px; display:flex; align-items:center; gap:8px;">
+              <span>🛡️</span> Robustness
+            </h4>
+            <div id="robustness-analysis"></div>
+          </section>
+
+          <section class="insight-card"
+            style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 15px; border-radius: 8px;">
+            <h4
+              style="color:#4db6ac; text-transform:uppercase; font-size:0.75em; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px; margin-bottom: 12px; display:flex; align-items:center; gap:8px;">
+              <span>🌐</span> Self-Org (Clustering)
+            </h4>
+            <div id="clustering-analysis"></div>
+          </section>
+
+          <section class="insight-card"
+            style="background: rgba(74, 144, 226, 0.05); border: 1px solid rgba(74, 144, 226, 0.15); padding: 15px; border-radius: 8px;">
+            <h4
+              style="color:#4a90e2; text-transform:uppercase; font-size:0.75em; border-bottom:1px solid rgba(74, 144, 226, 0.2); padding-bottom:8px; margin-bottom: 12px; display:flex; align-items:center; gap:8px;">
+              <span>👥</span> Agent Analytics
+            </h4>
+            <div id="agent-analysis"></div>
+          </section>
+
+          <section class="insight-card"
+            style="background: rgba(255, 76, 76, 0.05); border: 1px solid rgba(255, 76, 76, 0.15); padding: 15px; border-radius: 8px;">
+            <h4
+              style="color:#ff4c4c; text-transform:uppercase; font-size:0.75em; border-bottom:1px solid rgba(255, 76, 76, 0.2); padding-bottom:8px; margin-bottom: 12px; display:flex; align-items:center; gap:8px;">
+              <span>🔗</span> Redundancy
+            </h4>
+            <div id="redundancy-analysis"></div>
+          </section>
+        </div>
+
+        <section class="insight-card"
+          style="margin-top:20px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 20px; border-radius: 10px;">
+          <h4
+            style="color:#777; text-transform:uppercase; font-size:0.7em; letter-spacing:1px; margin-bottom:15px; display:flex; align-items:center; gap:10px;">
+            <div style="height:1px; flex-grow:1; background:rgba(255,255,255,0.05);"></div>
+            <span>Topology: Degree Distribution</span>
+            <div style="height:1px; flex-grow:1; background:rgba(255,255,255,0.05);"></div>
+          </h4>
+          <canvas id="degree-chart" width="700" height="180"
+            style="width:100%; height:180px; max-height:200px;"></canvas>
+        </section>
+      </div>
+      <div style="padding: 10px 15px; border-top: 1px solid #444; background: #2a2a2a; text-align: right;">
+        <button id="insights-ok-btn"
+          style="padding: 6px 15px; background: #4a90e2; border: none; color: white; border-radius: 4px; cursor: pointer;">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Presets Modal -->
+  <div id="presets-modal"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 3050; justify-content: center; align-items: center;">
+    <div
+      style="background: #222; padding: 25px; border-radius: 12px; width: 450px; max-height: 85vh; color: #eee; border: 1px solid #444; box-shadow: 0 20px 50px rgba(0,0,0,0.6); display: flex; flex-direction: column;">
+      <div
+        style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #333; padding-bottom:10px;">
+        <div style="display:flex; flex-direction:column;">
+          <h3 style="margin:0; color:#4a90e2;">Template Library</h3>
+          <span id="presets-count" style="font-size:0.75rem; color:#888; margin-top:2px;">Count: 0</span>
+        </div>
+        <button id="presets-close-btn"
+          style="padding: 6px 12px; background: #c0392b; border: none; color: white; border-radius: 4px; cursor: pointer; font-size:0.85rem; font-weight:bold;">Close</button>
+      </div>
+      <div id="presets-list" style="overflow-y: auto; flex-grow: 1; padding-right: 5px;">
+        <!-- Items filled by UI Manager -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Translator Modal -->
+  <div id="translator-modal"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 3050; justify-content: center; align-items: center;">
+    <div
+      style="background: #2a2a2a; padding: 20px; border-radius: 8px; width: 500px; max-width: 90%; display: flex; flex-direction: column; border: 1px solid #444;">
+      <h3 style="margin-top:0; color:#4a90e2;">🗣️ Natural Language Translator</h3>
+      <div style="margin-bottom: 15px;">
+        <label style="display:block; margin-bottom:5px;">Check a Formula:</label>
+        <input type="text" id="trans-formula-input" placeholder="e.g. []p -> <>q"
+          style="width:100%; padding:8px; background:#333; border:1px solid #444; color:white; border-radius:4px;">
+      </div>
+      <div style="margin-bottom: 15px;">
+        <label style="display:block; margin-bottom:5px;">Select Theme:</label>
+        <select id="trans-theme-select"
+          style="width:100%; padding:8px; background:#333; border:1px solid #444; color:white; border-radius:4px;">
+          <option value="rain">Weather (Rain/Wet)</option>
+          <option value="love">Romance (Love/Heartbreak)</option>
+          <option value="war">War & Peace (Attack/Treaty)</option>
+          <option value="crypto">Cryptocurrency (Bear/Bull)</option>
+        </select>
+      </div>
+      <div style="margin-bottom: 15px;">
+        <label style="display:block; font-size: 0.8em; color:#aaa; margin-bottom:3px;">Translation:</label>
+        <textarea id="trans-output" readonly
+          style="width:100%; height:80px; padding:10px; background:#222; border:1px solid #444; color:#fff; border-radius:4px; resize:none;"></textarea>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:10px;">
+        <button id="trans-copy-btn"
+          style="background:#4a90e2; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Copy</button>
+        <button id="trans-close-btn"
+          style="background:#555; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Close</button>
+      </div>
+    </div>
+  </div>
+  <!-- Agent Selection Popup (ContextMenu for Relations) -->
+  <div id="agent-popup"
+    style="display: none; position: absolute; z-index: 2000; background: #222; border: 1px solid #444; padding: 10px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); min-width: 150px; color: #fff;">
+    <h4 style="margin: 0 0 8px 0; font-size: 0.9em; border-bottom: 1px solid #444; padding-bottom: 4px;">Select
+      Agents
+    </h4>
+    <div style="display: flex; flex-direction: column; gap: 5px;">
+      <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;"><input type="checkbox" value="a"
+          class="agent-cb"> Agent <span style="color:#4a90e2">a</span></label>
+      <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;"><input type="checkbox" value="b"
+          class="agent-cb"> Agent <span style="color:#e24a90">b</span></label>
+      <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;"><input type="checkbox" value="c"
+          class="agent-cb"> Agent <span style="color:#4ae290">c</span></label>
+      <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;"><input type="checkbox" value="d"
+          class="agent-cb"> Agent <span style="color:#f5a623">d</span></label>
+
+    </div>
+    <div style="margin-top: 10px; display: flex; justify-content: flex-end; gap: 5px;">
+      <button id="agent-cancel-btn"
+        style="padding: 4px 8px; background: transparent; border: 1px solid #555; color: #aaa; cursor: pointer; border-radius: 3px; font-size: 0.8em;">Cancel</button>
+      <button id="agent-confirm-btn"
+        style="padding: 4px 8px; background: #007bff; border: none; color: white; cursor: pointer; border-radius: 3px; font-size: 0.8em;">Create</button>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+
+</html>

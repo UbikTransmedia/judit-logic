@@ -1,0 +1,431 @@
+arXiv:1302.5393v1 [math.LO] 21 Feb 2013
+
+The omega-rule interpretation of transfinite
+provability logic
+David Fernández Duque,
+Universidad de Sevilla
+Joost J. Joosten
+Universitat de Barcelona
+August 17, 2018
+Abstract
+Given a recursive ordinal Λ, the transfinite provability logic GLPΛ has
+for each ξ < Λ a modality [ξ] with the intention of representing a sequence
+of provability predicates of increasing strength. One possibility is to read
+[ξ]φ as φ is provable in T using an ω-rule of depth ξ, where T is a secondorder theory extending ACA0 .
+In this paper we shall fomalize this notion in second-order arithmetic.
+Our main results are that, under some fairly general conditions for T , the
+logic GLPΛ is sound and complete for the resulting interpretation.
+
+1
+
+Introduction
+
+One compelling and particularly successful interpretation of modal logic is to
+think of φ as the formula φ is provable, where provability is understood within a
+formal theory T capable of coding syntax. This was suggested by Gödel; indeed,
+if we use ♦φ as a shorthand for ¬¬φ, the Second Incompleteness Theorem
+could be written as ♦⊤ → ♦⊥. It took some time, however, for a complete
+set of axioms to be assembled, namely until Löb showed (φ → φ) → φ to
+be valid. It took longer still for the resulting calculus to be proven complete by
+Solovay [12]. The resulting modal logic is called GL (for Gödel-Löb).
+Later, Japaridze [10] enriched the language of GL by adding a sequence of
+provability modalities [n], for n < ω. The modality [0] is now used as before
+to state that φ is derivable within some fixed formal theory T , while higher
+modalities represent provability in stronger and stronger theories. There are
+many arithmetic interpretations for Japaridze’s logic, and one of them also
+stems from an idea of Gödel, who introduced the notion of a theory T being
+ω-consistent: T is ω-consistent whenever for any formula φ, if T ⊢ φ(n̄) for all
+n ∈ N, then T 0 ∃x¬φ(x). Dually to this notion one can define a notion of
+1
+
+ω-provability: φ is ω-provable in T whenever T + ¬φ is ω-inconsistent. One
+may then interpret [1]φ as φ is ω-provable; a detailed discussion of this is given
+in Boolos [6].
+One can then go on to interpret the higher modalities by using iterated ωrules. This idea was already explored by Japaridze and gives an interpretation
+for which the polymodal logic GLPω is sound and complete; Ignatiev [9] and
+Beklemishev [4] later improved on this result. This logic is much more powerful
+than GL, and indeed Beklemishev has shown how it can be used to perform an
+ordinal analysis of Peano Arithmetic and its natural subtheories [1].
+Our (hyper)arithmetical interpretations will be a straightforward generalization of Japaridze’s where we read [α]T φ as The formula φ is derivable in T
+using ω-rules of nesting depth at most α; we shall make this precise later. We
+do this by considering a well-ordering ≺ on the naturals and defining a logic
+GLP≺ . This is a variation of GLPΛ already studied by the authors and Beklemishev [2, 8], with the sole difference that we shall represent ordinals as natural
+numbers rather than appending them as external entities.
+Our main result is that GLP≺ is sound and complete for arithmetical interpretations on ‘suitable’ theories T ; we will mainly work with extensions of
+ACA0 , but as we shall discuss later, it is possible to work over a weaker base
+theory.
+Plan of the paper Section 2 gives a quick review of the logics GLP≺ as well
+as their Kripke semantics, and Section 3 of second-order arithmetic. Section
+4 formalizes the notion of iterated ω-provability in second-order arithmetic;
+this notion is most naturally interpreted in introspective theories, introduced in
+Section 5. Section 6 proves that GLP≺ is sound for our interpretation. In order
+to prove completeness, Section 7 gives a brief review of the modal logic J, which
+is used in the completeness proof provided in Section 8. Finally, Appendix B
+discusses our choice of base theory and Appendix A possible variations on the
+notion of iterated ω-provability.
+
+2
+
+The logic GLP≺
+
+Formulas of the language L[·] are built from ⊥ and countably many propositional
+variables p ∈ P using Boolean connectives ¬, ∧ and a modality [ξ] for each
+natural number ξ. As is customary, we use hξi as a shorthand for ¬[ξ]¬.
+If ≺ is a binary relation on the naturals, the logic GLP≺ is given by the
+following rules and axioms:
+1. all propositional tautologies,
+2. [ξ](φ → ψ) → ([ξ]φ → [ξ]ψ) for all ξ,
+3. [ξ]([ξ]φ → φ) → [ξ]φ for all ξ,
+4. hζi φ → hξi φ for ξ ≺ ζ,
+
+2
+
+5. hξi φ → [ζ] hξi φ for ξ ≺ ζ,
+6. Modus Ponens, Substitution and Necessitation:
+
+φ
+.
+[ξ]φ
+
+We will normally be interested in the case where ≺ is a well-order, in which case
+it is known that hξi⊤ is consistent with GLP≺ for all ξ (see [8]). In case ≺ is a
+recursive well-order of order-type Λ we shall often write GLPΛ instead of GLP≺
+making the necessary definitional changes for finite order types Λ.
+We shall also work with Kripke semantics. A Kripke frame is a structure
+F = W, hRi ii<I , where W is a set and hRi ii<I a family of binary relations on
+W . A valuation on F is a function J·K : L[·] → P(W ) such that
+J⊥K
+
+=
+
+∅
+
+J¬φK
+
+=
+
+W \ JφK
+
+Jφ ∧ ψK =
+
+JφK ∩ JψK
+
+Jhii φK
+
+Ri−1 JφK .
+
+=
+
+A Kripke model is a Kripke frame equipped with a valuation J·K. Note that
+propositional variables may be assigned arbitrary subsets of W . Clearly, a valuation is uniquely determined once we have fixed its values for the propositional
+variables. As usual, φ is satisfied on hF, J·Ki if JφK 6= ∅, and valid on hF, J·Ki if
+JφK = W .
+It is well-known that polymodal GL is sound for F whenever Ri−1 is wellfounded and transitive, in which case we write Ri−1 as <i . However, constructing models of GLPΛ is substantially more difficult than constructing models of
+GL, since the full logic GLPΛ is not sound and complete for any class of Kripke
+frames. In Section 7 we will circumvent this problem by working in Beklemishev’s J, a slightly weaker logic that is complete for a manageable class of Kripke
+frames.
+
+3
+
+Second-order arithmetic
+
+Aside from the modal language L[·] , we will work mainly in the language L2∀ of
+second-order arithmetic.
+We fix some primitive recursive Gödel numbering mapping a formula ψ ∈ L2∀
+to its corresponding Gödel number pψq, and similarly for terms and sequents of
+formulas (used to represent derivations). Moreover, we fix some set of numerals
+which are terms so that each natural number n is denoted by exactly one numeral
+written as n. Since we will be working mainly inside theories of arithmetic, we
+will often identify ψ with pψq or even with pψq for that matter.
+Our results are not very sensitive to the specific choice of primitive symbols; however, to simplify notation, we will assume we have the following terms
+available:
+3
+
+arXiv:1309.1779v6 [cs.CC] 23 Aug 2016
+
+Fractal Dimension versus Process Complexity
+Joost J. Joosten1,5 , Fernando Soler-Toscano2,5 , and Hector
+Zenil∗3,4,5
+1
+
+Departamento de Lògica, Història i Filosofia de la Ciéncia,
+Universitat de Barcelona, Barcelona, Spain.
+2
+Departamento de Filosofı́a, Lógica y Filosofı́a de la Ciencia,
+Universidad de Sevilla, Seville, Spain.
+3
+Unit of Computational Medicine, SciLifeLab, Department of
+Medicine Solna, Center for Molecular Medicine, Karolinska
+Institute, Stockholm, Sweden.
+4
+Department of Computer Science, University of Oxford, UK.
+5
+Algorithmic Nature Group, LABORES, Paris, France.
+
+Abstract
+In this paper we look at small Turing machines (TMs) that work with
+just two colors (alphabet symbols) and either two or three states. For
+any particular such machine τ and any particular input x we consider
+what we call the space-time diagram which is basically the collection of
+consecutive tape configurations of the computation τ (x). In our setting
+it makes sense to define a fractal dimension for a Turing machine as the
+limiting fractal dimension for the corresponding space-time diagrams. It
+turns out that there is a very strong relation between the fractal dimension
+of a Turing machine of the above specified type and its runtime complexity.
+In particular, a TM with three states and two colors runs in at most linear
+time, if and only if, its dimension is 2, and its dimension is 1, if and only
+if, it runs in super-polynomial time and it uses polynomial space. If a TM
+runs in time O(xn ) we have empirically verified that the corresponding
+, a result that we can only partially prove. We find
+dimension is n+1
+n
+the results presented here remarkable because they relate two completely
+different complexity measures: the geometrical fractal dimension on the
+one side versus the time complexity of a computation on the other side.
+Keywords: small Turing machines, Fractal complexity, Hausdorff dimension, Box dimension, space-time complexity, computational complexity.
+
+∗ Corresponding author: hector.zenil@algorithmicnaturelab.org
+
+1
+
+Part I: Theoretical setting
+In the first part of the paper, we shall define the basic notions we work with.
+In particular, we shall fix on a computational model: small Turing machines
+with a one-way infinite tape. For these machines, we will define so-called spacetime diagrams which are a representation of the memory state throughout time.
+For these diagrams we shall define a notion of fractal dimension. Next, some
+theoretical results are proven about this dimension.
+
+1
+
+Complexity Measures
+
+Complexity measures are designed to capture complex behavior and quantify
+how complex, according to that measure, that particular behavior is. It can
+be expected that different complexity measures from possibly entirely different
+fields are related to each other in a non-trivial fashion. This paper explores the
+relation between two rather different but widely studied concepts and measures
+of complexity. On the one hand, there is a geometrical framework in which the
+complexity of spatio-temporal objects is measured by their fractal dimension.
+On the other hand, there is the standard framework of computational (resources)
+complexity where the complexity of algorithms is measured by the amount of
+time and memory they take to be executed.
+The relation we have between both frameworks is as follows. We start in
+the framework of computations and algorithms and for simplicity assume that
+they can be modeled as using discrete time steps. Now, suppose we have some
+computer τ that performs a certain task τ (x) on input x. We can assign a
+spatio-temporal object to the computation corresponding to τ (x) as follows.
+We look at the spatial representation σ0 of the memory when τ starts on
+input x. Next we look at σ1 : the spatial representation of the memory after
+one step in the computation and so forth for σ2 , σ3 , . . .. Then we ‘glue’ these
+spatial objects together into one object Σ(τ, x) by putting each output in time
+next to the other: hσ0 , σ1 , σ2 . . .i. Each σi can be seen as a slice of Σ(τ, x) of the
+memory at one particular time i in the computation. This is why we call Σ(τ, x)
+the space-time diagram of τ (x). It is of these spatio-temporal objects and in
+particular the limit for x going to infinity that we can sometimes compute or
+estimate the fractal dimension d(τ ).
+One can set this up in such a way that d(τ ) becomes a well defined quantity.
+Thus, we have a translation from the computational framework to the geometrical framework. Next, one can then investigate the relation between these
+two frameworks, and in particular, if complex algorithms (in terms of time and
+space complexity) get translated to complex (in the sense of fractal dimension)
+space-time diagrams.
+It is this main question that is being investigated in this paper. The computational model that we choose is that of Turing machines. In particular we look
+at small one-way infinite Turing machines (TMs) with just two or three states
+and a binary tape alphabet.
+
+2
+
+For these particular machines we define a notion of dimension along the lines
+sketched above. In exhaustive computer experiments we compute the dimensions of all machines with at most three states. Among the various relations that
+we uncover is that such a TM runs in at most linear time iff the corresponding
+dimension is 2. Likewise, if a TM (in general) runs in super-polynomial time
+and uses polynomial space, we see that the corresponding dimension is 1.
+Admittedly, the way in which fractal geometry measures complexity is not
+entirely clear and one could even sustain the view that fractal geometry measures
+something entirely else. Nonetheless, dimension is clearly related to degrees of
+freedom and as such related to an amount of information storage.
+In [49] space-time diagrams of Turing machines and one-dimensional cellular automata were investigated in the context of algorithmic information theory. Notably an uncompressibility test on the space-time diagrams led to a
+classification of the behaviour of CAs and TMs thereby identifying non-trivial
+behaviour [53]. The same type of space-time diagrams were also investigated in
+connection to two other seminal measures of complexity [38, 54, 2] connected to
+Kolmogorov complexity, namely Solomonoff’s algorithmic probability [53, 51]
+and Bennett’s logical depth [11, 50]. Interesting connections between fractal dimension and spatio-temporal parameters have also been explored in the
+past [25, 46, 18], delivering a range of applications in landscape analysis and
+even medicine in the study of time series.
+The results presented in this paper were found by computer experiments and
+proven in part. To the best of our knowledge it is the first time that a relation
+is studied between computational complexity and fractal geometry, of a nature
+as presented here.
+Outline: The current paper naturally falls apart into three parts. In the
+first part (Sections 2—4) we define the ideas and concepts and prove various theoretical results. In the second part, Sections 5—6, we describe our experiment
+and its results to investigate those cases where non of our theoretical results
+would apply. Finally in the third part, we present a literature study where we
+mention various results that link fractal dimension to other complexity notions.
+More in detail: In Section 2 we describe the kind of TMs we shall work with.
+This paper can be seen as part of a larger project where the authors mine and
+study the space of small TMs. As such, various previous results and data could
+be re-used in this paper and in Section 2 we give an adequate description of
+these used data and results.
+In Section 3 we revisit the box-counting dimension and define a suitable
+similar notion of fractal dimension d(τ ) for TMs τ . We prove that d(τ ) = 2 in
+case τ runs in time at most linear in the size of the input. Next, in Section 4 we
+prove an upper and a lower bound for the dimension of Turing machines. The
+Upper Bound Conjecture is formulated to the effect that the proven upper bound
+is actually always attained. For special cases this can be proved. Moreover,
+under some additional assumptions this can also be proven in general. In our
+experiment we test if in our test-space the sufficient additional assumptions were
+also necessary ones and they turn out to be so.
+3
+
+arXiv:1404.4483v2 [math.LO] 3 Aug 2015
+
+Turing-Taylor expansions for arithmetic theories
+Joost J. Joosten
+September 3, 2018
+Abstract
+Turing progressions have been often used to measure the proof-theoretic
+strength of mathematical theories: iterate adding consistency of some
+weak base theory until you “hit” the target theory. Turing progressions
+based on n-provability give rise to a Πn+1 proof-theoretic ordinal |U |Π0 .
+n+1
+As such, to each theory U we can assign the sequence of corresponding
+Πn+1 ordinals h|U |n in>0 . We call this sequence a Turing-Taylor expansion
+or spectrum of a theory.
+In this paper, we relate Turing-Taylor expansions of sub-theories of
+Peano Arithmetic to Ignatiev’s universal model for the closed fragment
+of the polymodal provability logic GLPω . In particular, we observe that
+each point in the Ignatiev model can be seen as Turing-Taylor expansions
+of formal mathematical theories.
+Moreover, each sub-theory of Peano Arithmetic that allows for a TuringTaylor expansion will define a unique point in Ignatiev’s model.
+
+1
+
+Introduction
+
+Alan Turing considered in his dissertation progressions that are based on transfinitely adding consistency statements ([18]). If we disregard for the moment
+subtle coding and representation issues, these Turing progressions starting with
+some base theory T were defined by
+T0
+T α+1
+Tλ
+
+:= T ;
+:= S
+T α ∪ { Con(T α ) };
+α
+for limit λ.
+:=
+α<λ T
+
+Here, Con(T α ) denotes some natural formalization of the statement that the
+theory T α cannot derive, say, 0 = 1. If one starts out with a sound base theory
+T this gives rise to a progression of increasing proof-theoretic strength. Since
+the consistency statements are of logical complexity Π01 , Turing progressions can
+be used to define a Π01 ordinal of a theory that contains (interprets) arithmetic;
+one starts out with a relatively weak theory T and defines the Π01 ordinal of
+some target theory U by
+|U |Π01 := sup{α | T α ⊆ U }.
+1
+
+Using stronger notions of provability this can be generalized. We shall use [n]T
+to denote a formalization of “provable in T together with all true Π0n sentences”
+and hniT will denote the dual consistency notion ¬[n]¬. Generalized Turing
+progressions are readily defined:
+Tn0
+Tnα+1
+Tnλ
+
+:=
+:=
+:=
+
+T;
+Tnα ∪ {hniTnα ⊤};
+S
+α
+for limit λ.
+α<λ Tn
+
+Here, the ⊤ stands for some fixed provable like for example 1 = 1 so that hniTnα ⊤
+simply says that the theory Tnα is consistent with all true Πn formulas. We can
+now define the Π0n+1 proof-theoretical ordinal of a theory U w.r.t. some base
+theory T :
+|U |Π0n := sup{α | Tnα ⊆ U }.
+Using Primitive Recursive Arithmetic as base theory, U. Schmerl proved in [17]
+that |PA|Π0n = ε0 for all n ∈ ω and Beklemishev showed ([2, 3, 4]) how provability
+logics can naturally be employed to perform and simplify the computations to
+obtain these ordinals.
+In this paper we shall see how various theories can be written as the finite
+union of Turing progressions in a way reminiscent of how C∞ functions can
+be written as a countable sum of monomials in their Taylor expansion. Hence,
+we shall speak of Turing-Taylor expansions of arithmetical theories. Whereas
+the monomials in a Turing expansion of a C∞ function are in a sense orthogonal, the monomials in our Turing-Taylor expansions are not. Therefore, we
+will sometimes call the Turing-Taylor expansions also ordinal spectra or simply
+spectra of theories.
+
+2
+
+Arithmetical preliminaries
+
+We need to formalize various arguments that use cut-elimination. To this end,
+we assume that the base theory proves supexp, i.e. the totality
+of the superx
+exponential function x 7→ 2xx , where 2x0 := x and 2xy+1 := 22y . However, we also
+need that our base theories are of low logical complexity aka, that the axioms
+are of logical complexity at most Π01 .
+To this end, we shall assume that any theory T will be in a language that
+contains a function symbol for the super-exponentiation and that the recursive
+defining equations for this super-exponentiation are amongst the axioms of T .
+After having fixed our language, we define the arithmetical hierarchy syntactically as usual: ∆0 formulas are those formulas that only employ bounded
+quantification (i.e., quantification of the form ∀ x<t where t is some term not
+containing x); If φ ∈ Πn (Σn resp.), then ∃ ~x φ ∈ Σn+1 (∀~xφ ∈ Πn+1 resp.).
+Since T has a constant for super-exponentiation, T will be able to prove the
+totality of super-exponentiation in a trivial way using induction for ∆0 formulas.
+It is folklore that ∆0 induction can be axiomatized in a Π1 fashion:
+
+2
+
+Lemma 2.1. Over Robinson’s arithmetic Q the following two schemes are equivalent
+1. ∀x (∀ y<x φ(y) → φ(x)) → ∀x φ(x) for φ ∈ ∆0 ;
+
+
+
+
+2. ∀x ∀ z≤x ∀ y<z φ(y) → φ(z) → φ(x) for φ ∈ ∆0 .
+Proof. The only non-trivial direction is (1) ⇒ (2) which follows by applying (1)
+to φ′ (x, u) := x ≤ u → φ(x).
+In the paper we shall heavily use formalized provability and the corresponding provability logics. As such, for c.e. theories T we fix natural formalizations
+[n]T of “provable in T together with all true Πn sentences” of complexity Σn+1
+and the dual consistency notion hniT of complexity Πn+1 . When the context
+allows us to, we shall drop mention of the base theory T and moreover, instead
+of writing [0] (h0i) we often write  (♦).
+We shall typically refrain from distinguishing a formula φ from its Gödel
+number or even a natural syntactical term denoting its Gödel number. Also, we
+use the standard dot notation  φ(ẋ) to denote a formula with free variable x
+so that for each x the formula  φ(ẋ) is provably equivalent to  n where n is
+the Gödel number of φ(t) where t is some term (often called numeral) denoting
+x. Note that for non-standard x, the corresponding term denoting x will also
+be non-standard.
+We shall assume that each c.e. theory T that we consider comes with a ∆0
+formula that defines the set of Gödel numbers of axioms of T on the standard
+model. A main result about formalized provability is formulated in what is
+nowadays called Löb’s rule ([16]):
+Proposition 2.2. Let T be a theory extending EA. If T ⊢ φ → φ, then T ⊢ φ.
+The natural way to prove statements about Turing progression is by transfinite induction. Weaker theories however cannot prove transfinite induction.
+Schmerl ([17]) introduced a way to circumvent transfinite induction employing
+so-called reflexive transfinite induction.
+Lemma 2.3 (Reflexive transfinite induction). Let T be some theory extending
+say, EA, so that
+
+
+T ⊢ ∀α T ∀ β<α̇ φ(β) → φ(α) .
+Then it holds that T ⊢ ∀α φ(α).
+
+
+Proof. Clearly, if T ⊢ ∀α T ∀ β<α̇ φ(β) → φ(α) , then also
+T ⊢ T ∀α φ(α) → ∀α φ(α),
+and the result follows from Löb’s rule.
+For theories U and V , we shall write U ≡n V for the statement that U and
+V prove the same Πn+1 formulas.
+3
+
+

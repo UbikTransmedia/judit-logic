@@ -1,0 +1,381 @@
+arXiv:1104.3421v3 [cs.CC] 23 Jun 2011
+
+Empirical Encounters with Computational
+Irreducibility and Unpredictability
+Hector Zenil
+Department of Computer Science
+University of Sheffield and
+IHPST, Université de Paris 1
+Fernando Soler-Toscano
+Grupo de Lógica, Lenguaje e Información
+Departamento de Filosofı́a, Lógica, y Filosofı́a de la Ciencia
+Universidad de Sevilla
+Joost J. Joosten
+Departament de Lògica, Història i Filosofia de la Ciència
+Universitat de Barcelona
+Abstract
+This paper is an exploration of the conceptual issues that have arisen
+in the course of investigating speed-up and slowdown phenomena in
+small Turing machines. We present the results of a test that may spur
+experimental approaches to the notion of computational irreducibility.
+The test involves a systematic attempt to outrun the computation of a
+large number of small Turing machines (all 3 and 4 state, 2 symbol) by
+means of integer sequence prediction using a specialized function finder
+program. This massive experiment prompts an investigation into rates of
+convergence of decision procedures and the decidability of sets in addition
+to a discussion of the (un)predictability of deterministic computing
+systems in practice. We think this investigation constitutes a novel
+approach to the discussion of an epistemological question in the context
+of a computer simulation, and thus represents an interesting exploration
+at the boundary between philosophical concerns and computational
+experiments.
+Keywords: Computational irreducibility; unpredictability; problem
+of induction; algorithmic epistemology; halting problem. 2010 Mathematics Subject Classification: 68Q01, 68Q17, 68Q15
+
+1
+
+1
+
+Introduction
+
+For more than half a century mathematicians and computer scientists have
+known that final victory is impossible in the struggle to attain ultimate predictability. Even for deterministic systems we have accepted that there are
+truths and facts about these systems which will remain unproven, as shown by
+Kurt Gödel and Alan Turing for formal axiom systems and computing machines.
+This doesn’t mean that we have to give up on gaining new insights through the
+study of predictability and unpredictability in deterministic systems.
+More and more powerful computing machines made possible tasks that has
+hitherto seemed impossible, and it wasn’t long after Gödel and Turing’s work
+when people started asking how much time a task would take if performed with
+one rather than another algorithm. The need for a notion of complexity became
+clear. Although not formally spelled out, in a letter written to von Neumann
+(Princeton, March 20, 1956), Gödel himself had already proposed a first version
+of the P=NP? problem in terms of finite problems of quadratic time (the letter
+came to light in 1988). Efficiency became a guiding principle in the design of
+algorithms, but the idea of designing an algorithm capable of producing optimal
+algorithms was found to be equivalent to the halting problem. For if there were
+a way to find such an algorithm, Gödel and Turing’s unsolvable and undecidable problems would be solved. Therefore one has no choice but to exchange
+idealistic goals for realistic approximations. In this paper we present an experimental approach for dealing with the notion of computational irreducibility as
+connected to the problem of empirical unpredictability. We think our approach
+is a novel one, in which we bring to a formal framework (a computer experiment) a notion we believe is largely epistemological in nature (computational
+irreducibility).
+
+2
+
+Predicting the behavior of deterministic computing systems
+
+Will looking at the behavior of a system for certain times and in certain cases tell
+you anything about the behavior of the system at a later time and in the general
+case? For example, the phase transition measure presented in [19] implies that
+one may, within limits, be able to predict the overall behavior of a system
+from a segment of initial inputs based on the prior variability of said system.
+Experience tells us we would do well to predict future behavior on the basis of
+prior behavior (a Bayesian hypothesis), yet we know this is impossible in the
+general case due to the halting problem.
+This is also related to Israeli and Goldenfeld’s [8] findings. They showed
+that some computationally irreducible Elementary Cellular Automata (ECA)
+have properties that are predictable at certain coarse-grained levels. They did
+so by employing a renormalization group technique, a mathematical apparatus
+that allows one to investigate the changes in a physical system as one views
+it at different distance scales. They sought ways to replace several cells of
+2
+
+an automaton with a single cell. However, their prediction capabilities too are
+bedeviled by the unavoidable (and ultimately undecidable) induction problem of
+whether one can keep on predicting for all initial conditions and for any number
+of steps, without having to run the system for all possible initial conditions and
+for an arbitrary number of steps.
+The question is, then, under what circumstances this kind of large-scale
+prediction is possible. For ECA Rule 30 in Wolfram’s CA enumeration [18],
+for example, this large-scale approach doesn’t seem to say very much. In many
+cases, it may at most predict a few steps ahead, meaning that while the behavior
+of the system is not completely chaotic, it is unpredictable, in the sense that one
+cannot in general predict an arbitrary number of steps ahead without having
+to run the entire computation step-by-step. For many systems, including the
+most random-looking ones, overall behavior cannot be expected to change much.
+One of the main features of systems in Wolfram’s class 4 [17] is precisely the
+existence of pervasive structures that one can predict up to a certain point.
+What is surprising is that in all these fully deterministic and extremely simple
+systems, such as ECA, not every aspect of their evolution is trivially predictable,
+not because of a problem of measurement or hypersensitivity, but because we
+don’t know whether there are any shortcuts—whether they exist or how to
+systematically find them. And some of these questions are reducible to the
+halting problem.
+
+Figure 1: In this simulation of ECA Rule 30, each row of pixels is derived
+from the one above it. No shortcut is known for computing all bit values of
+any column and row without having to run the system, despite the extreme
+simplicity of the fully deterministic rule that generates it (icon at the top).
+
+3
+
+Irreducibility measures
+
+There are several forms of irreducibility in computing systems, ranging from
+undecidability to intractability to nonlinearity. The principle of computational
+3
+
+arXiv:1210.4809v1 [math.LO] 17 Oct 2012
+
+On provability logics with linearly ordered
+modalities
+Lev D. Beklemishev∗, David Fernández-Duque†, Joost J. Joosten‡
+September 27, 2018
+
+Abstract
+We introduce the logics GLPΛ , a generalization of Japaridze’s polymodal provability logic GLPω where Λ is any linearly ordered set representing a hierarchy of provability operators of increasing strength.
+We shall provide a reduction of these logics to GLPω yielding among
+other things a finitary proof of the normal form theorem for the variablefree fragment of GLPΛ and the decidability of GLPΛ for recursive orderings Λ. Further, we give a restricted axiomatization of the variable-free
+fragment of GLPΛ .
+
+1
+
+Introduction
+
+The provability logic GLPΛ with transfinitely many modalities hαi, for all
+ordinals α < Λ, generalizes the well-known provability logic GLP denoted
+GLPω in this paper [21, 9]. The logic GLPω has been used to carry out
+a proof-theoretic analysis of Peano Arithmetic and related theories using
+the approach of provability algebras initiated in [3]. A natural next class
+of theories to analyze with this new approach are predicative theories such
+as the second order theories of iterated arithmetical comprehension and
+ATR0 . The first necessary step towards analyzing predicative theories with
+provability algebras was made in [4] where logics GLPΛ , for an arbitrary
+ordinal Λ, were introduced and it was shown that the variable-free fragments
+of these logics yield a natural ordinal notation system up to the ordinal Γ0 .
+∗
+V.A. Steklov Mathematical Institute, RAS; Moscow M.V. Lomonosov State University; NRU Higher School of Economics; bekl@mi.ras.ru
+†
+Group for Logic, Language and Computation, University of Seville, dfduque@us.es
+‡
+Dept.
+Lògica, Història i Filosofia de la Ciència, Universitat de Barcelona,
+jjoosten@ub.edu
+
+1
+
+Assuming an ordinal Λ to be represented, ordinals of a possibly larger
+class can be denoted by modal formulas (called words or worms) of the form
+hα1 ihα2 i . . . hαn i⊤,
+where αi < Λ, identified modulo provable equivalence in GLPΛ . The ordering
+between two words A and B is naturally defined by
+A <0 B ⇐⇒ GLPΛ ⊢ B → h0iA.
+It was shown that this ordering is a well-ordering, and basic formulas for
+the computation of the order types of its initial segments in terms of Veblen
+ordinal functions were found in [4].
+Since then, the logics GLPΛ and their ordinal notation systems have
+been studied in much more detail (see [16, 13, 14]). Most importantly,
+suitable Kripke models for the variable-free fragment of GLPΛ generalizing
+the so-called Ignatiev model for GLPω [20] have been developed. Also, the
+completeness of GLPΛ w.r.t. topological semantics has been proved [1, 12].
+Some of these papers used the normal form results from [4].
+Sections 4 and 5 of the present paper is in many respects a ‘recasting’ of
+the part of [4] devoted to the normal forms for the variable-free fragment of
+GLPΛ and to its axiomatizations. The main reason to have such a recasting
+is that the exposition in [4] was at some places overly sketchy, to the extent
+that some parts of the arguments were only hinted at. The main such omission was the proof of the fact that the ordering <0 on words was irreflexive,
+or equivalently the fact that any individual word was consistent with GLPΛ .
+Modulo this claim, the rest of the arguments in the paper were purely syntactical or dealt with ordinal computations. For this consistency result one
+would naturally use some kind of semantics, which were not available at the
+time for Λ > ω (but see [13]).
+Another reason for having a recast of parts of [4] is that the authors
+of [13] needed certain results –in particular, Corollaries 5.11 and 5.12 of
+the current paper – that follow from the line of reasoning presented in [4].
+However, a proof of these corollaries could not be given without revisiting
+and sharpening various results from [4].
+Moreover, it was remarked in [4] that the irreflexivity of <0 follows,
+for example, from any arithmetically sound interpretation of GLPΛ w.r.t. a
+sequence of strong provability predicates. Indeed, the existence of such interpretations was obvious at least for constructive ordinals Λ. On the other
+hand, a proof appealing to such an interpretation is necessarily based on the
+assumption of soundness of a fairly strong extension of Peano Arithmetic and
+2
+
+thus cannot be formalized in Peano Arithmetic itself. For proof-theoretic
+applications we would like to have an ordering representation whose elementary properties such as irreflexivity are provable by finitary means (e.g.,
+in Primitive Recursive Arithmetic). Alternative proofs based on the use of
+Ignatiev-like models or topological models for GLPΛ suffer from the same
+drawback.
+In this paper we remedy this situation and provide a different purely
+modal finitary proof of irreflexivity based on a reduction of GLPΛ to GLPω ,
+for which such a finitary proof is known [2]. We also prove the conservativity
+of GLPΛ over any of its restrictions to a subset of modalities. This reduction
+uses the methods of [6].
+The exposition of the normal form theorem for variable-free formulas in
+GLPΛ in this paper is also slightly different from the one in [3, 4]. Namely,
+the normal forms are defined in a ‘positive’ way, which helps, in particular, to eliminate the assumption of irreflexivity at some places where it is
+not necessary. Finally, we provide a more restricted axiomatization of the
+variable-free fragment of GLPΛ than the one in [4].
+An additional novelty of this paper is that the results can be stated and
+proved in a more general context of logics with linearly ordered sets of modalities. Thus, from the outset we introduce and work with a generalization of
+GLPΛ to the case when Λ is an arbitrary, not necessarily well-founded, linear
+ordering. So far, proof-theoretic interpretations of such logics have not been
+investigated; however it seems likely that they can appear, for example, in
+the study of progressions of theories defined along recursive linear orderings
+without infinite hyperarithmetical descending sequences (see, e.g., [11]).
+
+2
+
+The logic GLPΛ and its fragments
+
+In this section we shall introduce the formal systems that we will study
+throughout the paper. Our logics depend on a parameter, usually denoted
+Λ, which is a linear order of the form h|Λ|, <i. They then contain a modality
+[α] for each α ∈ |Λ|. In analogy to the set-theoretic treatment of ordinals,
+we will identify Λ with an upper bound for its elements and often write
+α < Λ instead of α ∈ |Λ|; elements of |Λ| will sometimes be called modals.
+Note, however, that unlike previous studies of GLPΛ , we allow for Λ to be
+an arbitrary linear order.
+We will also introduce some important fragments of GLPΛ . These fragments are easier to work with from a technical point of view, yet they already
+contain much of the crucial information about the full logic, as we shall see.
+
+3
+
+arXiv:1212.2395v1 [math.LO] 11 Dec 2012
+
+Π01-ordinal analysis beyond first-order arithmetic
+Joost J. Joosten
+November 27, 2024
+Abstract
+In this paper we give an overview of an essential part of a Π01 ordinal
+analysis of Peano Arithmetic (PA) as presented by Beklemishev ([3]). This
+analysis is mainly performed within the polymodal provability logic GLPω .
+We reflect on ways of extending this analysis beyond PA. A main
+difficulty in this is to find proper generalizations of the so-called Reduction Property. The Reduction Property relates reflection principles to
+reflection rules.
+In this paper we prove a result that simplifies the reflection rules.
+Moreover, we see that for an ordinal analysis the full Reduction Property
+is not needed. This latter observation is also seen to open up ways for
+applications of ordinal analysis relative to some strong base theory.
+
+1
+
+Introduction
+
+Primitive Recursive Arithmetic (PRA) is a rather weak formal theory about the
+natural numbers which is among various philosophers, logicians and mathematicians held to be a good candidate for the concept of finitism (see e.g., [15]). The
+concept of finitism tries to capture those mathematical truths and that part of
+mathematical reasoning which is true beyond doubt and which not uses strong
+assumptions on infinite mathematical entities.
+Gentzen showed in his seminal paper from 1936 ([11]) that PRA together
+with some clearly non-finitist notion of transfinite induction for easy formulas
+along a rather small ordinal could prove the consistency of Peano Arithmetic
+(PA).
+This result can be seen as a partial realization of Hilbert’s programme where
+finitist theories are to prove the consistency of strong mathematical theories. Of
+course, since Gödel’s incompleteness results we know that this program is not
+viable but Gentzen’s consistency proof seems to clearly isolate the non-finitist
+part needed for such a consistency proof.
+Since Gentzen’s consistency proof, the scientific community has tried to calibrate the proof-strength of various theories other than PA. The amount of
+transfinite induction needed in these consistency proofs is referred to as the
+
+1
+
+proof-theoretic ordinal of a theory. There are various ways of defining and computing these ordinals and for most natural theories these methods all yield the
+same ordinals.
+Among these methods the more novel one was introduced by Beklemishev [3]
+and is based on modal provability logics. The corresponding ordinals are referred
+to as the Π01 ordinals. In this paper we shall sketch the method for computing
+these Π01 ordinals. So far, the method has only been applied successfully to
+theories as PA and its kin. In this paper we reflect on ways of extending this
+analysis beyond PA.
+A main difficulty in this is to find proper generalizations of the so-called
+Reduction Property. The Reduction Property relates reflection principles to
+reflection rules. In this paper we prove a result that simplifies the reflection rules.
+Moreover, we see that for an ordinal analysis the full Reduction Property is not
+needed. This latter observation is also seen to open up ways for applications of
+ordinal analysis relative to some strong base theory.
+Before we can start looking into the ordinal analysis, we must first introduce
+some basic knowledge concerning arithmetic and provability logics.
+
+2
+
+Prerequisites
+
+All results in this section are given without proofs. For further background the
+reader is referred to standard textbooks like [6] or [12].
+
+2.1
+
+Arithmetic
+
+By the language of arithmetic we understand in this paper the language based
+on the symbols {0, S, +, ×, exp, ≤, =} where exp denotes the function x 7→ 2x .
+Formulas of arithmetic are stratified in complexity classes as usual. Thus,
+∆00 formulas are first-order formulas where all quantifiers refer to numbers and
+are bounded by some term t as in ∀ x≤t where of course x ∈
+/ t.
+We define Σ00 := Π00 := ∆00 . If ϕ(~x, ~y ) ∈ Σ0n , then ∀~x ϕ(~x, ~y ) ∈ Π0n+1 and
+likewise, if ϕ(~x, ~y) ∈ Π0n , then ∃~x ϕ(~x, ~y) ∈ Σ0n+1 .
+Similarly we define the hierarchies Πnm where now the number of nth-order
+quantifiers is counted although in this paper we shall at most need second order
+quantifiers.
+By EA we denote the arithmetic theory of Elementary Arithmetic. This
+theory is formulated in the language of arithmetic. Apart from the defining
+axioms for the symbols in the language, EA has an induction axiom Iϕ for each
+∆00 formula ϕ(~x, y) (that may contain exp):
+Iϕ (~x) : ϕ(~x, 0) ∧ ∀ y (ϕ(~x, y) → ϕ(~x, y + 1)) → ∀yϕ(~x, y).
+By EA+ we denote EA plus the axiom that states that super-exponentiation
+–the function that maps x to the x times iteration of exp– is a total function.
+
+2
+
+By IΣn we denote the theory that is as EA except that it now has induction
+axioms Iϕ for all formulas ϕ(~x) ∈ Σ0n . The theory PA is the union of all the
+IΣn in that it has induction axioms for all arithmetic formulas.
+
+2.2
+
+Transfinite induction
+
+Greek letters will often denote ordinals and as usual we denote by ε0 the supreω
+mum of {ω, ω ω , ω ω , . . .}. Apart from considering induction along the natural
+numbers we shall consider induction along transfinite orderings too. If hΓ, ≺i
+is a natural arithmetical representation in EA of some ordinal we denote by
+TI[X, Γ] the collection of transfinite induction axioms for all formulas in X:
+
+∀y ∀ y ′ ≺y ϕ(~x, y ′ ) → ϕ(~x, y) → ∀y ϕ(~x, y)
+with ϕ(~x, y) ∈ X.
+
+2.3
+
+Formalized metamathematics
+
+Throughout this paper we shall use representations in arithmetic of various
+metamathematical notions. In particular we fix some Gödel numbering to represent formulas and other syntactical objects in arithmetic.
+Moreover, we assume that we can represent r.e. theories in a suitable way
+so that we can speak of “the formula ϕ is provable in the theory T ” whose
+formalization we shall denote by T ϕ. Dually, we shall use the notion of “the
+formula ϕ is consistent with the theory T ” which is denoted by ConT (ϕ) or ♦T ϕ.
+If we write T ϕ(ẋ) we denote by that a formula whose free variable is x,
+and so that provably for every x, the formula T ϕ(ẋ) is equivalent to T ϕ(x).
+Here x denotes the numeral of x, that is,
+x times
+
+z }| {
+x = S . . . S 0.
+
+3
+
+Provability logics
+
+The logics GLPΛ provide provability logics for a series of provability predicates/modalities [α] of increasing strength.
+Definition 3.1. Let Λ be an ordinal. By GLPΛ we denote the poly-modal propositional logic that has for each α < Λ a modality [α] (that syntactically binds as
+the negation symbol). The axioms of GLP are all propositional logical tautologies
+in this signature together with instantiations of the following schemes:
+[α](A → B) → ([α]A → [α]B)
+[α]([α]A → A) → [α]A
+[α]A → [β]A
+hαiA → [β]hαiA
+
+∀α < Λ;
+∀α < Λ;
+∀α ≤ β < Λ;
+∀α < β < Λ.
+
+As always we have that hαiA := ¬[α]¬A. The rules are Modus Ponens and a
+A
+Necessitation rule for each modality below Γ, that is, [α]A
+.
+3
+
+

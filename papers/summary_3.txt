@@ -1,0 +1,428 @@
+The Selfish Algorithm
+
+arXiv:1411.2378v1 [cs.CC] 10 Nov 2014
+
+Eduardo Hermo Reyes
+
+Joost J. Joosten
+
+Department of Logic, History and Philosophy of Science
+University of Barcelona
+Barcelona, Spain
+
+ehermo.reyes@gmail.com
+
+jjoosten@ub.edu
+
+March 8, 2022
+Abstract
+The principle of Generalized Natural Selection (GNS) states that in
+nature, computational processes of high computational sophistication are
+more likely to maintain/abide than processes of lower computational sophistication provided that sufficiently many resources are around to sustain the processes. In this paper we give a concrete set-up how to test
+GNS in a weak sense. In particular, we work in the setting of Cellular
+Automata and see how GNS can manifest itself in this setting.
+
+1
+
+Introduction
+
+One can perceive various physical processes in general and biological ones in
+particular as computational systems (see for example [1]). By doing so, various
+notions and techniques of computer science become relevant and applicable in
+biological systems and vice versa.
+In [4] and [5] Joosten investigates these complexity notions to reflect on the
+direction of evolution in terms of complexity. A driving principle of Generalized
+Natural Selection (GNS) is proposed. GNS states that in nature, computational
+processes of high computational sophistication are more likely to maintain/abide
+than processes of lower computational sophistication provided that sufficiently
+many resources are around to sustain the processes.
+A main ingredient of the argument is an analogy of Dawkins paradigm of
+the Selfish Gene ([2]) which in our setting could be called The Selfish Algorithm
+as long as we do not interpret our analogy too strictly. In this paper we choose
+to model processes in nature by the parallel computing paradigm of Cellular
+Automata (CA) and study how GNS can be investigated in this setting. We
+present a methodology and some very preliminary results. As such the paper
+can be seen as a research roadmap to further investigations.
+
+1
+
+2
+
+A first implementation
+
+We want to design an experiment that captures, in a computer simulation,
+what happens when two different structures grow while both accessing a locally
+limited set of resources, and in particular when at least one of the structures
+presents some significant level of complexity. So, for this purpose we have
+chosen a one-dimensional cellular automaton (CA), with radius 1 and three
+colors, white, grey and black which we denote by 0,1, and 2 respectively.
+Our CA works with a one-dimensional tape of discrete cells, where each cell
+can be of any of these three colors, and time evolution is modeled with discrete
+time steps. This way, we start by fixing an initial condition telling what cell is
+of what color. Our CA will use a rule that stipulates how to compute the color
+of a particular cell at a next time step depending on its current color and the
+color of its two direct neighbors. This way, the color of each cell will evolve over
+time.
+More formally, we can label our tape-cells by . . . x−2 , x−1 , x0 , x1 , x2 . . .. A
+tape-configuration is thus a map c : {xi | i ∈ Z} → {0, 1, 2}. We will denote
+the tape configuration at time t (t ∈ N) by . . . ct (x−2 ), ct (x−1 ), ct (x0 ), ct (x1 ) . . ..
+Thus, a CA with three colors in general is just a look-up table of 27 (3 × 3 × 3)
+rules telling you the value ct+1 (xn ) depending on the triple
+hct (xn−1 ), ct (xn ), ct (xn+1 )i.
+The main idea of this experiment is that black cells will correspond to a
+structure that follows some growing rule, grey cells correspond to a different
+structure that grows following another rule and white cells can be interpreted
+as a set of limited resources that black and grey cells use for their propagation.
+Thus, we shall restrict our attention to CAs with three colors which can be
+seen as composed by three CAs with two colors: one that determines the relation
+between white cells and black cells and fixes the growing of the black organism,
+the analogous for the grey organism and one that tells us what happens when
+cells of the different organisms contact in the same neighborhood.
+In particular we have that ct+1 (xn ) should, be either white or black in case
+none of ct (xn−1 ), ct (xn ) and ct (xn+1 ) is grey. Likewise, ct+1 (xn ) should, be
+either white or grey in case none of ct (xn−1 ), ct (xn ) and ct (xn+1 ) is black.
+Admittedly one can argue that the correspondence between CAs and models of an organism leads way to discussion as to the ontological nature of what
+exactly is the organism. In this paper we will not enter this discussion since
+the paper is a mere first exploration of what happens when complex behavior
+interacts with less complex behavior, or with behavior of a different type of
+complexity. So, deliberately we shall be rather vague as to the exact correspondence between black cells on the one hand and organisms or models of attributes
+thereof on the other hand.
+Our CA model will be of such nature that from the contact between both
+colors only one of them survives or both disappear. This means that there
+are only three possible solutions to what happens when cells of both organisms
+contact in the same neighborhood: grey survives, black survives or there only
+remains a white cell.
+2
+
+It is easy to check that there are exactly 12 possible neighborhoods (three adjacent cells) so that at least one black and at least one grey cell occur1 . In these
+cases , the values for the rule are assigned randomly so we do not interfere when
+both structures come in contact, giving priority to one over the other. This way,
+given any mixed neighborhood N = hct (xj−1 ), ct (xj ), ct (xj+1 )i, ct+1 (xj ) = r
+where r is a random integer between 0 and 2. Since values are assigned randomly, we can expect that given N = hct (xj−1 ), ct (xj ), ct (xj+1 )i and M =
+hct (xi−1 ), ct (xi ), ct (xi+1 )i, two different mixed neighborhoods, ct+1 (xj ) and ct+1 (xi )
+might be different. For example, consider the neighborhood h2, 2, 1i and suppose
+that in this case, black cell survives, this does not mean that in the rest of the
+mixed neighborhoods, black cell survives, not even in similar cases as h2, 1, 2i
+or h1, 2, 2i2 . Also, notice that there is one special neighborhood, h0, 0, 0i where
+all elements are white cells. For this case, we restrict the rule to return 0.
+
+3
+
+Interacting CAs: some preliminary findings
+
+The authors are preparing a large simulation where interacting CAs are studied
+using the above methodology. Here, we report on some preliminary findings. As
+such we mention that we often see that the complexity of the resulting pattern
+indeed gets changed. Either we see that the more simple structure survives
+but increases its complexity or that the more complex structure survives while
+maintaining its complexity.
+Following Wolfram code, in the first two figures we can see respectively, Rules
+90 and 110 running alone with just one black cell at the initial state. Rule 90
+exhibits a nested pattern, while Rule 110 has a higher complexity. Moreover,
+Rule 110 it’s known to be Turing complete.
+
+1 From now on, we refer to this kind of neighborhoods as mixed neighborhoods.
+2 This way, we are not considering totalistic rules that are the ones that depend only on
+the average color of the cells in a neighborhood.
+
+3
+
+arXiv:1412.5521v2 [math.LO] 13 Jan 2015
+
+Predicativity through transfinite reflection
+Andrés Cordón–Franco1 , David Fernández–Duque2 , Joost J.
+Joosten3 , and Félix Lara–Martı́n4
+1
+
+Universidad de Sevilla, acordon@us.es
+Instituto Tecnológico Autónomo de México,
+david.fernandez@itam.mx
+3
+Universitat de Barcelona, jjoosten@ub.edu
+4
+Universidad de Sevilla, fflara@us.es
+2
+
+March 13, 2022
+Abstract
+Let T be a second-order arithmetical theory, Λ a well-order, λ < Λ
+and X ⊆ N. We use [λ|X]Λ
+T ϕ as a formalization of “ϕ is provable from T
+and an oracle for the set X, using ω-rules of nesting depth at most λ”.
+For a set of formulas Γ, define predicative oracle reflection for T over
+Γ (Pred-O-RFNT [Γ]) to be the schema that asserts that, if X ⊆ N, Λ is a
+well-order and ϕ ∈ Γ, then
+∀ λ<Λ ([λ|X]Λ
+T ϕ → ϕ).
+In particular, define predicative oracle consistency (Pred-O-Cons(T )) as
+Pred-O-RFNT [{0 = 1}].
+Our main result is as follows. Let ATR0 be the second-order theory
+of Arithmetic Transfinite Recursion, RCA∗0 be Weakened Recursive Comprehension and ACA be Arithmetic Comprehension with Full Induction.
+Then,
+ATR0 ≡ RCA∗0 + Pred-O-Cons(RCA∗0 ) ≡ RCA∗0 + Pred-O-RFNACA [Π12 ].
+We may even replace RCA∗0 by the weaker ECA0 , the second-order analogue of Elementary Arithmetic.
+Thus we characterize ATR0 , a theory often considered to embody
+Predicative Analysis, in terms of strong reflection and consistency principles.
+
+Keywords: Reflection principles; Fragments of second-order arithmetic; Predicative analysis; Reverse mathematics
+
+1
+
+1
+
+Introduction
+
+Reflection over a theory T roughly says that whatever is provable in T is actually
+true. As such, reflection is natural from a methodological or philosophical point
+of view. Moreover, from a technical point of view it also turns out to be natural,
+since various well-known fragments of arithmetic can be re-cast in terms of
+reflection principles. In this introduction we will discuss results along these
+lines for first-order arithmetical theories and address the question of how this
+can be extended beyond first-order theories.
+
+1.1
+
+Reflection, consistency and fragments of first-order
+arithmetic
+
+Fix a formal theory T . If we denote the formal provability of a formula ϕ in
+T by T ϕ, we can write Rfn(T ), called local reflection over T , as the scheme
+T ϕ → ϕ, where ϕ has no free variables.
+It turns out that a better-behaved notion of reflection is so-called uniform
+reflection where we allow for formulas, possibly with parameters. This scheme,
+denoted RFN(T ), is given by
+
+∀x T ϕ(ẋ) → ϕ(x) ,
+(1)
+
+where ϕ is any formula and ẋ means that we must replace x by a name for x.
+Let us denote the consistency of T + ϕ by ♦T ϕ, which is equivalent to
+¬T ¬ϕ. By Gödel’s Second Incompleteness Theorem we know that consistent computably enumerable (c.e.) theories T do not even prove the weakest
+instances of reflection; if we define ⊥ by 0 = 1, we know that
+T 0 T ⊥ → ⊥,
+since the latter is provably equivalent to the consistency of T .
+Thus, adding reflection to a consistent base theory will yield a proper extension of it. This is philosophically appealing, since one can sustain that it is
+natural to accept reflection over T once one has accepted T . An early result
+by Kreisel and Levy [12] shows that reflection principles are also natural from
+a technical point of view in that adding them yields natural extensions. Below, PA denotes the well-known first-order theory Peano Arithmetic and PRA
+refers to Primitive Recursive Arithmetic, which is often considered to embody
+Hilbert’s concept of finitist mathematics [18].
+Theorem 1.1 (Kreisel, Levy (1968)). PRA + RFN(PRA) ≡ PA.
+This relation between reflection and a system of arithmetic can be extended
+to fragments of Peano arithmetic. By Σ0n –or simply Σn in this introduction–
+we denote first-order arithmetical formulas of the form ∃xn ∀xn−1 . . . ϕ, where
+ϕ only has bounded quantifiers (see Section 2.1). The theory IΣn is the theory
+of arithmetic where apart from the basic axioms for + and × we have induction
+axioms
+
+∀ y<x ϕ(y, z) → ϕ(x, z) → ∀x ϕ(x, z)
+2
+
+for all Σn -formulas.
+Leivant [13] proved that there is a correspondence between the principles IΣn
+for n ≥ 2 and restricted reflection principles over PRA. Restricted reflection
+principles arise when we restrict the formulas in the reflection schema. If Γ
+is a set of formulas, RFNΓ (T ), denotes the restriction of (1) where ϕ(x) ∈ Γ.
+Beklemishev [2] extended Leviant’s result to the case n = 1 by lowering the base
+theory from PRA to a somewhat weaker theory EA called Kalmar Elementary
+Arithmetic.
+Theorem 1.2. Given n ≥ 1, EA + RFNΣn+1 (EA) ≡ IΣn .
+This theorem shows that reflection principles can be related to fragments
+of arithmetic. Moreover, for various notions of provability one can often link
+reflection to consistency statements. This relation is normally proved in the
+way presented in Lemma 1.4 below, where we need to require some minimal
+properties of the particular provability predicate, leading to the notion of normal
+provability predicate.
+Definition 1.3. We will call a predicate  a normal provability predicate if it
+is provable in EA that  satisfies the modal logic K; that is,
+EA ⊢ (ϕ → ψ) → (ϕ → ψ),
+EA ⊢ (ϕ) for any tautology ϕ, and EA ⊢ ϕ implies that EA ⊢ ϕ.
+For Γ a set of formulas, let ¬Γ denote the set {¬γ | γ ∈ Γ}. A predicate 
+is provably ∆-complete in U if U ⊢ δ → δ for any δ ∈ ∆.
+Lemma 1.4. Let U be a theory extending elementary arithmetic and let  be a
+normal provability predicate with dual consistency predicate . If Γ contains (a
+provable equivalence of ) ⊥ and  is provably ¬Γ-complete in U , then Γ-reflection
+for  is equivalent to ⊤. That is,
+U + {γ → γ | γ ∈ Γ} ≡ U + ⊤.
+Proof. The ⊢ direction follows directly since ⊥ ∈ Γ. The other direction follows
+directly from ¬Γ-completeness: suppose that γ and ⊤ and suppose for a contradiction that ¬γ; by completeness we have ¬γ, whence by γ and normality
+we get ⊥, which contradicts ⊤.
+Stronger notions of provability can be related to stronger notions of consistency. For this purpose it is very useful to consider the provability predicates
+[n]T for n ∈ N and c.e. theories T where [n]T is a natural first-order formalization of “provable from the axioms of T together with some true Πn sentence”,
+where a formula is Πn if its negation is Σn . More precisely, let TrueΠn be the
+standard partial truth-predicate for Πn formulas, which is itself of complexity
+Πn . Then, we define
+
+[n]T ϕ ↔ ∃π TrueΠn (π) ∧ T (π → ϕ) .
+
+It is well-known that each such predicate is normal and the following observation
+follows directly from the definition.
+3
+
+arXiv:1501.05327v1 [math.LO] 21 Jan 2015
+
+Turing jumps through provability
+Joost J. Joosten∗
+University of Barcelona
+October 3, 2018
+
+Abstract
+Fixing some computably enumerable theory T , the Friedman-GoldfarbHarrington (FGH) theorem says that over elementary arithmetic, each Σ1
+formula is equivalent to some formula of the form T ϕ provided that T
+is consistent. In this paper we give various generalizations of the FGH
+theorem. In particular, for n > 1 we relate Σn formulas to provability
+statements [n]True
+T ϕ which are a formalization of “provable in T together
+with all true Σn+1 sentences”. As a corollary we conclude that each [n]True
+T
+is Σn+1 -complete.
+This observation yields us to consider a recursively defined hierarchy
+True
+of provability predicates [n + 1]
+except
+T which look a lot like [n + 1]T
+True
+that where [n + 1]T calls upon the oracle of all true Σn+2 sentences,
+the [n + 1]
+T recursively calls upon the oracle of all true sentences of the
+form hni
+T φ. As such we obtain a ‘syntax-light’ characterization of Σn+1
+definability whence of Turing jumps which is readily extended beyond
+the finite. Moreover, we observe that the corresponding provability predicates [n + 1]
+T are well behaved in that together they provide a sound
+interpretation of the polymodal provability logic GLPω .
+
+1
+
+Introduction
+
+In first order arithmetic we have natural syntactical definitions that correspond
+to finite iterations of the Turing jump. Recall that a sentence in first order
+logic in the standard language of arithmetic is Σn+1 if it starts with a block of
+alternating quantifiers of length n + 1 where the leftmost quantifier is existential and where the block of quantifiers is followed by a decidable formula only
+containing bounded quantification. There are various results known that relate
+these formula classes to computational complexity classes.
+For example, a set of natural numbers is many-one reducible to the n-th
+Turing jump of the empty set if and only if it is Σn definable (on the standard
+∗ jjoosten@ub.edu
+
+1
+
+model of the natural numbers). Likewise, a set of natural numbers is Turingreducible to the n-th Turing jump of the empty set if and only if it and its
+complement can be defined on the standard model of the natural numbers by
+a Σn+1 formula. Similarly, a set of natural numbers is computably enumerable
+relative to the n-th Turing jump of the empty set if and only if it can be defined
+by a Σn+1 formula.
+In this paper we shall use the fact that various provability predicates are
+Turing complete in a certain sense so that we can give alternative characterizations for the finite Turing jumps. A central ingredient in proving our results
+come from generalizations of the so-called FGH Theorem.
+The FGH Theorem (for Friedman-Goldfarb-Harrington) tells us that for any
+c.e. theory T we have provably in Elementary Arithmetic that each Σ1 sentence
+σ is equivalent to a provability statement of T , provided T is consistent. In
+symbols,
+
+∀ σ∈Σ1 ∃ψ EA ⊢ ♦T ⊤ → σ ↔ T ψ .
+Here, as usual T denotes a natural formalization of provability in T and the
+♦T stands for the dual consistency assertion. In this paper we give various
+generalizations of the FGH theorem. In particular we prove that the theorem
+holds for the provability notion [n]T : provable in T together with all true Σn+1
+formulas. As a corollary we conclude that each [n]True
+is Σn+1 -complete.
+T
+This observation yields us to consider a recursively defined hierarchy of provTrue
+ability predicates [n + 1]
+except that where
+T which look a lot like [n + 1]T
+
+[n+1]True
+calls
+upon
+the
+oracle
+of
+all
+true
+Σ
+sentences,
+the
+[n+1]
+n+2
+T
+T recursively
+calls upon the oracle of all true sentences of the form hni
+φ.
+T
+As such we obtain a ‘syntax-light’ characterization of Σn+1 definability
+whence of Turing jumps which is readily extended beyond the finite. Moreover, we observe that the corresponding provability predicates [n + 1]
+T are well
+behaved in that together they provide a sound interpretation of the polymodal
+provability logic GLPω .
+
+2
+
+Preliminaries
+
+We shall work with theories with identity in the language {0, 1, exp, +, ·, <} of
+arithmetic where exp denotes the unary function x 7→ 2x . We define ∆0 =
+Σ0 = Π0 formulas as those where all quantifiers occur bounded, that is, we
+only allow quantifiers of the form ∀ x<t or ∃ x<t where t is some term not
+containing x. We inductively define Σn , Πn ⊂ Πn+1 and Σn , Πn ⊂ Σn+1 ; if
+φ, ψ ∈ Πn+1 , then ∀x φ, φ ∧ ψ, φ ∨ ψ ∈ Πn+1 and likewise, if φ, ψ ∈ Σn+1 , then
+∃x φ, φ ∧ ψ, φ ∨ ψ ∈ Σn+1 .
+We shall write Σn+1 ! for formulas ϕ of the form ∃x ϕ0 with ϕ0 ∈ Πn . We
+will work in the absence of strong versions of (bounded) collection Bϕ which is
+defined as
+
+
+Bϕ := ∀z ∀~u ∀ x<z ∃y ϕ(x, y, ~u) → ∃y ′ ∀ x<z ∃ y<y ′ ϕ(x, y, ~u) .
+
+2
+
+Therefore, we will consider the formula class Σn+1,1 consisting of existentially
+quantified disjunctions and conjunctions of Σn+1 formulas with bounded quantifiers over them. To be more precise, we first inductively define
+Σn+1,b := Σn+1 | (Σn+1,b ◦ Σn+1,b ) | (Q x<y Σn+1,b )
+with ◦ ∈ {∧, ∨} and Q ∈ {∀, ∃}. Next we define the Σn+1,1 formulas to be of
+the form ∃x φ with φ ∈ Σn+1,b .
+The theory of elementary arithmetic, EA, is axiomatized by the defining
+axioms for {0, 1, exp, +, ·, <} together with induction for all ∆0 formulas. The
+theory Peano Arithmetic, PA, is as EA but now allowing induction axioms for
+any first order formula.
+It is well known that PA proves any instance Bϕ of collection so that in
+particular each Σn+1,1 sentence is equivalent to some Σn+1 sentence. Clearly
+we have that Σn+1 ! ⊂ Σn+1 . Using coding techniques, it is clear that each Σn+1
+formula is within EA equivalent to a Σn+1 ! formula.
+For us, a computably enumerable (c.e.) theory T is understood to be given
+by a ∆0 formula that defines the set of codes of the primitive recursive set of
+axioms of T . We will employ standard formalizations of meta-mathematical
+properties like ProofT (x, y) for “x is the Gödel number of a proof from the
+axioms of T of the formula whose Gödel number is y”. We shall often refrain
+from distinguishing a syntactical object ϕ from its Gödel number pϕq or from
+a syntactical representation of its Gödel number.
+We will write T ϕ for the Σ1 ! formula ∃x ProofT (x, ϕ) and ♦T ϕ for ¬T ¬ϕ.
+By T ϕ(ẋ) we will denote a formula which contains the free variable x, that
+expresses that for each value of x the formula ϕ(x) is provable in T . Here, x
+denotes a syntactical representation of the number x.
+By Σ1 completeness we refer to the fact that for any true Σ1 sentence σ we
+have that EA ⊢ σ. It is well-known that EA proves a formalized version of this:
+for any Σ1 formula σ(x) and any c.e. theory T we have EA ⊢ σ(x) → T σ(ẋ).
+
+3
+
+The FGH theorem and generalizations
+
+In this section we shall be dealing with various so-called witness-comparison
+arguments where the order of (least) witnesses to existential sentences is important. The first and most emblematic such argument occurred in the proof
+of Rosser’s theorem which is a strengthening of Gödel’s first incompleteness
+theorem.
+Theorem 3.1 (Rosser’s Theorem). Let T be a consistent c.e. theory extending
+EA. There is some ρ ∈ Σ1 which is undecidable in T . That is,
+T 0ρ
+T 0 ¬ρ.
+
+and,
+
+For rhetoric reasons we shall below include a standard proof of this celebrated
+result. Before doing so, we first need some notation.
+3
+
+
