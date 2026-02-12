@@ -1,13 +1,158 @@
+/* ============================================================
+   JUDIT — Master Theme & Component Stylesheet
+   All colors routed through CSS custom properties.
+   ============================================================ */
+
 /* Global Box Sizing */
 * {
     box-sizing: border-box;
 }
 
-/* Base styles provided in index.html, adding specific component styles here */
+/* ─── THEME TOKENS ─────────────────────────────────────────── */
+
+:root {
+    /* DEFAULT — Slate Blue-Gray (harmonious cool palette) */
+    --bg-color: #171b21;
+    --panel-bg: #1e2228;
+    --panel-bg-alt: #232830;
+    --text-color: #c8cdd3;
+    --text-dim: #7a8694;
+    --accent-color: #5b9bd5;
+    --accent-hover: #78b0e2;
+    --accent-muted: rgba(91, 155, 213, 0.12);
+    --success-color: #5cb85c;
+    --danger-color: #d9534f;
+    --warning-color: #f0ad4e;
+    --border-color: #2d333b;
+    --border-light: #383e47;
+    --header-bg: #161a22;
+    --secondary-bg: #1a1f27;
+    --input-bg: #232830;
+    --input-border: #2d333b;
+    --btn-bg: #2a3038;
+    --btn-border: #363d47;
+    --btn-hover: #343b46;
+    --code-bg: #13171d;
+    --modal-overlay: rgba(0, 0, 0, 0.75);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.5);
+    --scroll-track: #1a1f27;
+    --scroll-thumb: #363d47;
+    --scroll-hover: #4a5260;
+    --canvas-bg: #111519;
+    --bevel-light: rgba(255, 255, 255, 0.06);
+    --bevel-dark: rgba(0, 0, 0, 0.45);
+}
+
+[data-theme="light"] {
+    --bg-color: #f4f6f8;
+    --panel-bg: #ffffff;
+    --panel-bg-alt: #f8f9fb;
+    --text-color: #24292e;
+    --text-dim: #6a737d;
+    --accent-color: #2563eb;
+    --accent-hover: #3b82f6;
+    --accent-muted: rgba(37, 99, 235, 0.08);
+    --success-color: #22863a;
+    --danger-color: #cb2431;
+    --warning-color: #e36209;
+    --border-color: #d1d5da;
+    --border-light: #e1e4e8;
+    --header-bg: #f0f2f5;
+    --secondary-bg: #ffffff;
+    --input-bg: #ffffff;
+    --input-border: #d1d5da;
+    --btn-bg: #f3f4f6;
+    --btn-border: #d1d5da;
+    --btn-hover: #e8eaed;
+    --code-bg: #f6f8fa;
+    --modal-overlay: rgba(0, 0, 0, 0.45);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.15);
+    --scroll-track: #f1f1f1;
+    --scroll-thumb: #c1c1c1;
+    --scroll-hover: #a8a8a8;
+    --canvas-bg: #e8ecf0;
+    --bevel-light: rgba(255, 255, 255, 0.9);
+    --bevel-dark: rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="high-contrast"] {
+    --bg-color: #000000;
+    --panel-bg: #0a0a0a;
+    --panel-bg-alt: #111111;
+    --text-color: #ffffff;
+    --text-dim: #ffff00;
+    --accent-color: #ffff00;
+    --accent-hover: #ffff80;
+    --accent-muted: rgba(255, 255, 0, 0.15);
+    --success-color: #00ff00;
+    --danger-color: #ff0000;
+    --warning-color: #ff8800;
+    --border-color: #ffffff;
+    --border-light: #ffffff;
+    --header-bg: #000000;
+    --secondary-bg: #000000;
+    --input-bg: #0a0a0a;
+    --input-border: #ffffff;
+    --btn-bg: #222222;
+    --btn-border: #ffffff;
+    --btn-hover: #333333;
+    --code-bg: #000000;
+    --modal-overlay: rgba(0, 0, 0, 0.9);
+    --shadow-sm: 0 1px 3px rgba(255, 255, 255, 0.2);
+    --shadow-md: 0 4px 12px rgba(255, 255, 255, 0.15);
+    --shadow-lg: 0 10px 30px rgba(255, 255, 255, 0.1);
+    --scroll-track: #000;
+    --scroll-thumb: #fff;
+    --scroll-hover: #ff0;
+    --canvas-bg: #000000;
+    --bevel-light: rgba(255, 255, 255, 0.15);
+    --bevel-dark: rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="monokai"] {
+    --bg-color: #272822;
+    --panel-bg: #2e2f28;
+    --panel-bg-alt: #373830;
+    --text-color: #f8f8f2;
+    --text-dim: #75715e;
+    --accent-color: #a6e22e;
+    --accent-hover: #b8f24e;
+    --accent-muted: rgba(166, 226, 46, 0.1);
+    --success-color: #a6e22e;
+    --danger-color: #f92672;
+    --warning-color: #e6db74;
+    --border-color: #49483e;
+    --border-light: #5a5950;
+    --header-bg: #1e1f1c;
+    --secondary-bg: #272822;
+    --input-bg: #3e3d32;
+    --input-border: #49483e;
+    --btn-bg: #3e3d32;
+    --btn-border: #49483e;
+    --btn-hover: #4a4940;
+    --code-bg: #1e1f1c;
+    --modal-overlay: rgba(0, 0, 0, 0.8);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.45);
+    --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.55);
+    --scroll-track: #1e1f1c;
+    --scroll-thumb: #75715e;
+    --scroll-hover: #a6e22e;
+    --canvas-bg: #1e1f1c;
+    --bevel-light: rgba(255, 255, 255, 0.05);
+    --bevel-dark: rgba(0, 0, 0, 0.5);
+}
+
+/* ─── BASE ELEMENTS ────────────────────────────── */
 
 body {
-    background: radial-gradient(circle at center, #2b2b2b 0%, #1a1a1a 100%);
-    color: #e0e0e0;
+    background: var(--bg-color) !important;
+    color: var(--text-color) !important;
+    transition: background 0.3s ease, color 0.3s ease;
 }
 
 canvas {
@@ -15,97 +160,431 @@ canvas {
     height: 100%;
 }
 
-/* Button Bevel Effect */
+/* ─── GLOBAL BUTTON SYSTEM ────────────────────── */
+
 button {
-    transition: all 0.1s ease;
-    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.5);
+    transition: all 0.15s ease;
+    box-shadow:
+        inset 0 1px 0 var(--bevel-light),
+        0 1px 2px var(--bevel-dark);
     position: relative;
     top: 0;
+    border-radius: 4px;
+    font-size: 11px;
+    cursor: pointer;
+    background: var(--btn-bg);
+    color: var(--text-color);
+    border: 1px solid var(--btn-border);
+}
+
+button:hover {
+    background: var(--btn-hover);
 }
 
 button:active {
-    box-shadow: 0 0 0 rgba(0, 0, 0, 0.5);
-    top: 2px;
+    box-shadow:
+        inset 0 1px 3px var(--bevel-dark);
+    top: 1px;
 }
 
-/* Glassmorphism for panels */
+/* ─── PANELS (Sidebar + Inspector) ─────────── */
+
 #sidebar,
 #inspector {
-    background: rgba(40, 40, 40, 0.75);
-    backdrop-filter: blur(10px);
-    border-color: rgba(255, 255, 255, 0.1);
-    /* Prevent horizontal scroll */
+    background: var(--panel-bg) !important;
+    border-color: var(--border-color) !important;
     overflow-x: hidden;
+    transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+    color: var(--text-color);
+    font-size: 12px;
 }
 
 #inspector {
     width: 300px;
-    padding: 20px;
-    border-left: 1px solid #333;
+    padding: 10px;
+    border-left: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
     overflow-y: hidden;
-    /* Main container hidden, children scroll */
 }
 
 #sidebar {
     width: 260px;
-    padding: 15px;
-    border-right: 1px solid #333;
+    padding: 10px;
+    border-right: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
     overflow-y: auto;
-    /* Allow vertical scroll for sidebar content */
 }
 
-/* Custom Scrollbar */
+/* Panel headings */
+#sidebar h3,
+#inspector h3 {
+    font-size: 10px;
+    font-weight: 700;
+    margin: 8px 0 6px 0;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Panel sub-elements */
+#sidebar label,
+#inspector label {
+    font-size: 11px;
+    color: var(--text-dim);
+}
+
+#sidebar select,
+#inspector select,
+#sidebar input,
+#inspector input {
+    font-size: 11px;
+}
+
+/* Panel buttons — grouped style */
+#sidebar button,
+#inspector button {
+    font-size: 11px;
+    padding: 5px 8px;
+    background: var(--btn-bg);
+    color: var(--text-color);
+    border: 1px solid var(--btn-border);
+    border-radius: 4px;
+}
+
+/* Properties panel area */
+#properties-panel {
+    background: var(--panel-bg-alt);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-color);
+}
+
+/* ─── TOP NAV TABS ─────────────────────────── */
+
+#main-tabs {
+    background: var(--header-bg) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    color: var(--text-color);
+}
+
+.tab-btn {
+    background: transparent !important;
+    color: var(--text-dim) !important;
+    border: none !important;
+    border-bottom: 2px solid transparent !important;
+    box-shadow: none !important;
+    font-size: 12px !important;
+}
+
+.tab-btn:hover {
+    color: var(--text-color) !important;
+    background: var(--accent-muted) !important;
+}
+
+.tab-btn.active {
+    color: var(--accent-color) !important;
+    border-bottom: 2px solid var(--accent-color) !important;
+    background: var(--accent-muted) !important;
+}
+
+/* ─── TOP BAR ──────────────────────────────── */
+
+#top-bar {
+    background: var(--header-bg) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+}
+
+#top-bar button {
+    background: var(--btn-bg) !important;
+    color: var(--text-color) !important;
+    border: 1px solid var(--btn-border) !important;
+    font-size: 11px;
+    padding: 4px 8px;
+}
+
+#top-bar button:hover {
+    background: var(--btn-hover) !important;
+}
+
+/* Primary action button style */
+#top-satisfy-btn {
+    background: var(--accent-color) !important;
+    color: #fff !important;
+    border: 1px solid var(--accent-color) !important;
+    font-weight: 600;
+}
+
+/* ─── INPUTS ────────────────────────────────── */
+
+input[type="text"],
+input[type="number"],
+input[type="range"],
+select,
+textarea {
+    background: var(--input-bg) !important;
+    color: var(--text-color) !important;
+    border: 1px solid var(--input-border) !important;
+    border-radius: 4px;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--accent-color) !important;
+    outline: none;
+}
+
+/* ─── TOOLBAR ITEMS (Draggable blocks) ─────── */
+
+.toolbar-item {
+    transition: all 0.2s ease;
+    border: 1px solid var(--border-color);
+    background: var(--panel-bg-alt);
+    color: var(--text-color);
+    user-select: none;
+    cursor: grab;
+    border-radius: 4px;
+    padding: 6px 8px;
+    font-size: 11px;
+    box-shadow: inset 0 1px 0 var(--bevel-light), 0 1px 2px var(--bevel-dark);
+}
+
+.toolbar-item:hover {
+    background: var(--btn-hover);
+    border-color: var(--accent-color);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.toolbar-item:active {
+    cursor: grabbing;
+    transform: translateY(0);
+}
+
+/* ─── COLLAPSIBLE BOTTOM PANELS (Turing, Lambda) */
+
+#turing-panel,
+#lambda-panel {
+    border-top: 2px solid var(--border-color) !important;
+    background: var(--panel-bg);
+}
+
+#turing-header,
+#lambda-header {
+    background: var(--header-bg) !important;
+}
+
+#turing-body,
+#lambda-body {
+    background: var(--panel-bg) !important;
+}
+
+/* All internal divs in these panels */
+#turing-panel div,
+#lambda-panel div,
+#turing-body *,
+#lambda-body * {
+    color: var(--text-color);
+}
+
+/* ─── MODALS ───────────────────────────────── */
+
+#random-modal>div,
+#export-modal>div,
+#tutorial-modal>div,
+#presets-modal>div,
+#translator-modal>div,
+#insights-modal>div,
+#relation-modal {
+    background: var(--panel-bg) !important;
+    color: var(--text-color) !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+/* ─── EVALUATION / RESULTS ─────────────────── */
+
+#evaluation-container {
+    height: 100%;
+}
+
+#evaluation-result,
+#prove-result {
+    background: var(--panel-bg-alt) !important;
+    color: var(--text-color) !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+.result-valid {
+    color: var(--success-color);
+    font-weight: bold;
+}
+
+.result-invalid {
+    color: var(--danger-color);
+    font-weight: bold;
+}
+
+/* ─── CANVAS CONTAINER ─────────────────────── */
+
+#canvas-container {
+    background: var(--canvas-bg) !important;
+}
+
+/* ─── HELP CARDS IN TUTORIAL MODAL ─────────── */
+
+#tutorial-modal [style*="background:#222"],
+#tutorial-modal [style*="background:var(--card-bg)"] {
+    background: var(--panel-bg-alt) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* ─── SCROLLBAR ────────────────────────────── */
+
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--scroll-track);
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #555;
+    background: var(--scroll-thumb);
     border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #666;
+    background: var(--scroll-hover);
 }
 
-.result-valid {
-    color: #4cd137;
-    font-weight: bold;
+/* ─── LESSONS TAB ──────────────────────────── */
+
+#lesson-sidebar,
+#lesson-content-area {
+    background: var(--panel-bg) !important;
+    color: var(--text-color) !important;
 }
 
-.result-invalid {
-    color: #e84118;
-    font-weight: bold;
+.lesson-link {
+    color: var(--text-dim) !important;
 }
 
-#evaluation-container {
-    height: 100%;
+.lesson-link:hover {
+    color: var(--text-color) !important;
+    background: var(--accent-muted) !important;
 }
 
-.toolbar-item {
-    transition: all 0.2s ease;
-    border: 1px solid transparent;
-    user-select: none;
-    /* Add bevel to toolbar items too? Maybe just hover */
-    cursor: grab;
+.lesson-link.active {
+    color: var(--accent-color) !important;
+    background: var(--accent-muted) !important;
+    border-left-color: var(--accent-color) !important;
 }
 
-.toolbar-item:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.2);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+/* ─── SETTINGS / APPEARANCE TAB ────────────── */
+
+#tab-settings {
+    background: var(--bg-color) !important;
+    color: var(--text-color) !important;
 }
 
-.toolbar-item:active {
-    cursor: grabbing;
+/* ─── FULL-SCREEN TABS (.fs-tab) ───────────── */
+
+.fs-tab {
+    background: var(--bg-color) !important;
+    color: var(--text-color) !important;
+}
+
+/* ─── SCRIPTING PANEL ──────────────────────── */
+
+#script-editor {
+    background: var(--code-bg) !important;
+    color: var(--text-color) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* ─── AGENT POPUP ──────────────────────────── */
+
+#agent-popup {
+    background: var(--panel-bg) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-color) !important;
+}
+
+/* ─── MISC OVERRIDES (catch remaining divs) ── */
+
+/* Ensure ALL bg-colored divs in the app follow theme */
+#app,
+#app>*,
+.tab-content {
+    transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Info overlay in canvas */
+#model-info-overlay {
+    background: var(--panel-bg) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-color) !important;
+}
+
+/* ─── TOOLTIP ──────────────────────────────── */
+
+#tooltip {
+    background: var(--panel-bg) !important;
+    border-color: var(--accent-color) !important;
+    color: var(--text-color) !important;
+}
+
+#tooltip strong {
+    color: var(--accent-color) !important;
+}
+
+/* ─── SECTION-SPECIFIC BUTTON VARIANTS ─────── */
+
+/* Action buttons (Prove, Announce) — accent tint */
+#prove-btn,
+#announce-btn {
+    border-radius: 5px;
+    font-weight: 600;
+}
+
+/* Layout section buttons — muted, small */
+#layout-grid-btn,
+#layout-circle-btn,
+#layout-random-btn,
+#layout-center-btn,
+#layout-toggle-btn {
+    background: var(--secondary-bg) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-dim) !important;
+    border-radius: 3px;
+    font-size: 10px;
+}
+
+#layout-grid-btn:hover,
+#layout-circle-btn:hover,
+#layout-random-btn:hover,
+#layout-center-btn:hover,
+#layout-toggle-btn:hover {
+    background: var(--btn-hover) !important;
+    color: var(--text-color) !important;
+}
+
+/* Export / Import — outlined style */
+#export-btn,
+#import-btn {
+    border-radius: 4px;
+    border: 1px solid var(--accent-color) !important;
+    color: var(--accent-color) !important;
+    background: transparent !important;
+    font-weight: 500;
+}
+
+#export-btn:hover,
+#import-btn:hover {
+    background: var(--accent-muted) !important;
 }

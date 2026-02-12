@@ -193,18 +193,6 @@ export class Modal extends Formula {
         // - S4: Treat as Reflexive + Transitive
         // - S5: Treat as Equivalence
 
-        let accessFunc = (w) => model.getAccessibleWorlds(w, this.agent);
-
-        if (system === 'T') {
-            // Reflexive closure on the fly?
-            // Or we rely on the user having drawn it? 
-            // Usually model checking checks the model AS IS.
-            // But if we say "System T", maybe we should implicitily add self-loops?
-            // Let's stick to "Model as is" but maybe add an "Implied" mode later.
-            // For now, standard Kripke evaluation on the explicit graph.
-        }
-        // ... (Leaving standard evaluation for K/T/S4/S5 as explicit graph evaluation)
-
         if (this.operator === 'X') {
             // Next: True in all immediate successors (Standard Modal K Step)
             const accessibleWorlds = model.getAccessibleWorlds(world, this.agent);
@@ -221,7 +209,28 @@ export class Modal extends Formula {
             }
         }
 
-        const accessibleWorlds = model.getAccessibleWorlds(world, this.agent);
+        let accessibleWorlds = [];
+
+        if (system === 'S5') {
+            // S5: Equivalence Relation (Partition)
+            // Accessible worlds are all worlds in the same connected component (undirected)
+            accessibleWorlds = model.getComponentWorlds(world, this.agent);
+        } else if (system === 'S4') {
+            // S4: Reflexive + Transitive
+            // Reachable worlds (Transitive closure)
+            accessibleWorlds = model.getReachableWorlds(world, this.agent);
+            // getReachableWorlds includes startWorld? logic says: reachable.push(startWorld) at line 440.
+            // So it is Reflexive implicitly if implemented correctly.
+        } else if (system === 'T') {
+            // T: Reflexive
+            accessibleWorlds = model.getAccessibleWorlds(world, this.agent);
+            if (!accessibleWorlds.some(w => w.id === world.id)) {
+                accessibleWorlds.push(world);
+            }
+        } else {
+            // K (Default): Explicit relations only
+            accessibleWorlds = model.getAccessibleWorlds(world, this.agent);
+        }
 
         if (this.operator === '□') {
             // Must be true in ALL accessible worlds
@@ -423,6 +432,13 @@ export class Model {
         }
     }
 
+    removeRelation(relation) {
+        const index = this.relations.indexOf(relation);
+        if (index > -1) {
+            this.relations.splice(index, 1);
+        }
+    }
+
     getAccessibleWorlds(world, agent = null) {
         return this.relations
             .filter(rel => rel.sourceId === world.id && (agent === null || rel.agent === agent))
@@ -450,7 +466,44 @@ export class Model {
                 }
             }
         }
+
         return reachable;
+    }
+
+    getComponentWorlds(startWorld, agent = null) {
+        // BFS on UNDIRECTED graph
+        const visited = new Set();
+        const queue = [startWorld];
+        visited.add(startWorld.id);
+        const component = [startWorld];
+
+        while (queue.length > 0) {
+            const current = queue.shift();
+
+            // Find neighbors (incoming AND outgoing)
+            const neighbors = new Set();
+            this.relations.forEach(r => {
+                if (agent !== null && r.agent !== agent) return;
+
+                if (r.sourceId === current.id) {
+                    const w = this.worlds.get(r.targetId);
+                    if (w) neighbors.add(w);
+                }
+                if (r.targetId === current.id) {
+                    const w = this.worlds.get(r.sourceId);
+                    if (w) neighbors.add(w);
+                }
+            });
+
+            for (const neighbor of neighbors) {
+                if (!visited.has(neighbor.id)) {
+                    visited.add(neighbor.id);
+                    component.push(neighbor);
+                    queue.push(neighbor);
+                }
+            }
+        }
+        return component;
     }
 
     getWorld(id) {

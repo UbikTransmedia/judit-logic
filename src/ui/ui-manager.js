@@ -75,6 +75,8 @@ export class UiManager {
         this.setupCalculus();
         this.setupTabHelp();
         this.setupLessons();
+        this.setupGlobalControls();
+        this.setupAppearanceControls();
     }
 
     setupRelationEditor() {
@@ -178,19 +180,16 @@ export class UiManager {
         if (deleteBtn) {
             deleteBtn.addEventListener('click', () => {
                 if (currentRelation) {
-                    // Should we delete just this one, or the pair if bidirectional?
-                    // "Delete Relation" implies removing the connection.
-                    // Let's remove BOTH if bidirectional? Or ask?
-                    // Visual expectation: click arrow -> delete -> arrow gone.
-                    // If bidirectional, maybe just delete both.
+                    console.log("Deleting relation:", currentRelation);
 
                     const source = currentRelation.sourceId;
                     const target = currentRelation.targetId;
                     const agent = currentRelation.agent;
 
+                    // Remove this relation
                     this.model.removeRelation(currentRelation);
 
-                    // Also remove reverse?
+                    // Also remove reverse if it exists (for bidirectional logic)
                     const reverseRel = this.model.relations.find(r =>
                         r.sourceId === target &&
                         r.targetId === source &&
@@ -200,9 +199,20 @@ export class UiManager {
                         this.model.removeRelation(reverseRel);
                     }
 
+                    // Reset selection in renderer
+                    if (this.renderer.selectedRelation === currentRelation) {
+                        this.renderer.selectedRelation = null;
+                        this.renderer.canvas.dispatchEvent(new CustomEvent('selectionChange'));
+                    }
+
                     this.renderer.draw();
                     this.renderer.canvas.dispatchEvent(new CustomEvent('modelChange'));
                     modal.style.display = 'none';
+
+                    // Also update properties panel if it was showing this relation
+                    this.updatePropertiesPanel();
+                } else {
+                    console.warn("Delete clicked but no currentRelation set.");
                 }
             });
         }
@@ -1146,6 +1156,8 @@ export class UiManager {
         });
 
         // Use custom tooltip from index.html (removed standard title)
+
+
         applyBtn.removeAttribute('title');
 
         // SETUP EXPORT HANDLERS
@@ -2460,6 +2472,262 @@ export class UiManager {
         });
     }
 
+    setupGlobalControls() {
+        const shareBtn = document.getElementById('share-session-btn');
+        const loadBtn = document.getElementById('load-session-btn');
+        const globalFileInput = document.getElementById('global-file-input');
+
+        if (shareBtn) {
+            shareBtn.addEventListener('click', () => this.exportGlobalSession());
+        }
+
+        if (loadBtn && globalFileInput) {
+            loadBtn.addEventListener('click', () => globalFileInput.click());
+            globalFileInput.addEventListener('change', (e) => this.importGlobalSession(e));
+        }
+    }
+
+    exportGlobalSession() {
+        // Gather ALL state
+        const session = {
+            type: 'judit-global-session',
+            version: 1,
+            timestamp: new Date().toISOString(),
+            logic: {
+                worlds: Array.from(this.model.worlds.values()).map(w => ({
+                    id: w.id,
+                    x: w.x, y: w.y,
+                    name: w.name,
+                    color: w.color,
+                    textColor: w.textColor,
+                    valuation: Array.from(w.valuation.entries())
+                })),
+                relations: this.model.relations.map(r => ({
+                    source: r.sourceId,
+                    target: r.targetId,
+                    agent: r.agent,
+                    data: r.data
+                })),
+                domain: Array.from(this.model.domain)
+            },
+            formula: {
+                raw: this.formulaInput ? this.formulaInput.value : ''
+            },
+            turing: {
+                tape: this.turing.getTapeString(),
+                startState: this.turing.currentStateId
+            },
+            lambda: {
+                input: document.getElementById('lambda-input')?.value || '',
+                goal: document.getElementById('lambda-goal-input')?.value || ''
+            },
+            scripting: {
+                code: document.getElementById('script-console')?.value || ''
+            },
+            appearance: {
+                theme: this.appTheme || 'dark',
+                logicSystem: this.systemSelect ? this.systemSelect.value : 'K',
+                fontFamily: document.getElementById('font-family-select')?.value || "'Inter', sans-serif",
+                uiScale: document.getElementById('ui-scale-range')?.value || '1.0'
+            }
+        };
+
+        const json = JSON.stringify(session, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `judit-session-${new Date().toISOString().slice(0, 10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    importGlobalSession(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            try {
+                const session = JSON.parse(ev.target.result);
+                if (session.type !== 'judit-global-session') {
+                    alert('Invalid session file format.');
+                    return;
+                }
+
+                // 1. Restore Logic Model
+                this.model.worlds.clear();
+                this.model.relations = [];
+                this.model.domain.clear();
+
+                if (session.logic) {
+                    // Domain
+                    if (session.logic.domain) {
+                        session.logic.domain.forEach(obj => this.model.addObject(obj));
+                    }
+                    // Worlds
+                    if (session.logic.worlds) {
+                        session.logic.worlds.forEach(wData => {
+                            const w = new World(wData.id, wData.x, wData.y);
+                            w.name = wData.name;
+                            w.color = wData.color;
+                            w.textColor = wData.textColor;
+                            if (wData.valuation) {
+                                w.valuation = new Map(wData.valuation);
+                            }
+                            this.model.addWorld(w);
+                        });
+                    }
+                    // Relations
+                    if (session.logic.relations) {
+                        session.logic.relations.forEach(r => {
+                            this.model.addRelation(r.source, r.target, r.agent, r.data);
+                        });
+                    }
+                }
+
+                // 2. Restore Turing Machine
+                if (session.turing) {
+                    if (session.turing.tape !== undefined) {
+                        this.turing.loadTape(session.turing.tape);
+                    }
+                    if (session.turing.startState) {
+                        this.turing.setStartWorld(session.turing.startState);
+                    }
+                }
+
+                // 3. Restore Formula
+                if (session.formula && session.formula.raw) {
+                    this.formulaInput.value = session.formula.raw;
+                    this.handleFormulaInput(session.formula.raw);
+                }
+
+                // 4. Restore Lambda
+                if (session.lambda) {
+                    const lInput = document.getElementById('lambda-input');
+                    const lGoal = document.getElementById('lambda-goal-input');
+                    if (lInput && session.lambda.input) lInput.value = session.lambda.input;
+                    if (lGoal && session.lambda.goal) lGoal.value = session.lambda.goal;
+                }
+
+                // 5. Restore Scripting
+                if (session.scripting && session.scripting.code) {
+                    const sConsole = document.getElementById('script-console');
+                    if (sConsole) sConsole.value = session.scripting.code;
+                }
+
+                // 3. Restore Appearance
+                if (session.appearance) {
+                    if (session.appearance.theme) {
+                        this.applyTheme(session.appearance.theme);
+                        const radio = document.querySelector(`input[name="theme"][value="${session.appearance.theme}"]`);
+                        if (radio) radio.checked = true;
+                    } else {
+                        this.applyTheme('dark');
+                    }
+
+                    if (session.appearance.logicSystem && this.systemSelect) {
+                        this.systemSelect.value = session.appearance.logicSystem;
+                    }
+
+                    if (session.appearance.fontFamily) {
+                        const fontSelect = document.getElementById('font-family-select');
+                        if (fontSelect) {
+                            fontSelect.value = session.appearance.fontFamily;
+                            document.body.style.fontFamily = session.appearance.fontFamily;
+                        }
+                    }
+
+                    if (session.appearance.uiScale) {
+                        const scaleRange = document.getElementById('ui-scale-range');
+                        if (scaleRange) {
+                            scaleRange.value = session.appearance.uiScale;
+                            document.body.style.fontSize = `${session.appearance.uiScale}em`;
+                            const scaleValue = document.getElementById('ui-scale-value');
+                            if (scaleValue) scaleValue.textContent = `${Math.round(session.appearance.uiScale * 100)}%`;
+                        }
+                    }
+                } else {
+                    this.applyTheme('dark');
+                }
+
+                // Refresh UI
+                this.renderer.selectedWorld = null;
+                this.renderer.resize();
+                this.renderer.draw();
+                this.updatePropertiesPanel();
+                this.updateDomainList();
+                this.updateEvaluation();
+                // Turing UI update
+                if (this.updateTuringUI) this.updateTuringUI();
+
+                // Reset file input
+                e.target.value = '';
+
+                // Show success message or log?
+                // alert('Session loaded successfully.');
+
+            } catch (err) {
+                console.error(err);
+                alert('Error loading session: ' + err.message);
+            }
+        };
+        reader.readAsText(file);
+    }
+
+
+
+    setupAppearanceControls() {
+        const themeRadios = document.querySelectorAll('input[name="theme"]');
+        themeRadios.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    this.applyTheme(e.target.value);
+                }
+            });
+        });
+
+        const fontSelect = document.getElementById('font-family-select');
+        if (fontSelect) {
+            fontSelect.addEventListener('change', (e) => {
+                document.body.style.fontFamily = e.target.value;
+            });
+        }
+
+        const scaleRange = document.getElementById('ui-scale-range');
+        const scaleValueLabel = document.getElementById('ui-scale-value');
+        if (scaleRange) {
+            scaleRange.addEventListener('input', (e) => {
+                const scale = e.target.value;
+                document.body.style.fontSize = `${scale}em`;
+                if (scaleValueLabel) scaleValueLabel.textContent = `${Math.round(scale * 100)}%`;
+            });
+        }
+
+        // Initialize default
+        this.appTheme = 'dark';
+    }
+
+    applyTheme(themeName) {
+        this.appTheme = themeName;
+        document.documentElement.setAttribute('data-theme', themeName);
+
+        // Update Renderer (Canvas Colors)
+        if (this.renderer && this.renderer.setTheme) {
+            this.renderer.setTheme(themeName);
+        }
+
+        // Handle specific overrides if strictly necessary, 
+        // but try to rely on CSS [data-theme="..."] as much as possible.
+        if (themeName === 'light') {
+            document.body.classList.add('light-theme');
+            document.body.classList.remove('dark-theme');
+        } else {
+            document.body.classList.add('dark-theme');
+            document.body.classList.remove('light-theme');
+        }
+    }
+
     insertAtCursor(text) {
         const input = this.formulaInput;
         if (!input) return;
@@ -2498,10 +2766,31 @@ export class UiManager {
                 // TODO: Visualize counter-model
             }
 
-            const resultDisplay = document.getElementById('prove-result');
+            const resultDisplay = document.getElementById('evaluation-result');
             if (resultDisplay) {
-                resultDisplay.textContent = msg;
-                resultDisplay.style.color = result.valid ? '#28a745' : '#dc3545';
+                const proveMsg = document.createElement('div');
+                proveMsg.style.padding = '8px';
+                proveMsg.style.margin = '5px 0';
+                proveMsg.style.borderRadius = '4px';
+                proveMsg.style.border = `1px solid ${result.valid ? 'var(--success-color)' : 'var(--danger-color)'}`;
+                proveMsg.style.background = result.valid ? 'rgba(92, 184, 92, 0.1)' : 'rgba(217, 83, 79, 0.1)';
+                proveMsg.style.fontWeight = 'bold';
+                proveMsg.style.color = result.valid ? 'var(--success-color)' : 'var(--danger-color)';
+
+                proveMsg.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span>${msg}</span>
+                    ${!result.valid ? `<button id="vis-counter-btn" style="padding:2px 6px; font-size:10px; background:var(--danger-color); border:none; color:white; border-radius:3px;">Show Counter-Model</button>` : ''}
+                </div>`;
+
+                resultDisplay.prepend(proveMsg);
+
+                // Add listener for visualization button
+                const visBtn = proveMsg.querySelector('#vis-counter-btn');
+                if (visBtn) {
+                    visBtn.addEventListener('click', () => {
+                        this.visualizeCounterModel(result.counterModel);
+                    });
+                }
             } else {
                 alert(msg);
             }
@@ -3984,6 +4273,7 @@ export class UiManager {
                     else if (section === 'scripting') targetId = 'help-scripting';
                     else if (section === 'lambda') targetId = 'help-lambda';
                     else if (section === 'analysis') targetId = 'help-analysis';
+                    else if (section === 'natural-deduction') targetId = 'help-natural-deduction';
 
                     // Scroll to section after a brief delay to ensure layout
                     if (targetId) {

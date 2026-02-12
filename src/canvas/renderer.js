@@ -41,11 +41,67 @@ export class WorldRenderer {
         this.damping = 0.8;
 
         this.setupInteractions();
+
+        // Theme Support — harmonized with CSS palettes
+        this.themes = {
+            dark: {
+                nodeBorder: '#c8cdd3',
+                nodeText: '#c8cdd3',
+                labelBg: '#1e2228',
+                selection: '#5b9bd5',
+                grid: '#2d333b',
+                arrowDefault: '#7a8694',
+                dimText: '#5a6270',
+                canvasBg: '#111519'
+            },
+            light: {
+                nodeBorder: '#24292e',
+                nodeText: '#24292e',
+                labelBg: '#f8f9fb',
+                selection: '#2563eb',
+                grid: '#d1d5da',
+                arrowDefault: '#6a737d',
+                dimText: '#959da5',
+                canvasBg: '#e8ecf0'
+            },
+            'high-contrast': {
+                nodeBorder: '#ffffff',
+                nodeText: '#ffffff',
+                labelBg: '#000000',
+                selection: '#ffff00',
+                grid: '#444444',
+                arrowDefault: '#ffffff',
+                dimText: '#ffff00',
+                canvasBg: '#000000'
+            },
+            monokai: {
+                nodeBorder: '#f8f8f2',
+                nodeText: '#f8f8f2',
+                labelBg: '#2e2f28',
+                selection: '#a6e22e',
+                grid: '#49483e',
+                arrowDefault: '#ae81ff',
+                dimText: '#75715e',
+                canvasBg: '#1e1f1c'
+            }
+        };
+        this.currentTheme = 'dark';
+        this.theme = this.themes.dark;
+
+
         this.startLoop();
     }
 
     resize() {
         this.resizeCanvas();
+    }
+
+    setTheme(themeName) {
+        if (this.themes[themeName]) {
+            this.currentTheme = themeName;
+            this.theme = this.themes[themeName];
+            this.draw();
+        }
     }
 
     setLayoutMode(enabled) {
@@ -643,7 +699,9 @@ export class WorldRenderer {
 
     draw() {
         this.updatePhysics();
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        // Fill with theme-aware background
+        this.ctx.fillStyle = this.theme.canvasBg || '#111519';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
         this.ctx.save();
         this.ctx.translate(this.offsetX, this.offsetY);
@@ -702,10 +760,10 @@ export class WorldRenderer {
             // 2. Border (Animated if selected)
             if (world === this.selectedWorld) {
                 const pulse = (Math.sin(Date.now() / 150) + 1) / 2; // Fast pulse
-                this.ctx.strokeStyle = '#4a90e2'; // Blue border
+                this.ctx.strokeStyle = this.theme.selection; // Theme Selection
                 this.ctx.lineWidth = 6 + (pulse * 4); // Thicker, animating between 6 and 10
             } else {
-                this.ctx.strokeStyle = '#fff';
+                this.ctx.strokeStyle = this.theme.nodeBorder; // Theme Border
                 this.ctx.lineWidth = 2;
             }
             this.ctx.stroke();
@@ -737,14 +795,14 @@ export class WorldRenderer {
             // Let's put Name above, and Valuations INSIDE.
 
             // Name Label (Above)
-            this.ctx.fillStyle = world.textColor || '#ffffff'; // Default to White
+            this.ctx.fillStyle = world.textColor || this.theme.nodeText; // Theme Text
             this.ctx.font = 'bold 13px "Inter", sans-serif'; // Bold and slightly larger
             this.ctx.textAlign = 'center';
             this.ctx.textBaseline = 'bottom';
             this.ctx.fillText(world.name || world.id, world.x, world.y - 40);
 
             // Internal Structure (Valuation)
-            this.ctx.fillStyle = world.textColor || '#ffffff';
+            this.ctx.fillStyle = world.textColor || this.theme.nodeText; // Theme Text
             this.ctx.font = '14px "Fira Code", monospace';
             this.ctx.textBaseline = 'middle';
 
@@ -780,7 +838,7 @@ export class WorldRenderer {
             const renderAtom = (atom, x, y) => {
                 const isTrue = world.valuation.get(atom);
                 const text = isTrue ? atom : `¬${atom}`;
-                this.ctx.fillStyle = isTrue ? '#fff' : '#888'; // Dim false ones
+                this.ctx.fillStyle = isTrue ? this.theme.nodeText : this.theme.dimText; // Theme Dim
                 this.ctx.fillText(text, x, y);
             };
 
@@ -856,7 +914,7 @@ export class WorldRenderer {
 
     drawArrow(x1, y1, x2, y2, agent, doubleHead, relObj) {
         const isSelected = this.selectedRelation === relObj;
-        const agentColor = agent ? (this.agentColors[agent] || '#888') : '#888';
+        const agentColor = agent ? (this.agentColors[agent] || this.theme.arrowDefault) : this.theme.arrowDefault;
         const headLength = 18; // Increased from 10
         const angle = Math.atan2(y2 - y1, x2 - x1);
 
@@ -899,7 +957,7 @@ export class WorldRenderer {
 
             const textWidth = this.ctx.measureText(agent).width;
             this.ctx.save();
-            this.ctx.fillStyle = '#222';
+            this.ctx.fillStyle = this.theme.labelBg; // Theme Label BG
             this.ctx.fillRect(midX - textWidth / 2 - 2, midY - 6, textWidth + 4, 12);
             this.ctx.restore();
 
@@ -950,7 +1008,7 @@ export class WorldRenderer {
 
             // Styling
             const isSelected = this.selectedRelation === rel;
-            const agentColor = rel.agent ? (this.agentColors[rel.agent] || '#888') : '#888';
+            const agentColor = rel.agent ? (this.agentColors[rel.agent] || this.theme.arrowDefault) : this.theme.arrowDefault;
             this.ctx.strokeStyle = isSelected ? '#ffcc00' : agentColor;
             this.ctx.fillStyle = isSelected ? '#ffcc00' : agentColor;
             this.ctx.lineWidth = isSelected ? 3 : 2;
@@ -986,7 +1044,7 @@ export class WorldRenderer {
                 // Text Background
                 const textWidth = this.ctx.measureText(rel.agent).width;
                 this.ctx.save();
-                this.ctx.fillStyle = '#222';
+                this.ctx.fillStyle = this.theme.labelBg; // Theme Label BG
                 this.ctx.fillRect(lx - textWidth / 2 - 2, ly - 6, textWidth + 4, 12);
                 this.ctx.restore();
 
