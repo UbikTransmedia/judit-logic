@@ -821,6 +821,16 @@ export class UiManager {
         });
     }
 
+    switchTab(tabId) {
+        const tabs = document.querySelectorAll('.tab-btn');
+        for (const tab of tabs) {
+            if (tab.getAttribute('data-tab') === tabId || tab.id === tabId) {
+                tab.click();
+                break;
+            }
+        }
+    }
+
     setupTopBar() {
         // Random Model
         const rndBtn = document.getElementById('top-random-btn');
@@ -2800,6 +2810,80 @@ export class UiManager {
             alert("Error in Prover: " + e.message);
         }
     }
+
+    visualizeCounterModel(branch) {
+        if (!branch) return;
+
+        // Confirm because it overwrites the current model
+        if (!confirm("This will overwrite your current canvas with the counter-model found by the prover. Proceed?")) {
+            return;
+        }
+
+        // Clear existing model
+        this.model.worlds.clear();
+        this.model.relations = [];
+
+        // 1. Create Worlds
+        const worldMap = new Map(); // branchId -> coreWorld
+
+        // Find all unique world IDs in the branch
+        const branchWorldIds = new Set();
+        branch.nodes.forEach(n => branchWorldIds.add(n.worldId));
+
+        // Create them on canvas in a circle/random layout
+        const ids = Array.from(branchWorldIds);
+        const radius = 200;
+        const centerX = (this.renderer.canvas.width / 2) || 400;
+        const centerY = (this.renderer.canvas.height / 2) || 300;
+
+        ids.forEach((bid, i) => {
+            const angle = (i / ids.length) * Math.PI * 2;
+            const x = centerX + Math.cos(angle) * radius;
+            const y = centerY + Math.sin(angle) * radius;
+
+            const w = new World(bid, x, y);
+            w.name = bid;
+            this.model.addWorld(w);
+            worldMap.set(bid, w);
+        });
+
+        // 2. Set Valuations
+        branch.nodes.forEach(n => {
+            const world = worldMap.get(n.worldId);
+            if (!world) return;
+
+            // Simple case: Atom p @ w
+            if (n.formula instanceof Atom) {
+                world.setAtom(n.formula.name, true);
+            }
+            // Simple case: ¬p @ w
+            if (n.formula instanceof Unary && n.formula.operator === '¬' && n.formula.operand instanceof Atom) {
+                world.setAtom(n.formula.operand.name, false);
+            }
+            // Predicates
+            if (n.formula instanceof Predicate) {
+                world.setAtom(n.formula.toString(), true);
+            }
+            // Negated Predicates
+            if (n.formula instanceof Unary && n.formula.operator === '¬' && n.formula.operand instanceof Predicate) {
+                world.setAtom(n.formula.operand.toString(), false);
+            }
+        });
+
+        // 3. Add Relations
+        branch.relations.forEach(rel => {
+            this.model.addRelation(rel.from, rel.to, 'a'); // Default to agent 'a' for counter-models
+        });
+
+        // Update UI
+        this.renderer.centerView();
+        this.renderer.draw();
+        this.renderer.canvas.dispatchEvent(new CustomEvent('modelChange'));
+
+        // Switch to the Canvas tab (default editor tab)
+        this.switchTab('tab-editor');
+    }
+
     handleExport() {
         const data = {
             metadata: {
@@ -3041,73 +3125,6 @@ export class UiManager {
                 alert("Invalid world. Game Aborted.");
             }
         }
-    }
-
-    handleProve() {
-        if (!this.currentFormula) {
-            alert("Please enter a valid formula first.");
-            return;
-        }
-
-        const system = document.getElementById('logic-system').value;
-        const result = this.prover.prove(this.currentFormula, system);
-
-        if (result.valid) {
-            this.resultDisplay.textContent = `Valid! The formula is a tautology (in ${system}).`;
-            this.resultDisplay.className = 'result-valid';
-        } else {
-            this.resultDisplay.textContent = `Invalid. Found counter-model (in ${system}).`;
-            this.resultDisplay.className = 'result-invalid';
-            this.loadCounterModel(result.counterModel);
-        }
-    }
-
-    loadCounterModel(branch) {
-        // Clear current model
-        this.model.worlds.clear();
-        this.model.relations = [];
-        this.renderer.selectedWorld = null;
-
-        // Create worlds from TabletBranch
-        // Branch nodes have {worldId, formula}
-        // We need to infer valuation from nodes like w: Atom and w: ¬Atom
-
-        const worldIds = new Set(branch.nodes.map(n => n.worldId));
-        const valuations = new Map(); // worldId -> Map<atom, bool>
-
-        worldIds.forEach(id => {
-            valuations.set(id, new Map());
-        });
-
-        // Populate valuations based on atomic formulas in the branch
-        branch.nodes.forEach(n => {
-            if (n.formula instanceof Atom) {
-                valuations.get(n.worldId).set(n.formula.name, true);
-            } else if (n.formula.type === 'unary' && n.formula.operator === '¬' && n.formula.operand instanceof Atom) {
-                valuations.get(n.worldId).set(n.formula.operand.name, false);
-            }
-        });
-
-        // Create World objects
-        let x = 100, y = 100;
-        worldIds.forEach(id => {
-            const w = new World(id, x, y);
-            // Apply valuation
-            valuations.get(id).forEach((val, key) => {
-                w.setAtom(key, val);
-            });
-            this.model.addWorld(w);
-            x += 150; // simple layout
-            if (x > 600) { x = 100; y += 150; }
-        });
-
-        // Create Relations
-        branch.relations.forEach(r => {
-            this.model.addRelation(r.from, r.to);
-        });
-
-        // Refresh UI
-        // renderer loop picks up changes automatically
     }
 
 
