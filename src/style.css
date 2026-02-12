@@ -200,7 +200,7 @@ button:active {
 }
 
 #inspector {
-    width: 300px;
+    width: 375px;
     padding: 10px;
     border-left: 1px solid var(--border-color);
     display: flex;
@@ -209,7 +209,7 @@ button:active {
 }
 
 #sidebar {
-    width: 260px;
+    width: 325px;
     padding: 10px;
     border-right: 1px solid var(--border-color);
     display: flex;
@@ -547,9 +547,12 @@ textarea:focus {
 
 /* Action buttons (Prove, Announce) — accent tint */
 #prove-btn,
-#announce-btn {
+#announce-btn,
+#satisfy-btn {
     border-radius: 5px;
     font-weight: 600;
+    flex-shrink: 0;
+    min-width: 80px;
 }
 
 /* Layout section buttons — muted, small */

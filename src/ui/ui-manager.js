@@ -77,6 +77,8 @@ export class UiManager {
         this.setupLessons();
         this.setupGlobalControls();
         this.setupAppearanceControls();
+        this.setupTemporalLogicHandlers();
+        this.setupSynthesisHandlers();
     }
 
     setupRelationEditor() {
@@ -1023,9 +1025,16 @@ export class UiManager {
 
         if (ndHeader && ndBody) {
             ndHeader.addEventListener('click', () => {
-                const isExpanded = ndBody.style.display === 'block';
-                ndBody.style.display = isExpanded ? 'none' : 'block';
-                ndToggleArrow.textContent = isExpanded ? '▶' : '▼';
+                const isCollapsed = ndBody.style.maxHeight === '0px' || ndBody.style.maxHeight === '0' || !ndBody.style.maxHeight;
+                if (isCollapsed) {
+                    ndBody.style.maxHeight = '800px';
+                    ndBody.style.padding = '0 12px 10px 12px';
+                    if (ndToggleArrow) ndToggleArrow.textContent = '▼';
+                } else {
+                    ndBody.style.maxHeight = '0';
+                    ndBody.style.padding = '0 12px';
+                    if (ndToggleArrow) ndToggleArrow.textContent = '▶';
+                }
             });
         }
 
@@ -1063,8 +1072,13 @@ export class UiManager {
 
             // Conclusion
             const conclusion = document.createElement('div');
-            const ctxList = node.context ? Array.from(node.context.entries()).map(([v, t]) => `${v}:${t}`) : [];
-            const ctxText = ctxList.length > 0 ? `{${ctxList.join(', ')}} ` : '';
+            let ctxText = '';
+            if (node.context_list && Array.isArray(node.context_list)) {
+                ctxText = node.context_list.length > 0 ? `{${node.context_list.join(', ')}} ` : '';
+            } else if (node.context) {
+                const ctxList = Array.from(node.context.entries()).map(([v, t]) => `${v}:${t}`);
+                ctxText = ctxList.length > 0 ? `{${ctxList.join(', ')}} ` : '';
+            }
             const termStr = node.term.toString();
             const typeStr = node.type.toString();
             conclusion.innerHTML = `<span style="color:#777;">${ctxText}</span> ⊢ <span style="color:#4a90e2;">${termStr}</span> : <span style="color:#4cd964;">${typeStr}</span>`;
@@ -1102,7 +1116,8 @@ export class UiManager {
                     this.currentDerivation = result.derivation; // Store for export
 
                     // Auto-expand ND panel if output valid and it was collapsed
-                    if (ndBody.style.display !== 'block') {
+                    const isCollapsed = ndBody.style.maxHeight === '0px' || ndBody.style.maxHeight === '0' || !ndBody.style.maxHeight;
+                    if (isCollapsed) {
                         ndHeader.click();
                     }
                 }
@@ -4291,6 +4306,8 @@ export class UiManager {
                     else if (section === 'lambda') targetId = 'help-lambda';
                     else if (section === 'analysis') targetId = 'help-analysis';
                     else if (section === 'natural-deduction') targetId = 'help-natural-deduction';
+                    else if (section === 'logic-to-lambda') targetId = 'help-logic-to-lambda';
+                    else if (section === 'temporal-logic') targetId = 'help-temporal-logic';
 
                     // Scroll to section after a brief delay to ensure layout
                     if (targetId) {
@@ -4379,5 +4396,161 @@ export class UiManager {
         // Auto-select and LOAD first lesson
         const first = indexEl.querySelector('.lesson-link');
         if (first) first.click();
+    }
+
+    setupTemporalLogicHandlers() {
+        const header = document.getElementById('temporal-header');
+        const body = document.getElementById('temporal-body');
+        const arrow = document.getElementById('temporal-toggle-arrow');
+        const presets = document.getElementById('temporal-presets');
+        const input = document.getElementById('temporal-input');
+        const verifyBtn = document.getElementById('temporal-verify-btn');
+        const resultEl = document.getElementById('temporal-result');
+
+        if (header && body) {
+            header.addEventListener('click', () => {
+                const isCollapsed = body.style.maxHeight === '0px' || body.style.maxHeight === '0' || !body.style.maxHeight;
+                if (isCollapsed) {
+                    body.style.maxHeight = '400px';
+                    body.style.padding = '0 12px 10px 12px';
+                    if (arrow) arrow.textContent = '▼';
+                } else {
+                    body.style.maxHeight = '0';
+                    body.style.padding = '0 12px';
+                    if (arrow) arrow.textContent = '▶';
+                }
+            });
+        }
+
+        if (presets) {
+            presets.addEventListener('change', () => {
+                const val = presets.value;
+                let formula = '';
+                switch (val) {
+                    case 'invariance': formula = 'G(p)'; break;
+                    case 'reachability': formula = 'F(q)'; break;
+                    case 'safety': formula = 'G(p -> X(q))'; break;
+                    case 'liveness': formula = 'G(F(p))'; break;
+                    case 'response': formula = 'G(p -> F(q))'; break;
+                }
+                if (formula) input.value = formula;
+            });
+        }
+
+        if (verifyBtn) {
+            verifyBtn.addEventListener('click', () => {
+                const formulaStr = input.value.trim();
+                if (!formulaStr) return;
+                try {
+                    const formula = this.parser.parse(formulaStr);
+                    // Find start of trace
+                    let startWorld = this.renderer.selectedWorld;
+                    if (!startWorld) {
+                        const worlds = Array.from(this.model.worlds.values());
+                        if (worlds.length > 0) {
+                            // Heuristic: world with no incoming relations
+                            startWorld = worlds.find(w => !this.model.relations.some(r => r.targetId === w.id)) || worlds[0];
+                        }
+                    }
+
+                    if (!startWorld) {
+                        resultEl.textContent = "No worlds to verify.";
+                        return;
+                    }
+
+                    const result = formula.evaluate(this.model, startWorld, {}, 'K');
+                    resultEl.textContent = result ? "✅ Trace SATISFIES property" : "❌ Trace VIOLATES property";
+                    resultEl.style.color = result ? '#4cd964' : '#ff3b30';
+                    resultEl.style.fontStyle = 'normal';
+                } catch (e) {
+                    resultEl.textContent = "Error: " + e.message;
+                    resultEl.style.color = '#ff3b30';
+                }
+            });
+        }
+    }
+
+    setupSynthesisHandlers() {
+        const header = document.getElementById('synthesis-header');
+        const body = document.getElementById('synthesis-body');
+        const arrow = document.getElementById('synthesis-toggle-arrow');
+        const input = document.getElementById('synthesis-input');
+        const btn = document.getElementById('synthesis-btn');
+        const resultContainer = document.getElementById('synthesis-result-container');
+        const output = document.getElementById('synthesis-output');
+        const copyBtn = document.getElementById('synthesis-copy-btn');
+
+        if (header && body) {
+            header.addEventListener('click', () => {
+                const isCollapsed = body.style.maxHeight === '0px' || body.style.maxHeight === '0' || !body.style.maxHeight;
+                if (isCollapsed) {
+                    body.style.maxHeight = '400px';
+                    body.style.padding = '0 12px 10px 12px';
+                    if (arrow) arrow.textContent = '▼';
+                } else {
+                    body.style.maxHeight = '0';
+                    body.style.padding = '0 12px';
+                    if (arrow) arrow.textContent = '▶';
+                }
+            });
+        }
+
+        if (btn) {
+            btn.addEventListener('click', () => {
+                const formulaStr = input.value.trim();
+                const typeOutput = document.getElementById('synthesis-type-output');
+                if (!formulaStr) return;
+                try {
+                    const formula = this.parser.parse(formulaStr);
+                    const type = this.lambdaEngine.formulaToType(formula);
+
+                    if (typeOutput) typeOutput.textContent = type.toString();
+                    resultContainer.style.display = 'flex';
+
+                    try {
+                        const term = this.lambdaEngine.proofSearch([], type, new Set());
+                        if (term) {
+                            output.textContent = term.toString();
+                            output.style.color = '#4cd964';
+                            copyBtn.style.display = 'block';
+                            if (document.getElementById('synthesis-label'))
+                                document.getElementById('synthesis-label').textContent = "Synthesized Witness:";
+                        } else {
+                            output.textContent = "Not a theorem in constructive logic.";
+                            output.style.color = '#ff3b30';
+                            copyBtn.style.display = 'none';
+                            if (document.getElementById('synthesis-label'))
+                                document.getElementById('synthesis-label').textContent = "Synthesis Result:";
+                            console.warn("Synthesis failed: Formula is not a tautology in IPL.");
+                        }
+                    } catch (e) {
+                        output.textContent = "Search Error: " + e.message;
+                        output.style.color = '#ff3b30';
+                        copyBtn.style.display = 'none';
+                    }
+                } catch (e) {
+                    alert("Analysis Error: " + e.message);
+                }
+            });
+        }
+
+        if (copyBtn) {
+            copyBtn.addEventListener('click', () => {
+                const lambdaInput = document.getElementById('lambda-input');
+                if (lambdaInput) {
+                    lambdaInput.value = output.textContent;
+                    // Show target section
+                    const lambdaHeader = document.getElementById('lambda-header');
+                    const lambdaBody = document.getElementById('lambda-body');
+                    const isCollapsed = lambdaBody.style.maxHeight === '0px' || lambdaBody.style.maxHeight === '0' || !lambdaBody.style.maxHeight;
+                    if (isCollapsed && lambdaHeader) {
+                        lambdaHeader.click();
+                    }
+                    // Auto-infer
+                    const inferBtn = document.getElementById('lambda-infer-btn');
+                    if (inferBtn) inferBtn.click();
+                }
+            });
+        }
     }
 }

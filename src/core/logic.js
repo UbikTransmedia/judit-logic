@@ -40,7 +40,11 @@ export class Atom extends Formula {
         if (system === 'Int') {
             return this.translateToS4().evaluate(model, world, assignment, 'S4');
         }
-        return world.valuation.get(this.name) === true;
+        const val = world.valuation.get(this.name);
+        if (system.startsWith('Fuzzy')) {
+            return (typeof val === 'number') ? val : (val === true ? 1.0 : 0.0);
+        }
+        return val === true;
     }
 
     substitute(x, t) {
@@ -70,7 +74,11 @@ export class Unary extends Formula {
             return this.translateToS4().evaluate(model, world, assignment, 'S4');
         }
         if (this.operator === '¬') {
-            return !this.operand.evaluate(model, world, assignment, system);
+            const val = this.operand.evaluate(model, world, assignment, system);
+            if (system.startsWith('Fuzzy')) {
+                return 1.0 - val;
+            }
+            return !val;
         }
         throw new Error(`Unknown unary operator: ${this.operator}`);
     }
@@ -107,6 +115,16 @@ export class Binary extends Formula {
         }
         const l = this.left.evaluate(model, world, assignment, system);
         const r = this.right.evaluate(model, world, assignment, system);
+
+        if (system.startsWith('Fuzzy')) {
+            switch (this.operator) {
+                case '∧': return Math.min(l, r);
+                case '∨': return Math.max(l, r);
+                case '→': return l <= r ? 1.0 : r; // Gödel implication
+                case '↔': return Math.min(l <= r ? 1.0 : r, r <= l ? 1.0 : l);
+                default: throw new Error(`Unknown binary operator: ${this.operator}`);
+            }
+        }
 
         switch (this.operator) {
             case '∧': return l && r;
@@ -233,11 +251,31 @@ export class Modal extends Formula {
         }
 
         if (this.operator === '□') {
-            // Must be true in ALL accessible worlds
-            return accessibleWorlds.every(w => this.operand.evaluate(model, w, assignment, system));
+            const results = accessibleWorlds.map(w => {
+                const inner = this.operand.evaluate(model, w, assignment, system);
+                if (system.startsWith('Fuzzy')) {
+                    const rel = model.relations.find(r => r.sourceId === world.id && r.targetId === w.id && (this.agent === null || r.agent === this.agent));
+                    const weight = rel ? (rel.weight ?? 1.0) : 1.0;
+                    // Fuzzy Box: inf (weight -> val)
+                    return weight <= inner ? 1.0 : inner;
+                }
+                return inner;
+            });
+            if (system.startsWith('Fuzzy')) return results.length > 0 ? Math.min(...results) : 1.0;
+            return results.every(v => v);
         } else if (this.operator === '◊') {
-            // Must be true in AT LEAST ONE accessible world
-            return accessibleWorlds.some(w => this.operand.evaluate(model, w, assignment, system));
+            const results = accessibleWorlds.map(w => {
+                const inner = this.operand.evaluate(model, w, assignment, system);
+                if (system.startsWith('Fuzzy')) {
+                    const rel = model.relations.find(r => r.sourceId === world.id && r.targetId === w.id && (this.agent === null || r.agent === this.agent));
+                    const weight = rel ? (rel.weight ?? 1.0) : 1.0;
+                    // Fuzzy Diamond: sup (weight * val)
+                    return Math.min(weight, inner);
+                }
+                return inner;
+            });
+            if (system.startsWith('Fuzzy')) return results.length > 0 ? Math.max(...results) : 0.0;
+            return results.some(v => v);
         }
 
         throw new Error(`Unknown modal operator: ${this.operator}`);
@@ -333,7 +371,11 @@ export class Predicate extends Formula {
         // Resolve arguments: If arg is in assignment, use that value. Else treat as constant.
         const resolvedArgs = this.args.map(arg => assignment[arg] || arg);
         const key = `${this.name}(${resolvedArgs.join(',')})`;
-        return world.valuation.get(key) === true;
+        const val = world.valuation.get(key);
+        if (system.startsWith('Fuzzy')) {
+            return (typeof val === 'number') ? val : (val === true ? 1.0 : 0.0);
+        }
+        return val === true;
     }
 
     substitute(x, t) {
@@ -371,6 +413,7 @@ export class Relation {
         this.targetId = targetId;
         this.agent = agent;
         this.data = data; // For storing transition rules (read/write/move)
+        this.weight = (typeof data.weight === 'number') ? data.weight : 1.0;
     }
 }
 

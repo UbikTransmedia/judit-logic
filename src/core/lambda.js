@@ -8,12 +8,20 @@ export class Type {
     constructor(type) {
         this.type = type;
     }
+
+    toString() {
+        return this.type;
+    }
 }
 
 export class TypeVar extends Type {
     constructor(name) {
         super('var');
         this.name = name;
+    }
+
+    toString() {
+        return this.name;
     }
 }
 
@@ -23,11 +31,43 @@ export class FunctionType extends Type {
         this.from = from;
         this.to = to;
     }
+
+    toString() {
+        return `(${this.from.toString()} → ${this.to.toString()})`;
+    }
+}
+
+export class ProductType extends Type {
+    constructor(left, right) {
+        super('product');
+        this.left = left;
+        this.right = right;
+    }
+
+    toString() {
+        return `(${this.left.toString()} × ${this.right.toString()})`;
+    }
+}
+
+export class SumType extends Type {
+    constructor(left, right) {
+        super('sum');
+        this.left = left;
+        this.right = right;
+    }
+
+    toString() {
+        return `(${this.left.toString()} + ${this.right.toString()})`;
+    }
 }
 
 export class LambdaTerm {
     constructor(type) {
         this.type = type;
+    }
+
+    toString() {
+        return `[term:${this.type}]`;
     }
 }
 
@@ -35,6 +75,10 @@ export class Var extends LambdaTerm {
     constructor(name) {
         super('var');
         this.name = name;
+    }
+
+    toString() {
+        return this.name;
     }
 }
 
@@ -44,6 +88,10 @@ export class Abs extends LambdaTerm {
         this.param = param;
         this.body = body;
     }
+
+    toString() {
+        return `λ${this.param}.${this.body.toString()}`;
+    }
 }
 
 export class App extends LambdaTerm {
@@ -51,6 +99,81 @@ export class App extends LambdaTerm {
         super('app');
         this.left = left;
         this.right = right;
+    }
+
+    toString() {
+        return `(${this.left.toString()} ${this.right.toString()})`;
+    }
+}
+
+export class Pair extends LambdaTerm {
+    constructor(left, right) {
+        super('pair');
+        this.left = left;
+        this.right = right;
+    }
+
+    toString() {
+        return `⟨${this.left.toString()}, ${this.right.toString()}⟩`;
+    }
+}
+
+export class Fst extends LambdaTerm {
+    constructor(term) {
+        super('fst');
+        this.term = term;
+    }
+
+    toString() {
+        return `fst(${this.term.toString()})`;
+    }
+}
+
+export class Snd extends LambdaTerm {
+    constructor(term) {
+        super('snd');
+        this.term = term;
+    }
+
+    toString() {
+        return `snd(${this.term.toString()})`;
+    }
+}
+
+export class Inl extends LambdaTerm {
+    constructor(term) {
+        super('inl');
+        this.term = term;
+    }
+
+    toString() {
+        return `inl(${this.term.toString()})`;
+    }
+}
+
+export class Inr extends LambdaTerm {
+    constructor(term) {
+        super('inr');
+        this.term = term;
+    }
+
+    toString() {
+        return `inr(${this.term.toString()})`;
+    }
+}
+
+export class Case extends LambdaTerm {
+    constructor(term, varL, bodyL, varR, bodyR) {
+        super('case');
+        this.term = term;
+        this.varL = varL;
+        this.bodyL = bodyL;
+        this.varR = varR;
+        this.bodyR = bodyR;
+    }
+
+    toString() {
+        return `case ${this.term.toString()} of { ${this.varL}.${this.bodyL.toString()}; ${this.varR}.${this.bodyR.toString()} }`;
     }
 }
 
@@ -203,6 +326,139 @@ export class LambdaEngine {
                 }
             };
         }
+
+        if (term instanceof Pair) {
+            const { type: t1, subst: s1, derivation: dLeft } = this.inferType(env, term.left);
+            const env2 = this.applySubstToEnv(s1, env);
+            const { type: t2, subst: s2, derivation: dRight } = this.inferType(env2, term.right);
+
+            const finalSubst = this.composeSubst(s2, s1);
+            const finalType = new ProductType(this.applySubst(s2, t1), t2);
+
+            return {
+                type: finalType,
+                subst: finalSubst,
+                derivation: {
+                    rule: '∧I',
+                    context: new Map(env),
+                    term: term.toString(),
+                    type: finalType,
+                    premises: [dLeft, dRight]
+                }
+            };
+        }
+
+        if (term instanceof Fst) {
+            const { type: t, subst: s, derivation: dTerm } = this.inferType(env, term.term);
+            const productType = new ProductType(new TypeVar(this.getNextTypeVar()), new TypeVar(this.getNextTypeVar()));
+            const s2 = this.unify(t, productType);
+
+            const finalSubst = this.composeSubst(s2, s);
+            const finalType = this.applySubst(finalSubst, productType.left);
+
+            return {
+                type: finalType,
+                subst: finalSubst,
+                derivation: {
+                    rule: '∧E_left',
+                    context: new Map(env),
+                    term: term.toString(),
+                    type: finalType,
+                    premises: [dTerm]
+                }
+            };
+        }
+
+        if (term instanceof Snd) {
+            const { type: t, subst: s, derivation: dTerm } = this.inferType(env, term.term);
+            const productType = new ProductType(new TypeVar(this.getNextTypeVar()), new TypeVar(this.getNextTypeVar()));
+            const s2 = this.unify(t, productType);
+
+            const finalSubst = this.composeSubst(s2, s);
+            const finalType = this.applySubst(finalSubst, productType.right);
+
+            return {
+                type: finalType,
+                subst: finalSubst,
+                derivation: {
+                    rule: '∧E_right',
+                    context: new Map(env),
+                    term: term.toString(),
+                    type: finalType,
+                    premises: [dTerm]
+                }
+            };
+        }
+
+        if (term instanceof Inl) {
+            const { type: t, subst: s, derivation: dTerm } = this.inferType(env, term.term);
+            const rightType = new TypeVar(this.getNextTypeVar());
+            const finalType = new SumType(t, rightType);
+
+            return {
+                type: finalType,
+                subst: s,
+                derivation: {
+                    rule: '∨I_left',
+                    context: new Map(env),
+                    term: term.toString(),
+                    type: finalType,
+                    premises: [dTerm]
+                }
+            };
+        }
+
+        if (term instanceof Inr) {
+            const { type: t, subst: s, derivation: dTerm } = this.inferType(env, term.term);
+            const leftType = new TypeVar(this.getNextTypeVar());
+            const finalType = new SumType(leftType, t);
+
+            return {
+                type: finalType,
+                subst: s,
+                derivation: {
+                    rule: '∨I_right',
+                    context: new Map(env),
+                    term: term.toString(),
+                    type: finalType,
+                    premises: [dTerm]
+                }
+            };
+        }
+
+        if (term instanceof Case) {
+            const { type: t, subst: s1, derivation: dTerm } = this.inferType(env, term.term);
+            const sumType = new SumType(new TypeVar(this.getNextTypeVar()), new TypeVar(this.getNextTypeVar()));
+            const s2 = this.unify(t, sumType);
+
+            const newEnvL = this.applySubstToEnv(s2, env);
+            newEnvL.set(term.varL, this.applySubst(s2, sumType.left));
+            const { type: tL, subst: s3, derivation: dBodyL } = this.inferType(newEnvL, term.bodyL);
+
+            const newEnvR = this.applySubstToEnv(this.composeSubst(s3, s2), env);
+            newEnvR.set(term.varR, this.applySubst(this.composeSubst(s3, s2), sumType.right));
+            const { type: tR, subst: s4, derivation: dBodyR } = this.inferType(newEnvR, term.bodyR);
+
+            const finalResultType = new TypeVar(this.getNextTypeVar());
+            const s5 = this.unify(this.applySubst(s4, tL), finalResultType);
+            const s6 = this.unify(this.applySubst(s5, this.applySubst(s4, tR)), finalResultType);
+
+            const finalSubst = this.composeSubst(s6, this.composeSubst(s5, this.composeSubst(s4, this.composeSubst(s3, s2))));
+            const finalType = this.applySubst(finalSubst, finalResultType);
+
+            return {
+                type: finalType,
+                subst: finalSubst,
+                derivation: {
+                    rule: '∨E',
+                    context: new Map(env),
+                    term: term.toString(),
+                    type: finalType,
+                    premises: [dTerm, dBodyL, dBodyR]
+                }
+            };
+        }
+
         throw new Error("Unknown term type");
     }
 
@@ -226,6 +482,12 @@ export class LambdaEngine {
             if (t instanceof FunctionType) {
                 return new Binary('→', apply(t.from), apply(t.to));
             }
+            if (t instanceof ProductType) {
+                return new Binary('∧', apply(t.left), apply(t.right));
+            }
+            if (t instanceof SumType) {
+                return new Binary('∨', apply(t.left), apply(t.right));
+            }
             return t;
         };
         return apply(type);
@@ -241,6 +503,18 @@ export class LambdaEngine {
             .replace(/\./g, ' . ')
             .replace(/\(/g, ' ( ')
             .replace(/\)/g, ' ) ')
+            .replace(/,/g, ' , ') // For pairs
+            .replace(/⟨/g, ' ⟨ ') // For pairs
+            .replace(/⟩/g, ' ⟩ ') // For pairs
+            .replace(/fst/g, ' fst ')
+            .replace(/snd/g, ' snd ')
+            .replace(/inl/g, ' inl ')
+            .replace(/inr/g, ' inr ')
+            .replace(/case/g, ' case ')
+            .replace(/of/g, ' of ')
+            .replace(/{/g, ' { ')
+            .replace(/}/g, ' } ')
+            .replace(/;/g, ' ; ')
             .split(/\s+/)
             .filter(t => t.length > 0);
 
@@ -251,7 +525,7 @@ export class LambdaEngine {
             let term = parseAtom();
             if (!term) return null;
 
-            while (pos < tokens.length && tokens[pos] !== ')') {
+            while (pos < tokens.length && tokens[pos] !== ')' && tokens[pos] !== '⟩' && tokens[pos] !== '}' && tokens[pos] !== ';' && tokens[pos] !== 'of' && tokens[pos] !== ',') {
                 const next = parseAtom();
                 if (next) {
                     term = new App(term, next);
@@ -290,7 +564,82 @@ export class LambdaEngine {
                     return term;
                 }
                 throw new Error("Unmatched '('");
-            } else if (token === ')' || token === '.') {
+            } else if (token === '⟨') {
+                const left = parseTerm();
+                if (!left) throw new Error("Expected left term in pair after '⟨'");
+                if (pos < tokens.length && tokens[pos] === ',') {
+                    pos++; // consume ,
+                } else {
+                    throw new Error("Expected ',' in pair");
+                }
+                const right = parseTerm();
+                if (!right) throw new Error("Expected right term in pair after ','");
+                if (pos < tokens.length && tokens[pos] === '⟩') {
+                    pos++; // consume ⟩
+                    return new Pair(left, right);
+                }
+                throw new Error("Unmatched '⟨'");
+            } else if (token === 'fst') {
+                const term = parseAtom(); // fst expects an atom or parenthesized term
+                if (!term) throw new Error("Expected term after 'fst'");
+                return new Fst(term);
+            } else if (token === 'snd') {
+                const term = parseAtom(); // snd expects an atom or parenthesized term
+                if (!term) throw new Error("Expected term after 'snd'");
+                return new Snd(term);
+            } else if (token === 'inl') {
+                const term = parseAtom();
+                if (!term) throw new Error("Expected term after 'inl'");
+                return new Inl(term);
+            } else if (token === 'inr') {
+                const term = parseAtom();
+                if (!term) throw new Error("Expected term after 'inr'");
+                return new Inr(term);
+            } else if (token === 'case') {
+                const term = parseTerm();
+                if (!term) throw new Error("Expected term after 'case'");
+                if (pos < tokens.length && tokens[pos] === 'of') {
+                    pos++; // consume 'of'
+                } else {
+                    throw new Error("Expected 'of' after case term");
+                }
+                if (pos < tokens.length && tokens[pos] === '{') {
+                    pos++; // consume '{'
+                } else {
+                    throw new Error("Expected '{' after 'of'");
+                }
+
+                const varL = tokens[pos++];
+                if (!varL) throw new Error("Expected variable for left branch");
+                if (pos < tokens.length && tokens[pos] === '.') {
+                    pos++; // consume '.'
+                } else {
+                    throw new Error("Expected '.' after left variable");
+                }
+                const bodyL = parseTerm();
+                if (!bodyL) throw new Error("Expected body for left branch");
+                if (pos < tokens.length && tokens[pos] === ';') {
+                    pos++; // consume ';'
+                } else {
+                    throw new Error("Expected ';' between branches");
+                }
+
+                const varR = tokens[pos++];
+                if (!varR) throw new Error("Expected variable for right branch");
+                if (pos < tokens.length && tokens[pos] === '.') {
+                    pos++; // consume '.'
+                } else {
+                    throw new Error("Expected '.' after right variable");
+                }
+                const bodyR = parseTerm();
+                if (!bodyR) throw new Error("Expected body for right branch");
+                if (pos < tokens.length && tokens[pos] === '}') {
+                    pos++; // consume '}'
+                    return new Case(term, varL, bodyL, varR, bodyR);
+                }
+                throw new Error("Unmatched '{'");
+            }
+            else if (token === ')' || token === '.' || token === '⟩' || token === '}' || token === ';' || token === 'of' || token === ',') {
                 return null;
             } else {
                 return new Var(token);
@@ -336,5 +685,116 @@ export class LambdaEngine {
         } catch (err) {
             return { valid: false, error: err.message };
         }
+    }
+
+    /**
+     * Logic-to-Lambda Synthesis (Proof Search)
+     * Given a goal formula, find a lambda term that has it as its type.
+     */
+    synthesize(formula) {
+        const type = this.formulaToType(formula);
+        const term = this.proofSearch([], type, new Set());
+        if (!term) throw new Error("No constructive proof found for this formula in the intuitionistic fragment.");
+        return term;
+    }
+
+    formulaToType(f) {
+        if (f instanceof Atom) return new TypeVar(f.name);
+        if (f instanceof Binary) {
+            switch (f.operator) {
+                case '→': return new FunctionType(this.formulaToType(f.left), this.formulaToType(f.right));
+                case '∧': return new ProductType(this.formulaToType(f.left), this.formulaToType(f.right));
+                case '∨': return new SumType(this.formulaToType(f.left), this.formulaToType(f.right));
+                case '↔': return new ProductType(
+                    new FunctionType(this.formulaToType(f.left), this.formulaToType(f.right)),
+                    new FunctionType(this.formulaToType(f.right), this.formulaToType(f.left))
+                );
+            }
+        }
+        throw new Error(`Formula outside supported fragment: ${f.toString()}`);
+    }
+
+    /**
+     * Simple depth-first proof search for intuitionistic implication.
+     */
+    proofSearch(context, goal, usedNames) {
+        const goalStr = goal.toString();
+
+        // 1. Goal: A -> B (→I)
+        if (goal instanceof FunctionType) {
+            const varName = this.getFreshName(usedNames);
+            const newContext = [...context, { name: varName, type: goal.from }];
+            const body = this.proofSearch(newContext, goal.to, new Set([...usedNames, varName]));
+            if (body) return new Abs(varName, body);
+        }
+
+        // 2. Goal: A ∧ B (∧I)
+        if (goal instanceof ProductType) {
+            const left = this.proofSearch(context, goal.left, usedNames);
+            if (left) {
+                const right = this.proofSearch(context, goal.right, usedNames);
+                if (right) return new Pair(left, right);
+            }
+        }
+
+        // 3. Goal: A ∨ B (∨I)
+        if (goal instanceof SumType) {
+            const left = this.proofSearch(context, goal.left, usedNames);
+            if (left) return new Inl(left);
+            const right = this.proofSearch(context, goal.right, usedNames);
+            if (right) return new Inr(right);
+        }
+
+        // 4. Base cases: Assumption (Ax) or Elimination of Conjunction (∧E)
+        for (const entry of context) {
+            const extracted = this.extractFromType(new Var(entry.name), entry.type, goalStr);
+            if (extracted) return extracted;
+        }
+
+        // 5. Modus Ponens (→E) and Disjunction Elimination (∨E)
+        for (const entry of context) {
+            const type = entry.type;
+
+            // Elimination of Function (A -> B)
+            if (type instanceof FunctionType && type.to.toString() === goalStr) {
+                const arg = this.proofSearch(context, type.from, usedNames);
+                if (arg) return new App(new Var(entry.name), arg);
+            }
+
+            // Elimination of Sum (A ∨ B -> Goal)
+            if (type instanceof SumType) {
+                const varL = this.getFreshName(usedNames);
+                const varR = this.getFreshName(new Set([...usedNames, varL]));
+                const bodyL = this.proofSearch([...context, { name: varL, type: type.left }], goal, new Set([...usedNames, varL, varR]));
+                if (bodyL) {
+                    const bodyR = this.proofSearch([...context, { name: varR, type: type.right }], goal, new Set([...usedNames, varL, varR]));
+                    if (bodyR) return new Case(new Var(entry.name), varL, bodyL, varR, bodyR);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Recursively try to extract a goal type from a potentially nested Product type.
+     */
+    extractFromType(term, type, goalStr) {
+        if (type.toString() === goalStr) return term;
+        if (type instanceof ProductType) {
+            return this.extractFromType(new Fst(term), type.left, goalStr) ||
+                this.extractFromType(new Snd(term), type.right, goalStr);
+        }
+        return null;
+    }
+
+    getFreshName(used) {
+        const names = 'xyzpqrstuvw'.split('');
+        for (const n of names) {
+            if (!used.has(n)) return n;
+        }
+        let i = 1;
+        while (used.has(`x${i}`)) i++;
+        return `x${i}`;
     }
 }

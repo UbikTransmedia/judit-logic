@@ -334,15 +334,18 @@ export class WorldRenderer {
         this.canvas.style.width = displayW + 'px';
         this.canvas.style.height = displayH + 'px';
 
-        // Set buffer size to match CSS pixels (not physical pixels)
-        // This keeps a 1:1 mapping between CSS pixels and canvas coordinates
-        this.canvas.width = displayW;
-        this.canvas.height = displayH;
+        // Set buffer size to match physical pixels
+        this.canvas.width = displayW * dpr;
+        this.canvas.height = displayH * dpr;
 
-        // Preserve center point on resize
+        // Scale context to match CSS pixels
+        this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        // Preserve center point on resize (if it was already set)
         if (oldW > 0 && oldH > 0) {
-            this.offsetX += (this.canvas.width - oldW) / 2;
-            this.offsetY += (this.canvas.height - oldH) / 2;
+            // Note: oldW and oldH are physical pixels. 
+            // We should ideally track offsets in CSS pixels or transform them.
+            // For now, simple adjustment.
         }
     }
 
@@ -406,13 +409,15 @@ export class WorldRenderer {
             const id = `w${this.model.worlds.size + 1}`;
             const world = new World(id, x, y);
 
-            // Random color from Curated Palette
-            const colorIdx = Math.floor(Math.random() * CURATED_PALETTE.length);
-            world.color = CURATED_PALETTE[colorIdx];
+            // Default Style: Soft Blue with White Text
+            world.color = '#4a90e2';
+            world.textColor = '#ffffff';
 
-            // Randomly assign p and q
-            if (Math.random() > 0.5) world.setAtom('p', true);
-            if (Math.random() > 0.5) world.setAtom('q', true);
+            // Default Valuation: p=true, q=r=s=false
+            world.setAtom('p', true);
+            world.setAtom('q', false);
+            world.setAtom('r', false);
+            world.setAtom('s', false);
 
             this.model.addWorld(world);
             this.canvas.dispatchEvent(new CustomEvent('modelChange'));
@@ -837,8 +842,14 @@ export class WorldRenderer {
 
             const renderAtom = (atom, x, y) => {
                 const isTrue = world.valuation.get(atom);
-                const text = isTrue ? atom : `¬${atom}`;
-                this.ctx.fillStyle = isTrue ? this.theme.nodeText : this.theme.dimText; // Theme Dim
+                const text = atom;
+                if (isTrue) {
+                    this.ctx.font = 'bold 15px "Fira Code", monospace';
+                    this.ctx.fillStyle = '#ffffff';
+                } else {
+                    this.ctx.font = '14px "Fira Code", monospace';
+                    this.ctx.fillStyle = '#a0aab4'; // Brighter grey than dimText (#5a6270)
+                }
                 this.ctx.fillText(text, x, y);
             };
 

@@ -835,6 +835,58 @@
         </div>
       </div>
 
+      <!-- LOGIC TO LAMBDA PANEL: Dedicated synthesis section -->
+      <div id="synthesis-panel"
+        style="flex-shrink:0; border-top:2px solid var(--border-color); transition:max-height 0.4s ease-in-out, opacity 0.3s ease; overflow:hidden;">
+        <div id="synthesis-header"
+          style="display:flex; justify-content:space-between; align-items:center; padding:8px 15px; cursor:pointer; user-select:none; background:var(--header-bg);"
+          title="Synthesize lambda terms from logical formulas.">
+          <div style="display:flex; align-items:baseline; gap:10px;">
+            <h3 style="color:var(--accent-color); margin:0; font-size:1em;">
+              <span id="synthesis-toggle-arrow" style="font-size:0.8em; margin-right:4px;">▶</span>🧪 Logic to Lambda
+            </h3>
+            <span style="color:var(--text-color); opacity: 0.6; font-size:0.72em; font-style:italic;">Synthesize
+              functional programs from proposition formulas</span>
+          </div>
+          <button class="help-btn-tab" data-section="logic-to-lambda"
+            style="background:var(--btn-bg); border:1px solid var(--border-color); color:var(--text-color); padding:4px 8px; border-radius:4px; cursor:pointer; font-size:0.8em;"
+            onclick="event.stopPropagation();">Help?</button>
+        </div>
+        <div id="synthesis-body"
+          style="max-height:0; overflow:hidden; transition:max-height 0.4s ease-in-out, padding 0.3s ease; padding:0 12px; background: var(--panel-bg);">
+          <div style="padding:15px; display:flex; flex-direction:column; gap:10px;">
+            <div style="display:flex; gap:10px; align-items:center;">
+              <input id="synthesis-input" type="text"
+                style="flex:1; background:#000; color:#4cd964; border:1px solid #333; border-radius:4px; padding:8px; font-family:'Fira Code', monospace;"
+                placeholder="Enter formula to synthesize (e.g. p -> p)">
+              <button id="synthesis-btn"
+                style="padding:8px 15px; background:var(--accent-color); color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">Synthesize</button>
+            </div>
+            <div id="synthesis-result-container"
+              style="display:none; background:#111; border:1px solid #333; border-radius:4px; padding:10px; flex-direction:column; gap:8px;">
+              <div style="border-bottom:1px solid #222; padding-bottom:5px; margin-bottom:5px;">
+                <span style="font-size:0.72em; color:#666; font-weight:bold; text-transform:uppercase;">STLC Target
+                  Type:</span>
+                <div id="synthesis-type-output"
+                  style="font-family:'Fira Code', monospace; color:#888; font-size:0.82em; margin-top:3px; font-style:italic;">
+                </div>
+              </div>
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span id="synthesis-label"
+                  style="font-size:0.72em; color:#888; font-weight:bold; text-transform:uppercase;">Synthesized
+                  Witness:</span>
+                <button id="synthesis-copy-btn"
+                  style="font-size:0.7em; background:#444; border:none; color:white; padding:4px 8px; border-radius:3px; cursor:pointer;">Copy
+                  to assistant</button>
+              </div>
+              <div id="synthesis-output"
+                style="font-family:'Fira Code', monospace; color:#4a90e2; font-size:1.1em; text-align:center; padding:5px 0;">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- LAMBDA PROOF: Collapsible bottom panel -->
       <div id="lambda-panel"
         style="flex-shrink:0; border-top:2px solid var(--border-color); transition:max-height 0.4s ease-in-out, opacity 0.3s ease; overflow:hidden;">
@@ -844,7 +896,7 @@
           title="Click to expand/collapse the Lambda Proof Assistant.">
           <div style="display:flex; align-items:baseline; gap:10px;">
             <h3 style="color:var(--accent-color); margin:0; font-size:1em;">
-              <span id="lambda-toggle-arrow" style="font-size:0.8em; margin-right:4px;">▶</span>ƛ Lambda Proof Assistant
+              <span id="lambda-toggle-arrow" style="font-size:0.8em; margin-right:4px;">▶</span>ƛ Lambda to Logic
             </h3>
             <span style="color:var(--text-color); opacity: 0.6; font-size:0.72em; font-style:italic;">Explore the
               Curry-Howard Isomorphism —
@@ -864,8 +916,8 @@
               <!-- Presets Section -->
               <div style="display:flex; flex-direction:column; gap:6px;">
                 <label
-                  style="color:#888; font-size:0.75em; font-weight:bold; text-transform:uppercase; letter-spacing:0.5px;">1.
-                  Select Preset</label>
+                  style="color:#888; font-size:0.75em; font-weight:bold; text-transform:uppercase; letter-spacing:0.5px;">Select
+                  Preset</label>
                 <div style="display:flex; gap:8px; align-items:center;">
                   <select id="lambda-presets"
                     style="flex:1; padding:8px; background:#1a1a2e; border:1px solid #333; color:white; border-radius:4px; font-size:0.9em; cursor:pointer; outline:none;"
@@ -909,8 +961,8 @@
               <div style="display:flex; flex-direction:column; gap:6px; flex:1;">
                 <div style="display:flex; justify-content:space-between; align-items:baseline;">
                   <label
-                    style="color:#888; font-size:0.75em; font-weight:bold; text-transform:uppercase; letter-spacing:0.5px;">2.
-                    Input Witness (Lambda Term)</label>
+                    style="color:#888; font-size:0.75em; font-weight:bold; text-transform:uppercase; letter-spacing:0.5px;">Input
+                    Witness (Lambda Term)</label>
                   <span style="font-size:0.7em; color:#555; font-family:monospace;">Syntax: \x.\y.x y</span>
                 </div>
                 <textarea id="lambda-input"
@@ -921,8 +973,8 @@
               <div style="display:flex; gap:10px;">
                 <div style="flex:1; display:flex; flex-direction:column; gap:6px;">
                   <label
-                    style="color:#888; font-size:0.75em; font-weight:bold; text-transform:uppercase; letter-spacing:0.5px;">
-                    3. Target Goal Formula (Optional)</label>
+                    style="color:#888; font-size:0.75em; font-weight:bold; text-transform:uppercase; letter-spacing:0.5px;">Target
+                    Goal Formula (Optional)</label>
                   <input id="lambda-goal-input" type="text"
                     style="background:#000; color:#4a90e2; border:1px solid #333; border-radius:4px; padding:10px; font-family:'Fira Code', monospace; font-size:0.9em;"
                     placeholder="e.g. p -> p">
@@ -1003,12 +1055,62 @@
               title="Open the Natural Deduction reference guide." onclick="event.stopPropagation();">Help?</button>
           </div>
         </div>
-        <div id="nd-body" style="padding:15px; background:var(--panel-bg); display:none;">
+        <div id="nd-body"
+          style="max-height:0; overflow:hidden; transition:max-height 0.4s ease-in-out, padding 0.3s ease; padding:0 12px; background: var(--panel-bg);">
           <div id="nd-tree-container"
-            style="width:100%; min-height:200px; max-height:400px; overflow:auto; background:var(--code-bg); border:1px solid var(--border-color); border-radius:4px; padding:20px; display:flex; justify-content:center; align-items:flex-end; font-family:'Fira Code', monospace; font-size:0.9em;">
+            style="width:100%; min-height:240px; max-height:400px; overflow:auto; background:var(--code-bg); border:1px solid var(--border-color); border-radius:4px; padding:20px; display:flex; justify-content:center; align-items:flex-end; font-family:'Fira Code', monospace; font-size:0.9em; margin-bottom:15px;">
             <div style="color:var(--text-dim); font-style:italic;">No witness provided. Enter a lambda term in the panel
               above to
               see its derivation.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TEMPORAL LOGIC PANEL: Collapsible bottom panel -->
+      <div id="temporal-panel"
+        style="flex-shrink:0; border-top:2px solid var(--border-color); transition:max-height 0.4s ease-in-out, opacity 0.3s ease; overflow:hidden;">
+        <!-- Header -->
+        <div id="temporal-header"
+          style="display:flex; justify-content:space-between; align-items:center; padding:8px 15px; cursor:pointer; user-select:none; background:var(--header-bg);"
+          title="Click to expand or collapse the Temporal Logic verification panel.">
+          <div style="display:flex; align-items:baseline; gap:10px;">
+            <h3 style="color:var(--accent-color); margin:0; font-size:1em;">
+              <span id="temporal-toggle-arrow" style="font-size:0.8em; margin-right:4px;">▶</span>⏳ Temporal Logic (LTL)
+            </h3>
+            <span style="color:var(--text-color); opacity: 0.6; font-size:0.72em; font-style:italic;">Verify properties
+              over execution traces (G, F, X)</span>
+          </div>
+          <button class="help-btn-tab" data-section="temporal-logic"
+            style="background:var(--btn-bg); border:1px solid var(--border-color); color:var(--text-color); padding:4px 8px; border-radius:4px; cursor:pointer; font-size:0.8em;"
+            onclick="event.stopPropagation();">Help?</button>
+        </div>
+
+        <!-- Body -->
+        <div id="temporal-body"
+          style="max-height:0; overflow:hidden; transition:max-height 0.4s ease-in-out, padding 0.3s ease; padding:0 12px; background: var(--panel-bg);">
+          <div style="padding:15px; display:flex; flex-direction:column; gap:12px;">
+            <div style="display:flex; gap:10px; align-items:center;">
+              <select id="temporal-presets"
+                style="padding:8px; background:#1a1a2e; border:1px solid #333; color:white; border-radius:4px; font-size:0.9em; cursor:pointer; outline:none;"
+                title="Choose a pre-defined temporal logic formula.">
+                <option value="">-- Choose a Preset --</option>
+                <option value="invariance">Invariance: G(p)</option>
+                <option value="reachability">Eventually: F(q)</option>
+                <option value="safety">Safety: G(p -> X(q))</option>
+                <option value="liveness">Liveness: G(F(p))</option>
+                <option value="response">Response Pattern: G(p -> F(q))</option>
+              </select>
+              <input id="temporal-input" type="text"
+                style="flex:1; background:#000; color:#4cd964; border:1px solid #333; border-radius:4px; padding:8px; font-family:'Fira Code', monospace;"
+                placeholder="Enter LTL formula (e.g. G(p -> F(q)))">
+              <button id="temporal-verify-btn"
+                style="padding:8px 15px; background:var(--accent-color); color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">Verify
+                Trace</button>
+            </div>
+            <div id="temporal-result"
+              style="background:#111; border:1px solid #333; border-radius:4px; padding:10px; font-family:monospace; min-height:40px; display:flex; align-items:center; justify-content:center; color:#888; font-style:italic;">
+              Verification results will appear here...
+            </div>
           </div>
         </div>
       </div>
@@ -1524,6 +1626,23 @@
           </p>
         </div>
 
+        <!-- 7b. Logic to Lambda -->
+        <div id="help-logic-to-lambda"
+          style="background:var(--card-bg); padding:15px; border-radius:8px; border:1px solid var(--border-color);">
+          <h3 style="color: var(--accent-color); margin-top:0;">🧪 Logic to Lambda Synthesis</h3>
+          <p style="font-size:0.88em; line-height:1.6;">
+            Construct functional programs automatically from logical specifications. This implements <strong>Proof
+              Synthesis</strong> for the <strong>Intuitionistic Propositional Logic</strong> (IPL).
+          </p>
+          <ul style="padding-left: 18px; line-height: 1.6; font-size:0.88em;">
+            <li>Enter a formula using <code>→</code>, <code>∧</code>, <code>∨</code>, <code>↔</code> and atoms (p, q, r,
+              s).</li>
+            <li>Click <strong>Synthesize</strong> to find a constructive proof (lambda term) for that proposition.</li>
+            <li>Use <strong>Copy to Assistant</strong> to transfer the result to the "Lambda to Logic" panel for
+              structural analysis and derivation tree visualization.</li>
+          </ul>
+        </div>
+
         <!-- 8. Scripting API -->
         <div id="help-scripting"
           style="background:var(--card-bg); padding:15px; border-radius:8px; border:1px solid var(--border-color);">
@@ -1560,6 +1679,58 @@
             <div style="margin-bottom:4px;">turing.setStartWorld(w.id);</div>
             <div style="margin-bottom:4px;">if (turing.step()) console.log("Stepped!");</div>
           </div>
+        </div>
+
+        <!-- 8b. Temporal Logic (LTL) -->
+        <div id="help-temporal-logic"
+          style="background:var(--card-bg); padding:15px; border-radius:8px; border:1px solid var(--border-color);">
+          <h3 style="color: var(--accent-color); margin-top:0;">⏳ Temporal Logic (LTL)</h3>
+          <p style="font-size:0.88em; line-height:1.6;">
+            Linear Temporal Logic (LTL) is used to verify properties of <strong>execution traces</strong> (sequences of
+            states) in your model.
+          </p>
+
+          <h4 style="color:#ddd; margin:10px 0 5px 0;">How to Verify a Trace</h4>
+          <ol style="padding-left: 18px; line-height: 1.6; font-size:0.85em; color:#ccc;">
+            <li><strong>Select a Starting World:</strong> Click on a world in the canvas to designate it as the
+              beginning of the trace. If no world is selected, the system will attempt to find a natural starting point
+              (a node with no incoming arrows).</li>
+            <li><strong>Define the Path:</strong> The verification logic follows the accessibility relations (arrows)
+              from the starting world.</li>
+            <li><strong>Enter/Choose Formula:</strong> Use the input box or select a <strong>Preset</strong> (like
+              Safety or Liveness).</li>
+            <li><strong>Click Verify:</strong> The system will evaluate if the property holds over the available paths.
+            </li>
+          </ol>
+
+          <h4 style="color:#ddd; margin:10px 0 5px 0;">Operators Reference</h4>
+          <ul style="padding-left: 18px; line-height: 1.6; font-size:0.88em;">
+            <li><strong>G φ (Globally):</strong> φ must be true <strong>always</strong> in the current and all future
+              states.</li>
+            <li><strong>F φ (Finally):</strong> φ must be true <strong>at least once</strong> somewhere in the future.
+            </li>
+            <li><strong>X φ (Next):</strong> φ must be true in the <strong>immediate next</strong> world.</li>
+            <li><strong>G(p → F q) (Response):</strong> If <em>p</em> happens, then <em>q</em> must
+              <strong>eventually</strong> happen later.
+            </li>
+            <li><strong>G(F p) (Liveness):</strong> <em>p</em> happens <strong>infinitely often</strong> (always
+              eventually).</li>
+          </ul>
+
+          <p style="font-size:0.85em; color:#aaa; border-top:1px solid var(--border-color); padding-top:10px;">
+            <strong>Note:</strong> In this simulator, if a path ends in a world with no outgoing relations, that state
+            is treated as repeating indefinitely (stuttering) for the purpose of temporal evaluation.
+          </p>
+
+          <h4 style="color:#ddd; margin:15px 0 5px 0;">Pro Tips</h4>
+          <ul style="padding-left: 18px; line-height: 1.6; font-size:0.85em; color:#ccc;">
+            <li><strong>Branching:</strong> Evaluates properties over <em>all</em> possible paths (Universal). If a
+              property fails, it means there's at least one path where it doesn't hold.</li>
+            <li><strong>Loops:</strong> The engine correctly handles cyclic graphs (e.g., p → q → p) as infinite
+              execution traces.</li>
+            <li><strong>Initial State:</strong> If you don't select a world, the system looks for "root" nodes (no
+              incoming arrows) to start verification automatically.</li>
+          </ul>
         </div>
 
 
