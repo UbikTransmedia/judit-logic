@@ -1,6 +1,6 @@
 import nearley from 'nearley';
 import * as grammarModule from './grammar.js';
-import { Atom, Unary, Binary, Modal, Constant, Quantifier, Predicate } from '../core/logic.js'; // Import logic classes
+import { Atom, Unary, Binary, Modal, Constant, Quantifier, Predicate, Variable, FunctionalTerm, CTLUnary, CTLBinary } from '../core/logic.js'; // Import logic classes
 
 const grammar = grammarModule.default || grammarModule;
 
@@ -45,9 +45,25 @@ export class FormulaParser {
             case 'quantifier':
                 return new Quantifier(node.operator, node.variable, this.astToFormula(node.operand));
             case 'predicate':
-                return new Predicate(node.name, node.args);
+                return new Predicate(node.name, node.args.map(a => this.astToTerm(a)));
+            case 'ctl_unary':
+                return new CTLUnary(node.operator, this.astToFormula(node.operand));
+            case 'ctl_binary':
+                return new CTLBinary(node.operator, this.astToFormula(node.left), this.astToFormula(node.right));
             default:
                 throw new Error(`Unknown AST node type: ${node.type}`);
+        }
+    }
+
+    astToTerm(node) {
+        if (!node) return null;
+        switch (node.type) {
+            case 'variable':
+                return new Variable(node.name);
+            case 'function':
+                return new FunctionalTerm(node.name, node.args.map(a => this.astToTerm(a)));
+            default:
+                throw new Error(`Unknown term node type: ${node.type}`);
         }
     }
 }

@@ -294,6 +294,39 @@ export class Modal extends Formula {
 
 // --- FOL Classes ---
 
+export class Term {
+    constructor(type) {
+        this.type = type;
+    }
+    toString() { throw new Error("Not implemented"); }
+    substitute(x, t) { throw new Error("Not implemented"); }
+}
+
+export class Variable extends Term {
+    constructor(name) {
+        super('variable');
+        this.name = name;
+    }
+    toString() { return this.name; }
+    substitute(x, t) {
+        return this.name === x ? t : this;
+    }
+}
+
+export class FunctionalTerm extends Term {
+    constructor(name, args) {
+        super('function');
+        this.name = name;
+        this.args = args; // Array of Terms
+    }
+    toString() {
+        return `${this.name}(${this.args.map(a => a.toString()).join(',')})`;
+    }
+    substitute(x, t) {
+        return new FunctionalTerm(this.name, this.args.map(a => a.substitute(x, t)));
+    }
+}
+
 export class Quantifier extends Formula {
     constructor(operator, variable, operand) {
         super('quantifier');
@@ -303,7 +336,7 @@ export class Quantifier extends Formula {
     }
 
     toString() {
-        return `${this.operator}${this.variable}${this.operand.toString()}`;
+        return `${this.operator}${this.variable}.${this.operand.toString()}`;
     }
 
     evaluate(model, world, assignment = {}, system = 'K') {
@@ -311,13 +344,13 @@ export class Quantifier extends Formula {
             return this.translateToS4().evaluate(model, world, assignment, 'S4');
         }
 
-        // Universal: True if true for ALL objects in domain
-        // Existential: True if true for AT LEAST ONE object in domain
-        // Domain is implicit? We collect all constants from the model.
-        // Or we use a fixed domain. Let's use "Active Domain" (all constants known in the model).
+        // Use world-specific domain if not empty, otherwise fallback to global domain
+        const domain = (world.domain && world.domain.size > 0) ? world.domain : model.getDomain();
+        if (domain.size === 0) {
+            // Standard FOL: Domain must be non-empty.
+            return this.operator === '∀';
+        }
 
-        const domain = model.getDomain(); // Set<string>
-        if (domain.size === 0) return false; // Or true for empty domain forall?
 
         if (this.operator === '∀') {
             for (const obj of domain) {
@@ -337,55 +370,157 @@ export class Quantifier extends Formula {
     }
 
     substitute(x, t) {
-        if (x === this.variable) return this; // Bound variable shadows x
+        if (x === this.variable) return this;
         return new Quantifier(this.operator, this.variable, this.operand.substitute(x, t));
     }
 
     translateToS4() {
         const op = this.operand.translateToS4();
-        // T(∀x A) = □(∀x T(A))
         if (this.operator === '∀') {
             return new Modal('□', new Quantifier('∀', this.variable, op));
         }
-        // T(∃x A) = ∃x T(A) (Homomorphism usually? Or Boxed?)
-        // Standard GMT: T(∃x A) = ∃x T(A).
         return new Quantifier(this.operator, this.variable, op);
     }
 }
 
 export class Predicate extends Formula {
-    constructor(name, args) { // args is array of strings (vars or constants)
+    constructor(name, args) {
         super('predicate');
         this.name = name;
         this.args = args;
     }
 
     toString() {
-        return `${this.name}(${this.args.join(',')})`;
+        return `${this.name}(${this.args.map(a => a.toString()).join(',')})`;
     }
 
     evaluate(model, world, assignment = {}, system = 'K') {
         if (system === 'Int') {
             return this.translateToS4().evaluate(model, world, assignment, 'S4');
         }
-        // Resolve arguments: If arg is in assignment, use that value. Else treat as constant.
-        const resolvedArgs = this.args.map(arg => assignment[arg] || arg);
+        const resolvedArgs = this.args.map(arg => {
+            if (arg instanceof Variable) return assignment[arg.name] || arg.name;
+            return arg.toString();
+        });
         const key = `${this.name}(${resolvedArgs.join(',')})`;
         const val = world.valuation.get(key);
-        if (system.startsWith('Fuzzy')) {
-            return (typeof val === 'number') ? val : (val === true ? 1.0 : 0.0);
-        }
+        if (system.startsWith('Fuzzy')) return (typeof val === 'number') ? val : (val === true ? 1.0 : 0.0);
         return val === true;
     }
 
     substitute(x, t) {
-        const newArgs = this.args.map(a => a === x ? t : a);
-        return new Predicate(this.name, newArgs);
+        return new Predicate(this.name, this.args.map(a => a.substitute(x, t)));
     }
 
     translateToS4() {
-        // Predicates are like Atoms. T(P(x)) = □P(x)
         return new Modal('□', this);
+    }
+}
+
+// --- CTL Classes ---
+
+export class CTLUnary extends Formula {
+    constructor(operator, operand) {
+        super('ctl_unary');
+        this.operator = operator; // AX, EX, AF, EF, AG, EG
+        this.operand = operand;
+    }
+
+    toString() {
+        return `${this.operator}(${this.operand.toString()})`;
+    }
+
+    evaluate(model, world, assignment = {}, system = 'K') {
+        switch (this.operator) {
+            case 'EX': return model.getSuccessors(world.id).some(nextId => this.operand.evaluate(model, model.getWorld(nextId), assignment, system));
+            case 'AX':
+                const succs = model.getSuccessors(world.id);
+                return succs.length === 0 || succs.every(nextId => this.operand.evaluate(model, model.getWorld(nextId), assignment, system));
+            case 'EF': return this._checkReachability(model, world, assignment, system, (w) => this.operand.evaluate(model, w, assignment, system));
+            case 'AF': return !new CTLUnary('EG', new Unary('¬', this.operand)).evaluate(model, world, assignment, system);
+            case 'EG': return this._checkExistentialGlobal(model, world, assignment, system);
+            case 'AG': return !new CTLUnary('EF', new Unary('¬', this.operand)).evaluate(model, world, assignment, system);
+            default: throw new Error(`Unknown CTL operator: ${this.operator}`);
+        }
+    }
+
+    _checkReachability(model, startWorld, assignment, system, predicate) {
+        const visited = new Set([startWorld.id]);
+        const queue = [startWorld];
+        while (queue.length > 0) {
+            const current = queue.shift();
+            if (predicate(current)) return true;
+            for (const nextId of model.getSuccessors(current.id)) {
+                if (!visited.has(nextId)) {
+                    visited.add(nextId);
+                    queue.push(model.getWorld(nextId));
+                }
+            }
+        }
+        return false;
+    }
+
+    _checkExistentialGlobal(model, startWorld, assignment, system) {
+        let candidates = new Set(Array.from(model.worlds.values()).filter(w => this.operand.evaluate(model, w, assignment, system)).map(w => w.id));
+        let changed = true;
+        while (changed) {
+            changed = false;
+            let nextCandidates = new Set();
+            for (const id of candidates) {
+                if (model.getSuccessors(id).some(sid => candidates.has(sid))) nextCandidates.add(id);
+            }
+            if (nextCandidates.size < candidates.size) {
+                candidates = nextCandidates;
+                changed = true;
+            }
+        }
+        return candidates.has(startWorld.id);
+    }
+}
+
+export class CTLBinary extends Formula {
+    constructor(operator, left, right) {
+        super('ctl_binary');
+        this.operator = operator; // AU, EU, AW, EW
+        this.left = left;
+        this.right = right;
+    }
+
+    toString() {
+        return `${this.operator}(${this.left.toString()}, ${this.right.toString()})`;
+    }
+
+    evaluate(model, world, assignment = {}, system = 'K') {
+        switch (this.operator) {
+            case 'EU': // Existential Until
+                let candidates = new Set(Array.from(model.worlds.values()).filter(w => this.right.evaluate(model, w, assignment, system)).map(w => w.id));
+                let changed = true;
+                while (changed) {
+                    changed = false;
+                    let size = candidates.size;
+                    for (const w of model.worlds.values()) {
+                        if (!candidates.has(w.id) && this.left.evaluate(model, w, assignment, system)) {
+                            if (model.getSuccessors(w.id).some(sid => candidates.has(sid))) candidates.add(w.id);
+                        }
+                    }
+                    if (candidates.size > size) changed = true;
+                }
+                return candidates.has(world.id);
+            case 'AU': // Universal Until
+                // AU(p, q) <=> !EU(!q, !p & !q) & !EG(!q)
+                const notQ = new Unary('¬', this.right);
+                const cond = new CTLBinary('EU', notQ, new Binary('∧', new Unary('¬', this.left), notQ));
+                const eg = new CTLUnary('EG', notQ);
+                return !cond.evaluate(model, world, assignment, system) && !eg.evaluate(model, world, assignment, system);
+            case 'EW': // Existential Weak Until (Equivalent to EU(p,q) OR EG(p))
+                return new CTLBinary('EU', this.left, this.right).evaluate(model, world, assignment, system) ||
+                    new CTLUnary('EG', this.left).evaluate(model, world, assignment, system);
+            case 'AW': // Universal Weak Until (Equivalent to AU(p,q) OR AG(p))
+                return new CTLBinary('AU', this.left, this.right).evaluate(model, world, assignment, system) ||
+                    new CTLUnary('AG', this.left).evaluate(model, world, assignment, system);
+            default:
+                throw new Error(`Unknown CTL operator: ${this.operator}`);
+        }
     }
 }
 
@@ -400,11 +535,22 @@ export class World {
         this.color = '#ffffff'; // Default white
         this.description = '';
         this.valuation = new Map(); // Map<string, boolean>
+        this.domain = new Set(); // Local domain for varying domains
     }
+
 
     setAtom(atomName, value) {
         this.valuation.set(atomName, value);
     }
+
+    addLocalObject(obj) {
+        this.domain.add(obj);
+    }
+
+    removeLocalObject(obj) {
+        this.domain.delete(obj);
+    }
+
 }
 
 export class Relation {
@@ -417,11 +563,27 @@ export class Relation {
     }
 }
 
+import { SymbolicModelChecker } from './symbolic.js';
+
 export class Model {
     constructor() {
         this.worlds = new Map(); // Map<string, World>
         this.relations = []; // Array<Relation>
         this.domain = new Set(); // Explicitly added objects
+    }
+
+    verifySymbolic(formula) {
+        const smc = new SymbolicModelChecker(this);
+        const resBdd = smc.compute(formula);
+        const results = new Map();
+        for (const w of this.worlds.values()) {
+            const wBdd = smc.worldToBdd.get(w.id);
+            // check if wBdd implies resBdd
+            // imp(wBdd, resBdd) should be TRUE if w is in SAT(formula)
+            const imp = smc.mgr.imp(wBdd, resBdd);
+            results.set(w.id, imp === smc.mgr.TRUE);
+        }
+        return results;
     }
 
     addWorld(world) {

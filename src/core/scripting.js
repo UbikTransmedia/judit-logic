@@ -246,12 +246,38 @@ export class ScriptEngine {
                 }
             };
 
-            const func = new Function('model', 'turing', 'World', 'Relation', 'console', `
+            const logos = {
+                spawnWorld: (config = {}) => {
+                    const id = 'w' + Date.now() + Math.floor(Math.random() * 1000);
+                    const w = new World(id, config.x || 100, config.y || 100);
+                    if (config.name) w.name = config.name;
+                    if (config.props) {
+                        for (const [k, v] of Object.entries(config.props)) {
+                            w.setAtom(k, v);
+                        }
+                    }
+                    this.model.addWorld(w);
+                    return w;
+                },
+                addRelation: (sourceId, targetId, agent = 'a', data = {}) => {
+                    this.model.addRelation(sourceId, targetId, agent, data);
+                },
+                evaluate: (formulaStr) => {
+                    try {
+                        // Dynamically import parser and logic helper if needed, 
+                        // but here we can assume the script might want to trigger evaluations
+                        // For the lesson, simple model mutation is key.
+                        console.log("Evaluating via Script:", formulaStr);
+                    } catch (e) { console.error(e); }
+                }
+            };
+
+            const func = new Function('model', 'turing', 'World', 'Relation', 'console', 'logos', `
                 "use strict";
                 ${code}
             `);
 
-            func(this.model, this.turing, World, Relation, customConsole);
+            func(this.model, this.turing, World, Relation, customConsole, logos);
 
             this.renderer.resize();
             this.renderer.draw();

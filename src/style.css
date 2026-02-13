@@ -23,6 +23,7 @@
     --success-color: #5cb85c;
     --danger-color: #d9534f;
     --warning-color: #f0ad4e;
+    --input-text-color: var(--text-color);
     --border-color: #2d333b;
     --border-light: #383e47;
     --header-bg: #161a22;
@@ -43,40 +44,49 @@
     --canvas-bg: #111519;
     --bevel-light: rgba(255, 255, 255, 0.06);
     --bevel-dark: rgba(0, 0, 0, 0.45);
+    --action-color: #c9a75d;
+    /* Muted Gold/Yellow */
+    --action-hover: #dbbc71;
 }
 
 [data-theme="light"] {
-    --bg-color: #f4f6f8;
-    --panel-bg: #ffffff;
-    --panel-bg-alt: #f8f9fb;
-    --text-color: #24292e;
-    --text-dim: #6a737d;
-    --accent-color: #2563eb;
-    --accent-hover: #3b82f6;
-    --accent-muted: rgba(37, 99, 235, 0.08);
-    --success-color: #22863a;
-    --danger-color: #cb2431;
-    --warning-color: #e36209;
-    --border-color: #d1d5da;
-    --border-light: #e1e4e8;
-    --header-bg: #f0f2f5;
-    --secondary-bg: #ffffff;
+    --bg-color: #d8d7cd;
+    /* Metallic Yellowish Gray */
+    --panel-bg: #cccbbf;
+    --panel-bg-alt: #bfbeb1;
+    --text-color: #2c2c2c;
+    --text-dim: #5c5c50;
+    --accent-color: #3a6fa5;
+    --accent-hover: #4b80b6;
+    --accent-muted: rgba(58, 111, 165, 0.1);
+    --success-color: #2e7d32;
+    --danger-color: #c62828;
+    --warning-color: #ef6c00;
+    --border-color: #a8a799;
+    --border-light: #b8b7ab;
+    --header-bg: #c1c0b3;
+    --secondary-bg: #cccbbf;
     --input-bg: #ffffff;
-    --input-border: #d1d5da;
-    --btn-bg: #f3f4f6;
-    --btn-border: #d1d5da;
-    --btn-hover: #e8eaed;
-    --code-bg: #f6f8fa;
-    --modal-overlay: rgba(0, 0, 0, 0.45);
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.15);
-    --scroll-track: #f1f1f1;
-    --scroll-thumb: #c1c1c1;
-    --scroll-hover: #a8a8a8;
-    --canvas-bg: #e8ecf0;
-    --bevel-light: rgba(255, 255, 255, 0.9);
-    --bevel-dark: rgba(0, 0, 0, 0.12);
+    --input-border: #99988a;
+    --input-text-color: #000000;
+    --btn-bg: #d0cfc4;
+    --btn-border: #a8a799;
+    --btn-hover: #c4c3b7;
+    --code-bg: #d8d7cd;
+    --modal-overlay: rgba(0, 0, 0, 0.4);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.15);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.2);
+    --scroll-track: #c1c0b3;
+    --scroll-thumb: #a8a799;
+    --scroll-hover: #969587;
+    --canvas-bg: #9a9a8f;
+    /* Darker than interface */
+    --bevel-light: rgba(255, 255, 255, 0.7);
+    --bevel-dark: rgba(0, 0, 0, 0.15);
+    --action-color: #f1c40f;
+    /* Brighter yellowish-gold */
+    --action-hover: #f39c12;
 }
 
 [data-theme="high-contrast"] {
@@ -111,6 +121,9 @@
     --canvas-bg: #000000;
     --bevel-light: rgba(255, 255, 255, 0.15);
     --bevel-dark: rgba(0, 0, 0, 0.6);
+    --action-color: #ffff00;
+    /* Bright Yellow */
+    --action-hover: #ffff80;
 }
 
 [data-theme="monokai"] {
@@ -200,21 +213,33 @@ button:active {
 }
 
 #inspector {
-    width: 375px;
+    min-width: 240px;
+    /* 320 * 0.75 */
+    width: 280px;
+    /* 375 * 0.75 roughly */
     padding: 10px;
     border-left: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
     overflow-y: hidden;
+    flex-shrink: 0;
+    position: sticky;
+    right: 0;
+    z-index: 100;
+    background: var(--panel-bg);
 }
 
 #sidebar {
-    width: 325px;
+    min-width: 225px;
+    /* 300 * 0.75 */
+    width: 245px;
+    /* 325 * 0.75 roughly */
     padding: 10px;
     border-right: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
     overflow-y: auto;
+    flex-shrink: 0;
 }
 
 /* Panel headings */
@@ -432,6 +457,11 @@ textarea:focus {
 
 #canvas-container {
     background: var(--canvas-bg) !important;
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    position: relative;
+    overflow: hidden;
 }
 
 /* ─── HELP CARDS IN TUTORIAL MODAL ─────────── */

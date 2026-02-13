@@ -18,8 +18,8 @@ export const LESSONS = [
                     <li><strong>Arc I — Classical Logic (Lessons 1-4):</strong> The atoms, connectives, and truth tables that form the bedrock of all formal reasoning. You will learn how to express any statement in a precise symbolic language.</li>
                     <li><strong>Arc II — Modal & Epistemic Logic (Lessons 5-13):</strong> We leave the single-world view behind and enter the universe of <em>Possible Worlds</em>, where truth depends on perspective, knowledge flows between agents, and announcements reshape reality.</li>
                     <li><strong>Arc III — Computation (Lessons 14-19):</strong> From Turing's mechanical tape to Church's mathematical functions. Two radically different answers to the same question: "What can be computed?"</li>
-                    <li><strong>Arc IV — The Curry-Howard Bridge (Lessons 20-24):</strong> The deepest lesson of all. We discover that <em>writing a program</em> and <em>constructing a proof</em> are the same activity, viewed from different angles. This is developed step-by-step across five progressive lessons.</li>
-                    <li><strong>Arc V — Systems & Limits (Lessons 25-35):</strong> Cybernetics, ordinals, paradoxes, and the hard boundaries of what logic can achieve.</li>
+                    <li><strong>Arc IV — The Curry-Howard Bridge (Lessons 20-24):</strong> The deepest lesson of all. We discover that <em>writing a program</em> and <em>constructing a proof</em> are the same activity, viewed from different angles.</li>
+                    <li><strong>Arc V — Advanced Reasoning (Lessons 25-35):</strong> From BDDs and SAT solving to First-Order Logic and formal synthesis. The limits and power of automated reasoners.</li>
                 </ol>
 
                 <div class="lesson-tip">
@@ -1053,152 +1053,420 @@ export const LESSONS = [
         id: 25,
         title: "Ordinals & The Hydra Game",
         content: `
-    < div class="lesson-card" >
-                <h2>25. Ordinals & The Hydra Game</h2>
+            <div class="lesson-card">
+                <h2>25. Ordinals & The Hydra Game: Taming Infinity</h2>
                 <div class="lesson-quote">
-                    "The infinite can be tamed, but not easily."
+                    "The infinite can be tamed, but not easily. To measure the depth of a tree, we need numbers that go beyond the horizon." — Georg Cantor
                 </div>
-                <p>Beyond the finite integers (1, 2, 3...) lie the <strong>Ordinal Numbers</strong> (ω, ω+1, ω^ω...). These are used to measure the "Proof-Theoretic Strength" of a logical system. JUDIT uses the <strong>Worm/Ordinal notation</strong> to label the complexity of your derivation trees.</p>
+                <p>Beyond the finite counting integers (1, 2, 3...) lie the <strong>Ordinal Numbers</strong>. Discovered by Georg Cantor, these numbers represent <em>order types</em> of well-ordered sets. In JUDIT, we use them to measure the "Proof-Theoretic Strength" of logical systems.</p>
+
+                <h3>The Ordinal Hierarchy</h3>
+                <p>The sequence starts simply: <code>0, 1, 2...</code>. But after all finite numbers comes <strong>ω (Omega)</strong>, the first transfinite ordinal. Then comes <code>ω+1, ω+2..., ω·2..., ω²..., ω^ω...</code>. This hierarchy is used to rank the complexity of recursive processes.</p>
 
                 <h3>Goodstein's Theorem & The Hydra</h3>
-                <p>Imagine a Hydra. Every time you cut off a head, it grows back multiple new heads on a different branch. It seems impossible to kill. However, <strong>Reuben Goodstein</strong> proved that if you follow a specific mathematical rule, the Hydra WILL eventually die.</p>
-
-                <div class="lesson-warning">
-                    <strong>The Catch:</strong> The proof that you win cannot be done within standard Arithmetic (Peano Axioms). It requires the strength of an ordinal called <strong>ε₀ (Epsilon Zero)</strong>. It is a win that is "true but unprovable" in simple systems.
+                <p>Imagine a Hydra represented as a tree. Every time you cut off a leaf (a head), the Hydra regrows <em>n</em> copies of the subtree attached to the parent of the head you just cut. As <em>n</em> increases with every step, it seems the Hydra will grow forever.</p>
+                <div class="lesson-example">
+                    <strong>The Mathematical Rule:</strong>
+                    <ol>
+                        <li>Choose a head.</li>
+                        <li>Cut it.</li>
+                        <li>The body regrows <em>k</em> copies of the remaining branch, where <em>k</em> is the current step number.</li>
+                    </ol>
                 </div>
 
-                <h3>The Ordinal Calculator</h3>
-                <p>The sidebar in JUDIT features an experimental <em>Ordinal/Worm</em> explorer. Here, you can visualize how small changes in a recursive rule can lead to explosive growth towards transfinite infinities.</p>
-            </div >
-    `
+                <div class="lesson-warning">
+                    <strong>The Catch:</strong> Reuben Goodstein proved that the Hydra WILL eventually die. However, this proof <strong>cannot be conducted within standard Arithmetic (Peano Axioms)</strong>. It requires the strength of an ordinal called <strong>ε₀ (Epsilon Zero)</strong>. This illustrates Gödel's Incompleteness: there are truths about finite trees that require infinite systems to prove.
+                </div>
+
+                <h3>JUDIT's Ordinal/Worm Sidebar</h3>
+                <p>Look at the sidebar. When you build complex Kripke models or derivative trees, JUDIT calculates a "Worm" value. This is a visualization of the Beklemishev's Worm, a system where logical consistency is mapped to ordinal growth. A "long worm" means your logic is exploring deep, almost-unprovable territories.</p>
+
+                <div class="lesson-example">
+                    <strong>✎ Try It:</strong> Open the <em>Ordinal Calculator</em> in the elements panel. Try to increment the "Step" and see how the "Hydra" tree representation changes. Notice how small shifts in the base lead to explosive growth in the visual structure.
+                </div>
+            </div>
+        `
     },
     {
         id: 26,
         title: "Type Theory & Russel's Paradox",
         content: `
-    < div class="lesson-card" >
-                <h2>26. Type Theory & Russel's Paradox</h2>
-                <p>In 1901, <strong>Bertrand Russell</strong> discovered a fatal flaw in early set theory. He asked: <em>"Does the set of all sets that do not contain themselves contain itself?"</em></p>
-                <ul>
-                    <li>If it DOES, then it doesn't (by definition).</li>
-                    <li>If it DOES NOT, then it must (by definition).</li>
-                </ul>
+            <div class="lesson-card">
+                <h2>26. Type Theory: The Shield Against Paradox</h2>
+                <div class="lesson-quote">
+                    "A set that contains all sets is a monster that eats itself."
+                </div>
+                <p>In 1901, <strong>Bertrand Russell</strong> shattered the foundations of logic. He asked: <em>"Does the set of all sets that do not contain themselves contain itself?"</em> This led to a logical explosion (the Liar's Paradox in set form).</p>
 
-                <h3>The Solution: Hierarchies and Types</h3>
-                <p>To fix this, Russell (and later Church) developed <strong>Type Theory</strong>. You cannot have a set of sets without specifying its "Grade" or "Type." A term can only act on terms of a <strong>lower type</strong>.</p>
+                <h3>The Solution: Types vs. Terms</h3>
+                <p>To fix this, Russell and later Alonzo Church developed <strong>Type Theory</strong>. In a typed system, every expression has a fixed "category." You cannot simply apply anything to anything else. Modern programming languages (Rust, TypeScript, Haskell) are the direct descendants of this mathematical fix.</p>
+
+                <h3>Hierarchy of Levels</h3>
+                <ul>
+                    <li><strong>Level 0 (Atoms):</strong> Basic values like <code>True</code>, <code>False</code>, or numbers.</li>
+                    <li><strong>Level 1 (Functions):</strong> Operations that take Atoms and return Atoms.</li>
+                    <li><strong>Level 2 (Meta-functions):</strong> Operations that take Level 1 functions as input.</li>
+                </ul>
+                <p>A term of Level 1 can <strong>never</strong> take itself as an argument. This simple rule deletes Russell's Paradox from existence.</p>
 
                 <div class="lesson-example">
                     <strong>In the Lambda Tab:</strong>
-                    <p>JUDIT uses <em>Simply Typed Lambda Calculus</em>. If you try to write <code>\\x. x x</code> (self-application), the type checker will throw an error. Why? Because <code>x</code> cannot simultaneously be a "Function" and the "Input to that function." Type theory enforces logical hygiene.</p>
+                    <p>JUDIT uses <em>Simply Typed Lambda Calculus (STLC)</em>. If you try to write <code>\\x. x x</code> (the self-application used in the Omega combinator), the type checker will highlight it in red. It will say "Infinite Type" or "Cannot unify." This is JUDIT protecting your logic from collapsing into a paradox.</p>
                 </div>
 
                 <h3>Philosophical Context: Cantor's Paradise</h3>
-                <p>Georg Cantor discovered that there are different "sizes" of infinity. Type theory is the way we organize these infinite layers to prevent the universe of logic from collapsing into contradiction.</p>
-            </div >
-    `
+                <p>Georg Cantor discovered that there are different "sizes" (cardinalities) of infinity. Type theory is how we organize these infinite layers. Without types, logic is a flat plane where contradictions can roam free; with types, it is a skyscraper where each floor is safe.</p>
+                
+                <div class="lesson-tip">
+                    <strong>Advanced Note:</strong> Beyond STLC, there are systems like <strong>System F</strong> or <strong>Calculus of Constructions</strong> where types themselves can be passed as arguments! This is the basis of "Generics" in modern coding.
+                </div>
+            </div>
+        `
     },
     {
         id: 27,
         title: "Bisimulation: Twin Worlds",
         content: `
-    < div class="lesson-card" >
-                <h2>27. Bisimulation: Twin Worlds</h2>
-                <p>Two worlds are <strong>Bisimilar</strong> if they behave identically from a modal perspective. Even if they have different names or are in different parts of the canvas, if they satisfy all the same modal formulas, they are <strong>Logically Equivalent</strong>.</p>
+            <div class="lesson-card">
+                <h2>27. Bisimulation: The Logic of Equivalence</h2>
+                <div class="lesson-quote">
+                    "Two systems are the same if no experiment can tell them apart."
+                </div>
+                <p>In Modal Logic, two worlds are <strong>Bisimilar</strong> if they behave identically regarding what is <em>possible</em> and <em>necessary</em>. Even if they have different names or internal states, if they satisfy the same modal formulas, they are effectively the same point in the universe of thought.</p>
 
-                <h3>Structural Equivalence</h3>
-                <p>The concept was refined by <strong>David Park</strong> and <strong>Robin Milner</strong> in the study of <em>Process Calculi</em> (how computers communicate). If two programs "bisimulate," you can swap one for the other and no observer will ever know the difference.</p>
+                <h3>The Zig-Zag Definition</h3>
+                <p>A relation <em>R</em> is a bisimulation if for two worlds <em>u</em> and <em>v</em>:</p>
+                <ul>
+                    <li><strong>Atom Equivalence:</strong> They satisfy the exact same propositions (p, q...).</li>
+                    <li><strong>The Zig:</strong> If <em>u</em> can move to <em>u'</em>, then <em>v</em> must be able to move to some <em>v'</em> such that <em>u' R v'</em>.</li>
+                    <li><strong>The Zag:</strong> If <em>v</em> can move to <em>v''</em>, then <em>u</em> must be able to move to some <em>u''</em> such that <em>u'' R v''</em>.</li>
+                </ul>
+
+                <h3>Model Minimization</h3>
+                <p>Why does this matter? Many Kripke models are redundant. By finding bisimilar worlds and merging them, we get the <strong>Minimal Model</strong>. This is critical in software verification—why check 1,000,000 states if they are all bisimilar to just 5?</p>
 
                 <div class="lesson-example">
-                    <strong>The Mirror Test:</strong>
+                    <strong>The Mirror Test in JUDIT:</strong>
                     <ol>
-                        <li>World A has <code>p</code> and points to World B.</li>
-                        <li>World C has <code>p</code> and points to World D.</li>
-                        <li>If B and D are identical, then A and C are bisimilar.</li>
+                        <li>Place two worlds, A and B. Give both the property <code>p</code>.</li>
+                        <li>Make A point to itself. Make B point to a new world C.</li>
+                        <li>Give C the property <code>p</code> and make it point back to B.</li>
+                        <li><strong>Result:</strong> A and B are bisimilar. They both represent "an infinite cycle of p."</li>
                     </ol>
                 </div>
 
                 <div class="lesson-tip">
-                    <strong>Refinement:</strong> JUDIT's <em>System Redundancy</em> check uses a Co-Inductive algorithm to find these "Twin Worlds". Merging them (Model Minimization) is a key step in optimizing complex logical systems.
+                    <strong>JUDIT Feature:</strong> The "System Redundancy" check (sidebar) uses a co-inductive algorithm to highlight these "Twin Worlds". Merging them simplifies the canvas without losing any logical information.
                 </div>
-            </div >
-    `
+            </div>
+        `
     },
     {
         id: 28,
         title: "Epistemic Paradoxes: Surprise Exam",
         content: `
-    < div class="lesson-card" >
-                <h2>28. Paradoxes of Knowledge & Timing</h2>
-                <p>Knowledge isn't just about facts; it's about <em>timing</em>. The <strong>Surprise Exam Paradox</strong> shows how logic can struggle with self-referential time.</p>
+            <div class="lesson-card">
+                <h2>28. Epistemic Paradoxes: Knowledge & Timing</h2>
+                <div class="lesson-quote">
+                    "A surprise that is predicted is no surprise at all... or is it?"
+                </div>
+                <p>Knowledge isn't just a static set of facts; it changes when information is announced. The <strong>Surprise Exam Paradox</strong> is a classic riddle that shows how logic struggles with self-referential predictions.</p>
 
-                <h3>The Paradox</h3>
-                <p>A teacher says: "There will be a surprise exam next week, but you won't know which day until it happens."</p>
+                <h3>The Riddle</h3>
+                <p>A teacher announces: "There will be a surprise exam next week (Monday–Friday). You will not know which day it is until the morning it happens."</p>
                 <ul>
-                    <li>Student: "It can't be Friday. If I'm still alive Thursday night, I'll know it's Friday, so it's not a surprise."</li>
-                    <li>Student: "Since it's not Friday, it can't be Thursday..."</li>
-                    <li>Result: The student "proves" the exam is impossible. On Wednesday, the exam happens. The student is surprised.</li>
+                    <li><strong>The Student's Logic:</strong> "It can't be Friday. If Thursday passes and there's no exam, I'll KNOW it's Friday. So it wouldn't be a surprise."</li>
+                    <li>"Since it's not Friday, it can't be Thursday either... (repeating the logic backwards)."</li>
+                    <li><strong>The Result:</strong> The student concludes the exam is impossible. On Wednesday, the teacher knocks. The student is genuinely surprised.</li>
                 </ul>
 
-                <h3>Modeling Meta-Knowledge</h3>
-                <p>To resolve this, we must use <strong>Multi-Agent Epistemic Logic</strong>. The "Surprise" is a modal property: <code>¬K_student (Exam_on_day_i)</code>. JUDIT allows you to model these nested beliefs (I know that you don't know that I know...) to see where the logic breaks down.</p>
-            </div >
-    `
+                <h3>Modeling Modern Epistemics</h3>
+                <p>In Dynamic Epistemic Logic (DEL), we model this using <strong>Public Announcements</strong>. When the teacher speaks, certain "possible worlds" are deleted from the model. 
+                The paradox arises because the announcement "The exam is a surprise" creates a <em>Moore Sentence</em> (a statement that becomes false the moment you know it).</p>
+
+                <div class="lesson-example">
+                    <strong>The Muddy Children Example:</strong>
+                    <p>Three children are playing. Two have mud on their foreheads. Each can see the others but not themselves. A parent says: "At least one of you has mud." Then asks: "Do you know if you have mud?"</p>
+                    <ol>
+                        <li>Round 1: Everyone says "No."</li>
+                        <li>Round 2: The two muddy children suddenly say "Yes!"</li>
+                    </ol>
+                    <p>Why? Because the <em>silence</em> of the first round was itself a piece of information that narrowed down the possibilities.</p>
+                </div>
+
+                <div class="lesson-tip">
+                    <strong>In JUDIT:</strong> You can model these agents. Use world-relations with different colors for different agents (Agent A, Agent B). Use the "Announce" button to see how your Kripke model physically shrinks as agents gain common knowledge.
+                </div>
+            </div>
+        `
     },
     {
         id: 29,
         title: "The Busy Beaver (Radical Non-Computability)",
         content: `
-    < div class="lesson-card" >
-                <h2>29. The Busy Beaver Machine</h2>
+            <div class="lesson-card">
+                <h2>29. The Busy Beaver: The Limits of the Machine</h2>
                 <div class="lesson-quote">
-                    "There are more things in heaven and earth, Horatio, than are dreamt of in your philosophy — or your computer."
+                    "Some numbers are so large they cannot be reached by any calculation, only by pure thought." — Tibor Radó
                 </div>
-                <p>Some numbers are so large they are <strong>Non-Computable</strong>. Tibor Radó introduced the <strong>Busy Beaver</strong> to prove that some problems are impossible for any machine to solve.</p>
+                <p>Is everything provable? Is everything computable? Alan Turing said No. Tibor Radó took it further with the <strong>Busy Beaver Game</strong> (Σ function), which proves that the "Halting Problem" has physical consequences.</p>
 
                 <h3>The Challenge</h3>
-                <p>How many '1's can an <em>n</em>-state Turing Machine write on an empty tape before halting? For 5 states, the number is already massive. For 6, it is unknown and likely larger than the number of atoms in the universe.</p>
+                <p>A "n-state Busy Beaver" is a Turing Machine with <em>n</em> states that writes as many '1's as possible on an empty tape and then <strong>stops</strong> (halts). If it doesn't stop, it's disqualified.</p>
+                <ul>
+                    <li><strong>Σ(1):</strong> 1 (Very simple).</li>
+                    <li><strong>Σ(2):</strong> 4 (Getting interesting).</li>
+                    <li><strong>Σ(3):</strong> 6.</li>
+                    <li><strong>Σ(4):</strong> 13.</li>
+                    <li><strong>Σ(5):</strong> At least 4,098.</li>
+                    <li><strong>Σ(6):</strong> Larger than 10^30,000.</li>
+                </ul>
+
+                <h3>Non-Computability</h3>
+                <p>The Σ function grows faster than <strong>any</strong> computable function. Faster than exponentials, faster than factorials, faster than Ackermann's function. No program can ever be written to calculate Σ(n) for all <em>n</em>, because solving Σ requires solving the Halting Problem.</p>
 
                 <div class="lesson-warning">
-                    <strong>The Limit of JUDIT:</strong> If you build a Busy Beaver in the Turing Tab, JUDIT might run for millions of cycles. But because of the <strong>Halting Problem</strong>, no program can ever be written to tell you <em>offline</em> if the machine will ever stop.
+                    <strong>The Limit of JUDIT:</strong> If you build a complex Turing Machine in the Turing Tab, JUDIT simulates it step-by-step. But JUDIT cannot tell you <em>in advance</em> if your machine will ever stop. If you try to find the Busy Beaver for 6 states, your browser will likely freeze or the universe will end before the result is reached.
                 </div>
 
-                <h3>The Bound of Thought</h3>
-                <p>This proves that human logic and calculation have a hard, mathematical ceiling. There are truths that are "Too Busy" to ever be computed.</p>
-            </div >
-    `
+                <h3>The "Busy Beaver" Lesson</h3>
+                <p>This proves that the space of "Truth" is much larger than the space of "Proof." There are machines that halt, but we can never <em>prove</em> they halt within any fixed formal system. You are working at the very edge of what can be known.</p>
+            </div>
+        `
     },
     {
         id: 30,
-        title: "The Logos Canvas: Final Challenge",
+        title: "The Logos Canvas: Beyond the Grid",
         content: `
-    < div class="lesson-card" >
-                <h2>30. The Logos Canvas: Your New Universe</h2>
-                <p>Congratulations. You have traveled from the atomic simplicity of George Boole to the transfinite ordinals of the Hydra, and through the cybernetic loops of Ashby and Wiener.</p>
+            <div class="lesson-card">
+                <h2>30. The Logos Canvas: Scripting the Universe</h2>
+                <div class="lesson-quote">
+                    "The universe is a formal system, and you are its scriptwriter. Drawing is for children; scripting is for architects."
+                </div>
+                <p>Welcome to the ultimate layer of JUDIT. Beyond the UI buttons lies the <strong>Logos Console</strong>, an experimental JavaScript API that allows you to automate the creation of worlds and the evaluation of logic at scale.</p>
 
-                <h3>The Scripting API</h3>
-                <p>You have the foundations. Now, it's time to build. JUDIT features a hidden <strong>Logos Console</strong> (the Scripting API). You can write custom JavaScript to:</p>
+                <h3>The 'logos' Object</h3>
+                <p>In the browser console (F12) or the hidden Scripting Tab, you have access to the global <code>logos</code> controller. Key methods include:</p>
                 <ul>
-                    <li>Generate fractal Kripke models.</li>
-                    <li>Automate complex Public Announcements.</li>
-                    <li>Run probabilistic simulations of agent interactions.</li>
+                    <li><code>logos.spawnWorld({x, y, props})</code>: Creates a world at coordinates with initial atoms.</li>
+                    <li><code>logos.addRelation(id1, id2, type)</code>: Draws an arrow between worlds.</li>
+                    <li><code>logos.evaluate(formula)</code>: Runs the symbolic engine on the current canvas.</li>
                 </ul>
 
                 <div class="lesson-example">
-                    <strong>Final Challenge:</strong>
-                    <ol>
-                        <li>Open the <em>Help</em> tab.</li>
-                        <li>Find a script snippet from Section 8.</li>
-                        <li>Paste it into the Logos Console.</li>
-                        <li>Watch as a hundred worlds bloom on your canvas at once.</li>
-                    </ol>
+                    <strong>Practical Scripting Example:</strong>
+                    <p>Copy and paste this into the console to generate a "Solar System" of worlds:</p>
+                    <code>
+                        let center = logos.spawnWorld({x: 400, y: 300, props: {sun: true}});<br>
+                        for(let i=0; i<8; i++) {<br>
+                        &nbsp;&nbsp;let p = logos.spawnWorld({x: 400 + Math.cos(i)*200, y: 300 + Math.sin(i)*200, props: {planet: true}});<br>
+                        &nbsp;&nbsp;logos.addRelation(center.id, p.id, 'access');<br>
+                        }
+                    </code>
+                </div>
+
+                <h3>Recursive Generation</h3>
+                <p>Using these tools, you can generate <em>Fractal Kripke Models</em>—structures that would take hours to draw by hand but only milliseconds to script. This is how researchers test "State Explosion" in large systems.</p>
+
+                <div class="lesson-tip">
+                    <strong>The Real Challenge:</strong> Use logic to describe a property, then use a script to find a model that satisfies it. We call this <em>Model Checking</em>, and it’s the foundation of modern hardware design at companies like NVidia or AMD.
                 </div>
 
                 <div class="lesson-quote">
-                    "The universe is a formal system, and you are its scriptwriter."
+                    "Go forth and automate. The grid is just your playground."
+                </div>
+            </div>
+        `
+    },
+    {
+        id: 31,
+        title: "BDDs: Efficient Thought Representation",
+        content: `
+            <div class="lesson-card">
+                <h2>31. Binary Decision Diagrams (BDD): The Engine</h2>
+                <div class="lesson-quote">
+                    "Logic is exponential, but data structures can prune the tree of life." — Randal Bryant
+                </div>
+                <p>How does JUDIT check formulas with 20 variables without lagging? Truth tables would require 2^20 (1,048,576) rows. Instead, JUDIT uses **Reduced Ordered Binary Decision Diagrams (ROBDDs)**.</p>
+
+                <h3>How BDDs Prune the Search</h3>
+                <p>A BDD is a graph where each node is a variable. To evaluate, you follow the 'True' or 'False' edge. ROBDDs apply three critical reduction rules:</p>
+                <ol>
+                    <li><strong>Merging:</strong> If two nodes represent the same sub-formula, they are merged into one.</li>
+                    <li><strong>Deletion:</strong> If both edges of a node lead to the same result, the node is redundant and removed.</li>
+                    <li><strong>Ordering:</strong> Variables always appear in the same sequence (e.g., p then q then r).</li>
+                </ol>
+
+                <div class="lesson-example">
+                    <strong>The Canonicity Property:</strong>
+                    <p>In a ROBDD, every boolean function has <strong>exactly one</strong> representation. This means JUDIT can tell if two formulas are identical (even if they look different) by simply checking if their BDD pointers match. Equality is instant!</p>
                 </div>
 
-                <p style="text-align: center; font-style: italic; margin-top: 40px; color: #4a90e2;">This concludes the JUDIT Foundation Course. Go forth and calculate.</p>
-            </div >
-    `
+                <h3>Why This Matters</h3>
+                <p>Without BDDs, modern computer chips would be impossible to verify. JUDIT’s internal BDD engine (written in optimized JS) is what allows the "Symbolic" mode to run so efficiently.</p>
+
+                <div class="lesson-tip">
+                    <strong>✎ Try It:</strong> Type <code>(p | q) & !(!p & !q)</code>. Notice how JUDIT evaluates this instantly to <code>p | q</code>. Internally, the BDD for both expressions is identical.
+                </div>
+            </div>
+        `
+    },
+    {
+        id: 32,
+        title: "SAT Solvers: Finding Truth in Darkness",
+        content: `
+            <div class="lesson-card">
+                <h2>32. SAT Solvers: The Automated Detective</h2>
+                <div class="lesson-quote">
+                    "Is there a needle in this haystack of a billion possibilities?" — The Satisfiability Problem
+                </div>
+                <p>The **SAT** problem asks if there is ANY possible assignment of true/false that makes a formula hold. It's the "Holy Grail" of computer science, as solving it efficiently would prove P=NP.</p>
+
+                <h3>The DPLL Algorithm</h3>
+                <p>JUDIT’s <strong>Satisfy</strong> button uses a variant of the DPLL algorithm. It doesn't just guess; it reasons:</p>
+                <ul>
+                    <li><strong>Unit Propagation:</strong> If we have <code>(p)</code> and <code>(!p | q)</code>, then <code>q</code> MUST be true. JUDIT deduces this instantly.</li>
+                    <li><strong>Pure Literal:</strong> If <code>r</code> only appears as "true" and never "false" in a formula, we can assume it's true.</li>
+                    <li><strong>Backtracking:</strong> If the solver hits a contradiction, it "learns" why and jumps back to a previous decision.</li>
+                </ul>
+
+                <h3>Modeling with SAT</h3>
+                <p>You can use the <strong>Satisfy</strong> tool to solve Sudokus, plan schedules, or design circuits. Simply express the constraints as a logical formula, and let the machine find the solution.</p>
+
+                <div class="lesson-example">
+                    <strong>✎ Practical Exercise:</strong>
+                    <ol>
+                        <li>Clear the canvas.</li>
+                        <li>Type <code>(a | b) & (!a | c) & (!b | !c) & (a | !c)</code>.</li>
+                        <li>Click <strong>Satisfy</strong>.</li>
+                        <li>JUDIT will physically manifest a world where these conflicting constraints are delicately balanced.</li>
+                    </ol>
+                </div>
+
+                <div class="lesson-warning">
+                    <strong>Verification:</strong> If the solver says "UNSAT," it is mathematically impossible for that formula to ever be true. In software safety, "UNSAT" is often the goal (meaning a bug is impossible).
+                </div>
+            </div>
+        `
+    },
+    {
+        id: 33,
+        title: "Analytic Tableaux: The Art of Refutation",
+        content: `
+            <div class="lesson-card">
+                <h2>33. Analytic Tableaux: Breaking Logic Apart</h2>
+                <p>When you click <strong>Prove</strong>, JUDIT uses the **Tableau Method**. Unlike truth tables (which are bottom-up), Tableaux are top-down—they break complex formulas into their atomic components.</p>
+
+                <h3>The Rules of Decomposition</h3>
+                <p>The solver follows a "Branching" strategy:</p>
+                <table>
+                    <tr><th>Type</th><th>Rule</th><th>Effect</th></tr>
+                    <tr><td><strong>AND (α)</strong></td><td><code>A ∧ B</code></td><td>Adds both A and B to the current branch.</td></tr>
+                    <tr><td><strong>OR (β)</strong></td><td><code>A ∨ B</code></td><td><strong>Splits</strong> the proof into two separate branches (Case A and Case B).</td></tr>
+                    <li><strong>NEGATION:</strong> <code>¬(A ∧ B)</code> is treated as <code>¬A ∨ ¬B</code> (De Morgan).</li>
+                </table>
+
+                <h3>Open vs. Closed Branches</h3>
+                <ul>
+                    <li><strong>Closed Branch:</strong> If a branch contains both <code>p</code> and <code>¬p</code>, it is a contradiction. The branch "dies."</li>
+                    <li><strong>Open Branch:</strong> If the solver simplifies everything and NO contradiction is found, the branch remains open.</li>
+                </ul>
+
+                <div class="lesson-tip">
+                    <strong>The Counter-Model:</strong> An open branch is a direct recipe for a counter-example! JUDIT uses the facts in an open branch to draw a world that proves your formula is <em>not</em> valid. This is how JUDIT "talks back" to you.
+                </div>
+
+                <div class="lesson-example">
+                    <strong>✎ Observation:</strong> Try to prove <code>p | !p</code>. JUDIT will find no open branches, proving it's a Tautology. Now try to prove <code>p | q</code>. JUDIT will show you a branch where both are false—the counter-model.
+                </div>
+            </div>
+        `
+    },
+    {
+        id: 34,
+        title: "First-Order Logic: Objects and Quantifiers",
+        content: `
+            <div class="lesson-card">
+                <h2>34. First-Order Logic (FOL): The Language of Reality</h2>
+                <div class="lesson-quote">
+                    "Names are not enough. We need to speak of 'Everyone' and 'Someone'." — Gottlob Frege
+                </div>
+                <p>Propositional logic is about "Truths." First-Order Logic is about <strong>"Things."</strong> We introduce two powerful operators:</p>
+                <ul>
+                    <li><strong>∀ (For All):</strong> Claims something is true for every object in the universe.</li>
+                    <li><strong>∃ (Exists):</strong> Claims there is at least one object with a certain property.</li>
+                </ul>
+
+                <h3>1. Defining the Domain: Global vs. Local</h3>
+                <p>A "Model" in FOL requires a <strong>Domain (D)</strong>—the set of all things that exist. JUDIT offers two ways to manage this:</p>
+                <ul>
+                    <li><strong>Global Domain:</strong> Defined in the <em>Domain Editor</em> (Elements panel). These objects exist in every world by default.</li>
+                    <li><strong>Local Domain:</strong> In each world's Inspector, you can specify a <em>Local Domain</em>. If a world has a local domain, quantifiers like <code>all x</code> will only look at those specific objects. This allows you to model <strong>Varying Domains</strong>, where some things exist in one world but not in another.</li>
+                </ul>
+
+                <h3>2. Visual Predicate Assignment</h3>
+                <p>Once objects exist in a world, you must define their properties. Instead of typing everything, JUDIT provides a <strong>Predicate Assignment</strong> table in the Inspector:</p>
+                <ul>
+                    <li>The table automatically lists all objects currently in that world's domain.</li>
+                    <li>Use the <strong>P, Q, and R</strong> checkboxes to quickly toggle properties for each object.</li>
+                    <li>For example, marking 'P' for 'neo' creates the fact <code>P(neo)</code> in that world.</li>
+                </ul>
+
+                <div class="lesson-example">
+                    <strong>✎ Step-by-Step Guide:</strong>
+                    <ol>
+                        <li>In the <strong>Global Domain Editor</strong> (Elements panel), add <code>neo</code> and <code>trinity</code>.</li>
+                        <li>Select a world. In the <strong>Predicate Assignment</strong> table, check the <code>P</code> box for <code>neo</code>.</li>
+                        <li>In the formula bar, type: <code>P(neo)</code>. The world glows green!</li>
+                        <li>Now type: <code>exists x. P(x)</code>. It stays green because Neo is an object that satisfies P.</li>
+                        <li>Finally, try: <code>all x. P(x)</code>. It turns red! Why? Because Trinity also exists in the world, but her <code>P</code> box is empty.</li>
+                    </ol>
+                </div>
+
+                <div class="lesson-tip">
+                    <strong>Advanced modeling:</strong> Try using the <strong>Local Domain</strong> in the Inspector to remove 'trinity' from one world. Notice how <code>all x. P(x)</code> suddenly becomes true in that world, because Neo is now the <em>only</em> object that exists there!
+                </div>
+            </div>
+        `
+    },
+    {
+        id: 35,
+        title: "Logic Synthesis: Software from Thought",
+        content: `
+            <div class="lesson-card">
+                <h2>35. Logic Synthesis: The Grand Final Challenge</h2>
+                <div class="lesson-quote">
+                    "The final goal of logic is not just to describe the world, but to build correctly-functioning systems within it."
+                </div>
+                <p>In our final lesson, we bridge everything. We have seen how logic describes worlds (Arc I), how it models agents (Arc II), and how computation works (Arc III). Now, we use logic to **Generate Programs**.</p>
+
+                <h3>Program Extraction</h3>
+                <p>According to the <strong>Curry-Howard Isomorphism</strong>, a mathematical proof of a specification IS a computer program. When you click <strong>Extract Program</strong> in the Lambda tab, JUDIT performs <em>Isomorphism Mapping</em>:</p>
+                <ul>
+                    <li>Your **Assumptions** become **Function Arguments**.</li>
+                    <li>Your **Inferences** become **Variable Bindings**.</li>
+                    <li>Your **Conclusion** becomes the **Return Value**.</li>
+                </ul>
+
+                <div class="lesson-warning">
+                    <strong>The Grand Final Challenge:</strong>
+                    <ol>
+                        <li>Go to the <strong>Lambda</strong> tab.</li>
+                        <li>We want a program that "Transposes a double implication."</li>
+                        <li>Enter the theorem: <code>(A -> B -> C) -> (B -> A -> C)</code>.</li>
+                        <li>Click <strong>Extract Program</strong>.</li>
+                        <li>Result: <code>\\f. \\y. \\x. f x y</code> (The 'Flip' combinator).</li>
+                    </ol>
+                </div>
+
+                <p style="text-align: center; font-weight: bold; font-size: 1.3em; margin-top: 50px;">Q.E.D. — The Logos is yours.</p>
+
+                <p style="text-align: center; font-style: italic; color: #4a90e2; margin-top: 20px;">Congratulations! You have completed the intensive JUDIT curriculum. You are now equipped with the formal tools to navigate the most complex digital and philosophical systems in existence.</p>
+                
+                <div style="text-align: center; margin-top: 20px;">
+                     <button class="lesson-btn-active" onclick="location.reload()" style="padding: 15px 30px;">Restart Journey</button>
+                </div>
+            </div>
+        `
     }
 ];

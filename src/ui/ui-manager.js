@@ -465,10 +465,59 @@ export class UiManager {
 
         html += `<input type="text" id="prop-val-input" value="${valStr}" style="width: 100%; padding: 5px; background: #333; border: 1px solid #444; color: white; border-radius: 4px;" placeholder="Other atoms...">`;
 
+        html += `<label style="display:block; margin-top: 15px; font-size: 0.9em; font-weight: bold;">Local Domain:</label>`;
+        html += `<div id="prop-local-domain" style="margin-bottom: 10px; max-height: 120px; overflow-y: auto; background: #222; padding: 5px; border-radius: 4px; border: 1px solid #444;">`;
+        const localObjects = Array.from(selected.domain || []);
+        if (localObjects.length === 0) {
+            html += `<div style="font-size: 0.8em; color: #666; font-style: italic; text-align: center; padding: 5px;">Empty (Using Global)</div>`;
+        } else {
+            localObjects.forEach(obj => {
+                html += `<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 3px; background: #2a2a2a; padding: 3px 6px; border-radius: 3px; font-size: 0.85em;">
+                    <span>${obj}</span>
+                    <button class="remove-local-obj" data-obj="${obj}" style="background: none; border: none; color: #d9534f; cursor: pointer; font-weight: bold;">×</button>
+                </div>`;
+            });
+        }
+        html += `</div>`;
+        html += `<div style="display: flex; gap: 5px; margin-bottom: 15px;">
+            <input type="text" id="add-local-obj-input" placeholder="Object name..." style="flex: 1; padding: 4px; background: #333; border: 1px solid #444; color: white; border-radius: 4px; font-size: 0.85em;">
+            <button id="add-local-obj-btn" style="padding: 4px 8px; background: #28a745; border: none; color: white; border-radius: 4px; cursor: pointer; font-size: 0.85em;">Add</button>
+        </div>`;
+
+        // Visual Predicate Assignment
+        const effectiveDomain = (selected.domain && selected.domain.size > 0) ? selected.domain : this.model.getDomain();
+        if (effectiveDomain.size > 0) {
+            html += `<label style="display:block; margin-top: 15px; font-size: 0.9em; font-weight: bold;">Predicate Assignment:</label>`;
+            html += `<div style="max-height: 150px; overflow-y: auto; background: #222; border: 1px solid #444; border-radius: 4px; margin-top: 5px;">`;
+            html += `<table style="width: 100%; font-size: 0.82em; border-collapse: collapse;">
+                <thead style="background: #333; position: sticky; top: 0; z-index:10;">
+                    <tr style="text-align: left; border-bottom: 1px solid #444;">
+                        <th style="padding: 4px 8px;">Obj</th>
+                        <th style="padding: 4px; text-align: center;">P</th>
+                        <th style="padding: 4px; text-align: center;">Q</th>
+                        <th style="padding: 4px; text-align: center;">R</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+            for (const obj of effectiveDomain) {
+                const isP = selected.valuation.get(`P(${obj})`) === true;
+                const isQ = selected.valuation.get(`Q(${obj})`) === true;
+                const isR = selected.valuation.get(`R(${obj})`) === true;
+
+                html += `<tr style="border-bottom: 1px solid #333;">
+                    <td style="padding: 4px 8px; color: #aaa; font-family: monospace;">${obj}</td>
+                    <td style="padding: 4px; text-align: center;"><input type="checkbox" class="pred-toggle" data-pred="P" data-obj="${obj}" ${isP ? 'checked' : ''}></td>
+                    <td style="padding: 4px; text-align: center;"><input type="checkbox" class="pred-toggle" data-pred="Q" data-obj="${obj}" ${isQ ? 'checked' : ''}></td>
+                    <td style="padding: 4px; text-align: center;"><input type="checkbox" class="pred-toggle" data-pred="R" data-obj="${obj}" ${isR ? 'checked' : ''}></td>
+                </tr>`;
+            }
+            html += `</tbody></table></div>`;
+        }
+
         html += `<div style="display:flex; gap:10px; margin-top:10px;">`;
-        html += `<button id="prop-save-btn" style="flex:2; padding: 5px; background: #007bff; border: none; color: white; border-radius: 4px; cursor: pointer;">Update</button>`;
-        html += `<button id="prop-clone-btn" style="flex:1; padding: 5px; background: #28a745; border: none; color: white; border-radius: 4px; cursor: pointer;" title="Clone World">Clone</button>`;
-        html += `<button id="prop-del-btn" style="flex:1; padding: 5px; background: #dc3545; border: none; color: white; border-radius: 4px; cursor: pointer;" title="Delete World">Delete</button>`;
+        html += `<button id="prop-save-btn" style="flex:2; padding: 6px; background: #007bff; border: none; color: white; border-radius: 4px; cursor: pointer; font-weight: bold;">Update</button>`;
+        html += `<button id="prop-clone-btn" style="flex:1; padding: 6px; background: #28a745; border: none; color: white; border-radius: 4px; cursor: pointer;" title="Clone World">Clone</button>`;
+        html += `<button id="prop-del-btn" style="flex:1; padding: 6px; background: #dc3545; border: none; color: white; border-radius: 4px; cursor: pointer;" title="Delete World">Delete</button>`;
         html += `</div>`;
 
         html += this.getEpistemicInsight(selected);
@@ -600,6 +649,48 @@ export class UiManager {
                 }
             });
         }
+
+        // 7. Local Domain Management
+        const addLocalBtn = document.getElementById('add-local-obj-btn');
+        const addLocalInput = document.getElementById('add-local-obj-input');
+        if (addLocalBtn && addLocalInput) {
+            const handleAddLocal = () => {
+                const name = addLocalInput.value.trim();
+                if (name) {
+                    selected.addLocalObject(name);
+                    addLocalInput.value = '';
+                    this.saveState();
+                    this.updatePropertiesPanel();
+                    this.renderer.draw();
+                }
+            };
+            addLocalBtn.addEventListener('click', handleAddLocal);
+            addLocalInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') handleAddLocal();
+            });
+        }
+
+        document.querySelectorAll('.remove-local-obj').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const obj = e.target.getAttribute('data-obj');
+                selected.removeLocalObject(obj);
+                this.saveState();
+                this.updatePropertiesPanel();
+                this.renderer.draw();
+            });
+        });
+
+        document.querySelectorAll('.pred-toggle').forEach(chk => {
+            chk.addEventListener('change', (e) => {
+                const pred = e.target.getAttribute('data-pred');
+                const obj = e.target.getAttribute('data-obj');
+                const key = `${pred}(${obj})`;
+                selected.setAtom(key, e.target.checked);
+                this.saveState();
+                this.updateEvaluation();
+                this.renderer.draw();
+            });
+        });
 
         // 6. Delete Relation Buttons
         document.querySelectorAll('.del-rel-btn').forEach(btn => {
@@ -1027,10 +1118,18 @@ export class UiManager {
             ndHeader.addEventListener('click', () => {
                 const isCollapsed = ndBody.style.maxHeight === '0px' || ndBody.style.maxHeight === '0' || !ndBody.style.maxHeight;
                 if (isCollapsed) {
-                    ndBody.style.maxHeight = '800px';
+                    ndBody.style.maxHeight = ndBody.scrollHeight + 'px';
                     ndBody.style.padding = '0 12px 10px 12px';
                     if (ndToggleArrow) ndToggleArrow.textContent = '▼';
+                    // Allow dynamic growth after transition
+                    setTimeout(() => {
+                        if (ndBody.style.maxHeight !== '0px') {
+                            ndBody.style.maxHeight = 'none';
+                        }
+                    }, 450);
                 } else {
+                    ndBody.style.maxHeight = ndBody.scrollHeight + 'px';
+                    ndBody.offsetHeight; // Force reflow
                     ndBody.style.maxHeight = '0';
                     ndBody.style.padding = '0 12px';
                     if (ndToggleArrow) ndToggleArrow.textContent = '▶';
@@ -2402,9 +2501,29 @@ export class UiManager {
 
     setupDomainEditor() {
         const addBtn = document.getElementById('add-object-btn');
+        const input = document.getElementById('new-object-input');
+
+        if (addBtn && input) {
+            const handleAdd = () => {
+                const name = input.value.trim();
+                if (name) {
+                    this.model.addObject(name);
+                    input.value = '';
+                    this.updateDomainList();
+                    this.updateEvaluation();
+                    this.saveState();
+                }
+            };
+            addBtn.addEventListener('click', handleAdd);
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') handleAdd();
+            });
+        }
+
         // Initial render
         this.updateDomainList();
     }
+
 
     updateDomainList() {
         const list = document.getElementById('domain-list');
@@ -3459,6 +3578,7 @@ export class UiManager {
             });
         }
 
+
         // Load Tape
         if (loadBtn && tapeInput) {
             loadBtn.addEventListener('click', () => {
@@ -3584,13 +3704,14 @@ export class UiManager {
             turingHeader.addEventListener('click', () => {
                 const isCollapsed = turingBody.style.maxHeight === '0px' || turingBody.style.maxHeight === '0' || !turingBody.style.maxHeight;
                 if (isCollapsed) {
-                    turingBody.style.maxHeight = '800px';
+                    turingBody.style.maxHeight = turingBody.scrollHeight + 'px';
                     turingBody.style.padding = '0 12px 10px 12px';
                     if (turingArrow) turingArrow.textContent = '▼';
-                    // After animation ends, allow overflow for dropdowns
                     setTimeout(() => { turingBody.style.overflow = 'visible'; }, 450);
                 } else {
                     turingBody.style.overflow = 'hidden';
+                    turingBody.style.maxHeight = turingBody.scrollHeight + 'px';
+                    turingBody.offsetHeight; // Force reflow
                     turingBody.style.maxHeight = '0';
                     turingBody.style.padding = '0 12px';
                     if (turingArrow) turingArrow.textContent = '▶';
@@ -3606,12 +3727,14 @@ export class UiManager {
             scriptingHeader.addEventListener('click', () => {
                 const isCollapsed = scriptingBody.style.maxHeight === '0px' || scriptingBody.style.maxHeight === '0' || !scriptingBody.style.maxHeight;
                 if (isCollapsed) {
-                    scriptingBody.style.maxHeight = '800px';
+                    scriptingBody.style.maxHeight = scriptingBody.scrollHeight + 'px';
                     scriptingBody.style.padding = '0 12px 10px 12px';
                     if (scriptingArrow) scriptingArrow.textContent = '▼';
                     setTimeout(() => { scriptingBody.style.overflow = 'visible'; }, 450);
                 } else {
                     scriptingBody.style.overflow = 'hidden';
+                    scriptingBody.style.maxHeight = scriptingBody.scrollHeight + 'px';
+                    scriptingBody.offsetHeight; // Force reflow
                     scriptingBody.style.maxHeight = '0';
                     scriptingBody.style.padding = '0 12px';
                     if (scriptingArrow) scriptingArrow.textContent = '▶';
@@ -3627,12 +3750,14 @@ export class UiManager {
             lambdaHeader.addEventListener('click', () => {
                 const isCollapsed = lambdaBody.style.maxHeight === '0px' || lambdaBody.style.maxHeight === '0' || !lambdaBody.style.maxHeight;
                 if (isCollapsed) {
-                    lambdaBody.style.maxHeight = '800px';
+                    lambdaBody.style.maxHeight = lambdaBody.scrollHeight + 'px';
                     lambdaBody.style.padding = '0 12px 10px 12px';
                     if (lambdaArrow) lambdaArrow.textContent = '▼';
                     setTimeout(() => { lambdaBody.style.overflow = 'visible'; }, 450);
                 } else {
                     lambdaBody.style.overflow = 'hidden';
+                    lambdaBody.style.maxHeight = lambdaBody.scrollHeight + 'px';
+                    lambdaBody.offsetHeight; // Force reflow
                     lambdaBody.style.maxHeight = '0';
                     lambdaBody.style.padding = '0 12px';
                     if (lambdaArrow) lambdaArrow.textContent = '▶';
@@ -4411,10 +4536,12 @@ export class UiManager {
             header.addEventListener('click', () => {
                 const isCollapsed = body.style.maxHeight === '0px' || body.style.maxHeight === '0' || !body.style.maxHeight;
                 if (isCollapsed) {
-                    body.style.maxHeight = '400px';
+                    body.style.maxHeight = body.scrollHeight + 'px';
                     body.style.padding = '0 12px 10px 12px';
                     if (arrow) arrow.textContent = '▼';
                 } else {
+                    body.style.maxHeight = body.scrollHeight + 'px';
+                    body.offsetHeight;
                     body.style.maxHeight = '0';
                     body.style.padding = '0 12px';
                     if (arrow) arrow.textContent = '▶';
@@ -4484,10 +4611,19 @@ export class UiManager {
             header.addEventListener('click', () => {
                 const isCollapsed = body.style.maxHeight === '0px' || body.style.maxHeight === '0' || !body.style.maxHeight;
                 if (isCollapsed) {
-                    body.style.maxHeight = '400px';
+                    body.style.maxHeight = body.scrollHeight + 'px';
                     body.style.padding = '0 12px 10px 12px';
                     if (arrow) arrow.textContent = '▼';
+                    // Allow dynamic growth after transition
+                    setTimeout(() => {
+                        if (body.style.maxHeight !== '0px') {
+                            body.style.maxHeight = 'none';
+                        }
+                    }, 450);
                 } else {
+                    // Set to scrollHeight first for smooth transition back to 0
+                    body.style.maxHeight = body.scrollHeight + 'px';
+                    body.offsetHeight; // Force reflow
                     body.style.maxHeight = '0';
                     body.style.padding = '0 12px';
                     if (arrow) arrow.textContent = '▶';
@@ -4507,8 +4643,11 @@ export class UiManager {
                     if (typeOutput) typeOutput.textContent = type.toString();
                     resultContainer.style.display = 'flex';
 
+                    const depthInput = document.getElementById('synthesis-depth');
+                    const maxDepth = depthInput ? parseInt(depthInput.value) || 15 : 15;
+
                     try {
-                        const term = this.lambdaEngine.proofSearch([], type, new Set());
+                        const term = this.lambdaEngine.proofSearch([], type, new Set(), 0, maxDepth);
                         if (term) {
                             output.textContent = term.toString();
                             output.style.color = '#4cd964';
@@ -4522,6 +4661,11 @@ export class UiManager {
                             if (document.getElementById('synthesis-label'))
                                 document.getElementById('synthesis-label').textContent = "Synthesis Result:";
                             console.warn("Synthesis failed: Formula is not a tautology in IPL.");
+                        }
+
+                        // Recalculate height if it's currently fixed
+                        if (body.style.maxHeight !== 'none' && body.style.maxHeight !== '0px' && body.style.maxHeight !== '0') {
+                            body.style.maxHeight = body.scrollHeight + 'px';
                         }
                     } catch (e) {
                         output.textContent = "Search Error: " + e.message;

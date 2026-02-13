@@ -10,6 +10,14 @@ export class WorldRenderer {
         this.resizeCanvas();
         window.addEventListener('resize', () => this.resizeCanvas());
 
+        // Use ResizeObserver for flex-layout changes (expanding panels)
+        if (window.ResizeObserver && this.canvas.parentElement) {
+            this.resizeObserver = new ResizeObserver(() => {
+                requestAnimationFrame(() => this.resizeCanvas());
+            });
+            this.resizeObserver.observe(this.canvas.parentElement);
+        }
+
 
         this.selectedWorld = null;
         this.selectedRelation = null;
@@ -117,8 +125,9 @@ export class WorldRenderer {
     }
 
     getViewportWorldBounds() {
-        const width = this.canvas.width;
-        const height = this.canvas.height;
+        const dpr = window.devicePixelRatio || 1;
+        const width = this.canvas.width / dpr;
+        const height = this.canvas.height / dpr;
         return {
             minX: (0 - this.offsetX) / this.scale,
             minY: (0 - this.offsetY) / this.scale,
@@ -146,6 +155,10 @@ export class WorldRenderer {
 
     centerView() {
         const worlds = Array.from(this.model.worlds.values());
+        const dpr = window.devicePixelRatio || 1;
+        const canvasW = this.canvas.width / dpr;
+        const canvasH = this.canvas.height / dpr;
+
         if (worlds.length === 0) {
             this.offsetX = 0;
             this.offsetY = 0;
@@ -154,17 +167,35 @@ export class WorldRenderer {
             return;
         }
 
-        let sumX = 0, sumY = 0;
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
         worlds.forEach(w => {
-            sumX += w.x;
-            sumY += w.y;
+            minX = Math.min(minX, w.x);
+            minY = Math.min(minY, w.y);
+            maxX = Math.max(maxX, w.x);
+            maxY = Math.max(maxY, w.y);
         });
-        const avgX = sumX / worlds.length;
-        const avgY = sumY / worlds.length;
 
-        // Center the arithmetic mean in the middle of canvas
-        this.offsetX = (this.canvas.width / 2) - (avgX * this.scale);
-        this.offsetY = (this.canvas.height / 2) - (avgY * this.scale);
+        // Add padding (node radius is 35, plus a margin)
+        const padding = 100;
+        minX -= padding; minY -= padding;
+        maxX += padding; maxY += padding;
+
+        const worldW = maxX - minX;
+        const worldH = maxY - minY;
+
+        // Calculate scale to fit
+        const scaleX = canvasW / worldW;
+        const scaleY = canvasH / worldH;
+        this.scale = Math.min(scaleX, scaleY);
+
+        // Clamp scale to reasonable limits
+        if (this.scale > 1.2) this.scale = 1.2;
+        if (this.scale < 0.2) this.scale = 0.2;
+
+        // Center the bounding box
+        this.offsetX = (canvasW / 2) - ((minX + worldW / 2) * this.scale);
+        this.offsetY = (canvasH / 2) - ((minY + worldH / 2) * this.scale);
+
         this.draw();
     }
 
@@ -323,30 +354,18 @@ export class WorldRenderer {
     }
 
     resizeCanvas() {
-        const oldW = this.canvas.width;
-        const oldH = this.canvas.height;
         const dpr = window.devicePixelRatio || 1;
 
-        const displayW = this.canvas.parentElement.clientWidth;
-        const displayH = this.canvas.parentElement.clientHeight;
+        const displayW = Math.floor(this.canvas.parentElement.clientWidth);
+        const displayH = Math.floor(this.canvas.parentElement.clientHeight);
 
-        // Set CSS display size
-        this.canvas.style.width = displayW + 'px';
-        this.canvas.style.height = displayH + 'px';
-
-        // Set buffer size to match physical pixels
+        // Set buffer size to match physical pixels 
+        // We rely on CSS (width:100% height:100%) for the display size
         this.canvas.width = displayW * dpr;
         this.canvas.height = displayH * dpr;
 
         // Scale context to match CSS pixels
         this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-        // Preserve center point on resize (if it was already set)
-        if (oldW > 0 && oldH > 0) {
-            // Note: oldW and oldH are physical pixels. 
-            // We should ideally track offsets in CSS pixels or transform them.
-            // For now, simple adjustment.
-        }
     }
 
     setupInteractions() {
@@ -795,73 +814,66 @@ export class WorldRenderer {
 
             this.ctx.lineWidth = 1;
 
-            // Draw ID/Name at top (outside or small inside?)
-            // User wants internal structure displayed.
-            // Let's put Name above, and Valuations INSIDE.
+            // Name Label (Above) with Domain Info
+            const domainMembers = Array.from(world.domain || []);
+            const domainStr = domainMembers.length > 0 ? `(${domainMembers.join(', ')})` : '';
 
-            // Name Label (Above)
-            this.ctx.fillStyle = world.textColor || this.theme.nodeText; // Theme Text
-            this.ctx.font = 'bold 13px "Inter", sans-serif'; // Bold and slightly larger
             this.ctx.textAlign = 'center';
             this.ctx.textBaseline = 'bottom';
-            this.ctx.fillText(world.name || world.id, world.x, world.y - 40);
 
-            // Internal Structure (Valuation)
-            this.ctx.fillStyle = world.textColor || this.theme.nodeText; // Theme Text
-            this.ctx.font = '14px "Fira Code", monospace';
+            // Draw Main Name (Bold)
+            const name = world.name || world.id;
+
+            if (domainStr) {
+                // Name higher up
+                this.ctx.fillStyle = world.textColor || this.theme.nodeText;
+                this.ctx.font = 'bold 13px "Inter", sans-serif';
+                this.ctx.fillText(name, world.x, world.y - 52);
+
+                // Domain info between name and circle
+                this.ctx.font = '300 11px "Inter", sans-serif';
+                this.ctx.fillStyle = this.theme.dimText || '#888';
+                this.ctx.fillText(domainStr, world.x, world.y - 40);
+            } else {
+                this.ctx.fillStyle = world.textColor || this.theme.nodeText;
+                this.ctx.font = 'bold 13px "Inter", sans-serif';
+                this.ctx.fillText(name, world.x, world.y - 42);
+            }
+
+            // Internal Structure: 2x4 Grid for atoms p..w
+            const atoms = ['p', 'q', 'r', 's', 't', 'u', 'v', 'w'];
+            const cellW = 16;
+            const cellH = 16;
+            const startX = world.x - (2 * cellW) + cellW / 2;
+            const startY = world.y - (1 * cellH) + cellH / 2;
+
             this.ctx.textBaseline = 'middle';
+            atoms.forEach((atom, idx) => {
+                const col = idx % 4;
+                const row = Math.floor(idx / 4);
+                const x = startX + col * cellW;
+                const y = startY + row * cellH;
 
-            // Get atoms p,q,r,s
-            // We want to show ALL of them, with negation if false?
-            // "dónde indicas en el programa que estas proposiciones sean falsas de estas dos formas?"
-            // "visualice en los nodos de los mundos información de su estructura interna"
+                const isTrue = world.valuation.get(atom) === true;
 
-            // We will show p, q, r, s in a grid or list inside the node.
-            // If true: p. If false: ¬p.
-            // Only show relevant atoms? Or all 4?
-            // Let's show the ones that are "active" (in the map) or just p,q if they are there.
-            // But we typically only store TRUE values in the map.
-            // We need to know which atoms exist in the "language". 
-            // For this tool, the "language" is usually p,q,r,s implicitly.
-
-            const atoms = ['p', 'q', 'r', 's'];
-            // Check if any atom is set in this world (true or false explicitly)
-            // Actually, we usually only store true. But the user implies we want to see false too.
-            // Let's assume we show all 4 if they fit, or just p,q.
-            // Let's try to fit p,q,r,s in a 2x2 grid if needed, or just a line.
-
-            // Collect atoms to display.
-            // Display: p if true, ¬p if false (but only if we want to be explicit).
-            // Usually in Kripke models we only list true atoms.
-            // BUT the user explicitly asked: "where do you indicate... that these are false... visualize structure".
-            // So we MUST show the FALSE ones too.
-            // Let's show p and q by default? Or all 4 if they have been touched?
-
-            // Better approach: Show ALL 4 atoms p,q,r,s.
-            // p vs ¬p
-
-            const renderAtom = (atom, x, y) => {
-                const isTrue = world.valuation.get(atom);
-                const text = atom;
                 if (isTrue) {
-                    this.ctx.font = 'bold 15px "Fira Code", monospace';
-                    this.ctx.fillStyle = '#ffffff';
+                    this.ctx.fillStyle = world.textColor || this.theme.nodeText;
+                    this.ctx.font = 'bold 12px "Fira Code", monospace';
+                    this.ctx.globalAlpha = 1.0;
+                    this.ctx.fillText(atom, x, y);
                 } else {
-                    this.ctx.font = '14px "Fira Code", monospace';
-                    this.ctx.fillStyle = '#a0aab4'; // Brighter grey than dimText (#5a6270)
+                    this.ctx.fillStyle = world.textColor || this.theme.nodeText;
+                    this.ctx.font = '10px "Fira Code", monospace';
+                    this.ctx.globalAlpha = 0.35; // Dimmed
+                    this.ctx.fillText(`¬${atom}`, x, y);
                 }
-                this.ctx.fillText(text, x, y);
-            };
-
-            // 2x2 Grid for p,q,r,s
-            renderAtom('p', world.x - 15, world.y - 12);
-            renderAtom('q', world.x + 15, world.y - 12);
-            renderAtom('r', world.x - 15, world.y + 12);
-            renderAtom('s', world.x + 15, world.y + 12);
+            });
+            this.ctx.globalAlpha = 1.0;
         }
 
         this.ctx.restore();
     }
+
     drawGroupedEdges(source, target, rels) {
         // Multi-agent edge handling:
         // We draw BOTH directions in one pass to ensure spacing is consistent.

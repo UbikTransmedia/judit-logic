@@ -6,6 +6,11 @@
   <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>JUDIT Logos Canvas - Logic Simulator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Outfit:wght@400;600&family=Roboto:wght@400;700&family=Fira+Code&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;700&family=Montserrat:wght@400;600&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap"
+    rel="stylesheet">
   <style>
     /* ── Layout-only rules (colors handled by style.css) ── */
     body {
@@ -188,11 +193,17 @@
 
     .toolbar-item {
       margin-bottom: 8px;
+      /* Standard spacing for standalone items */
       cursor: pointer;
       padding: 6px 8px;
       border-radius: 4px;
       text-align: center;
       font-size: 11px;
+    }
+
+    /* Reset margin for items within grids to maintain perfect gap symmetry */
+    #building-blocks-toolbox .toolbar-item {
+      margin-bottom: 0 !important;
     }
 
     #formula-input {
@@ -235,6 +246,7 @@
 <body>
   <script>
     window.onerror = function (message, source, lineno, colno, error) {
+      if (message.includes('ResizeObserver loop')) return; // Ignore harmless warnings
       alert(`Global Error: ${message}\nSource: ${source}:${lineno}:${colno}`);
     };
     window.onunhandledrejection = function (event) {
@@ -291,7 +303,13 @@
     <input type="file" id="global-file-input" style="display:none" accept=".json">
     <!-- Top Navigation Tabs -->
     <nav id="main-tabs" style="background: var(--header-bg); border-bottom: 1px solid var(--border-color);">
-      <span style="font-weight: bold; color: var(--accent-color); margin-right: 15px; font-size:1.1em;">JUDIT</span>
+      <div style="display: flex; align-items: baseline; gap: 8px; margin-right: 15px;">
+        <span
+          style="font-weight: bold; color: var(--accent-color); font-size:1.2em; letter-spacing: 0.5px;">JUDIT</span>
+        <span
+          style="font-family: 'Inter', sans-serif; color: var(--text-dim); font-size: 0.72em; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7;">The
+          Epistemic Sandbox</span>
+      </div>
       <button class="tab-btn active" data-tab="tab-editor">🌌 Universe Editor</button>
 
       <button class="tab-btn" data-tab="tab-lessons">📚 Lessons</button>
@@ -324,14 +342,14 @@
             style="background:var(--btn-bg); border:1px solid var(--border-color); color:var(--text-color); padding:4px 10px; border-radius:0 3px 3px 0; cursor:pointer; font-size:0.9em;">↪</button>
         </div>
         <button id="top-random-btn"
-          style="background:var(--btn-bg); border:1px solid var(--border-color); color:var(--text-color); padding:4px 8px; border-radius:3px; cursor:pointer; font-size:0.9em;">Random
-          Model...</button>
+          style="background:var(--btn-bg); border:1px solid var(--border-color); color:var(--text-color); padding:4px 8px; border-radius:3px; cursor:pointer; font-size:0.9em;">🎲
+          Random Model</button>
         <button id="top-random-formula-btn"
-          style="background:var(--btn-bg); border:1px solid var(--border-color); color:var(--text-color); padding:4px 8px; border-radius:3px; cursor:pointer; font-size:0.9em;">Random
-          Formula</button>
+          style="background:var(--btn-bg); border:1px solid var(--border-color); color:var(--text-color); padding:4px 8px; border-radius:3px; cursor:pointer; font-size:0.9em;">🧩
+          Random Formula</button>
         <button id="top-satisfy-btn" class="action-btn"
-          style="background:var(--accent-color); border:none; color:white; padding:4px 10px; border-radius:3px; cursor:pointer; font-size:0.9em; font-weight:bold;">Satisfy
-          Formula</button>
+          style="background:var(--accent-color); border:none; color:white; padding:4px 10px; border-radius:3px; cursor:pointer; font-size:0.9em; font-weight:bold;">✅
+          Satisfy formula</button>
 
         <!-- Restored Buttons -->
         <button id="top-presets-btn"
@@ -354,7 +372,7 @@
         // Dropdown script removed as buttons are back inline
       </script>
 
-      <div style="display:flex; flex-grow:1; overflow:hidden;">
+      <div style="display:flex; flex-grow:1; overflow-x:auto; position: relative; scrollbar-gutter: stable;">
         <!-- COLUMN 1: SIDEBAR -->
         <div id="sidebar">
           <h3>Tools</h3>
@@ -365,18 +383,36 @@
             data-tooltip="<strong>Create Relation</strong><br>Drag this for instructions, or hold Shift and drag between worlds to create an accessibility relation (arrow).">
             🔗 Add Relation</div>
 
+          <div
+            style="margin: 0 0 15px 0; padding: 10px; background: var(--panel-bg-alt); border: 1px solid var(--border-color); border-radius: 6px;">
+            <label
+              style="color:var(--text-dim); font-size:0.72em; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:5px;">Active
+              Agent</label>
+            <select id="agent-select" class="toolbar-select"
+              style="width:100%; padding:6px; background:var(--input-bg); color:var(--text-color); border:1px solid var(--input-border); border-radius:4px; font-size:0.9em;">
+              <option value="">✨ Any (Select on Create)</option>
+              <option value="a" style="color:#4a90e2;">Agent a (Blue)</option>
+              <option value="b" style="color:#e24a4a;">Agent b (Red)</option>
+              <option value="c" style="color:#4ae24a;">Agent c (Green)</option>
+              <option value="d" style="color:#e2e24a;">Agent d (Yellow)</option>
+              <option value="u" style="color:#888888;">Agent u (Gray / Universal)</option>
+            </select>
+          </div>
+
           <div style="display: flex; gap: 5px; margin-bottom: 10px;">
             <button id="export-btn" style="flex: 1; background: #555; border: 1px solid #666;"
-              data-tooltip="<strong>Export Session</strong><br>Save the current model, layout, and history to a JSON file.">Export</button>
+              data-tooltip="<strong>Export Session</strong><br>Save the current model, layout, and history to a JSON file.">Export
+              Universe</button>
             <button id="import-btn" style="flex: 1; background: #555; border: 1px solid #666;"
-              data-tooltip="<strong>Import Session</strong><br>Load a previously saved JSON model file.">Import</button>
+              data-tooltip="<strong>Import Session</strong><br>Load a previously saved JSON model file.">Import
+              Universe</button>
             <input type="file" id="file-input" style="display: none;" accept=".json,.logos">
           </div>
 
           <h3>System</h3>
           <select id="logic-system" class="toolbar-select"
             data-tooltip="<strong>Modal Logic System</strong><br>Defines the constraints on relations:<br>• <strong>K</strong>: No constraints (Basic).<br>• <strong>T</strong>: Reflexive (all worlds access themselves). implies □p -> p.<br>• <strong>S4</strong>: Reflexive & Transitive. implies □p -> □□p.<br>• <strong>S5</strong>: Equivalence Relation. implies ◊p -> □◊p."
-            style="width: 100%; padding: 8px; margin-bottom: 10px; background: #333; color: white; border: 1px solid #444; border-radius: 4px;">
+            style="width: 100%; padding: 8px; margin-bottom: 10px; background: var(--input-bg); color: var(--input-text-color); border: 1px solid var(--input-border); border-radius: 4px;">
             <option value="K">System K (Standard)</option>
             <option value="T">System T (Reflexive)</option>
             <option value="S4">System S4 (Refl+Trans)</option>
@@ -390,21 +426,9 @@
             <span>📊</span> System Insights
           </button>
 
-          <h3>Settings</h3>
-          <div style="margin-bottom:10px;">
-            <label style="color:#aaa; font-size:0.8em;">Active Agent (for Relations)</label>
-            <select id="agent-select" class="toolbar-select"
-              style="width:100%; padding:5px; background:#333; color:white; border:1px solid #444; margin-top:3px;">
-              <option value="">✨ Any (Select on Create)</option>
-              <option value="a" style="color:#4a90e2;">Agent a (Blue)</option>
-              <option value="b" style="color:#e24a4a;">Agent b (Red)</option>
-              <option value="c" style="color:#4ae24a;">Agent c (Green)</option>
-              <option value="d" style="color:#e2e24a;">Agent d (Yellow)</option>
-              <option value="u" style="color:#888888;">Agent u (Gray / Universal)</option>
-            </select>
-          </div>
+          <h3>Visualization</h3>
 
-          <div style="margin-bottom: 20px; display:flex; flex-direction:column; gap:5px;">
+          <div style="margin-bottom: 10px; display:flex; flex-direction:column; gap:5px;">
             <button id="layout-toggle-btn"
               style="width: 100%; padding: 6px; background: #333; color: #aaa; border: 1px solid #444; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;"
               data-tooltip="<strong>Force Layout</strong><br>Enable physics engine to automatically arrange worlds. Nodes will repel each other, and relations will act like springs.">
@@ -434,139 +458,123 @@
             </button>
           </div>
 
-          <div class="toolbox"
-            style="flex-grow: 1; flex-shrink: 0; min-height: 200px; overflow-y: auto; padding-right: 5px; margin-bottom: 10px; border-top: 1px solid #444; padding-top: 10px;">
-            <h3 style="margin-top: 0;">Variables</h3>
-            <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 15px;">
-              <div class="toolbar-item" style="flex:1;" data-type="operator" data-op="var" data-char="p"
-                data-tooltip="<strong>Variable p (Proposition)</strong><br><p>In propositional and modal logic, <em>p</em> is a standard symbol for an atomic proposition. It represents a declarative statement that can be assigned a truth value (True or False) in a given world.</p><strong>Conceptual Use:</strong> It usually denotes the primary fact of interest in a model.</p><strong>Examples:</strong><ul><li>'It is raining.'</li><li>'The switch is ON.'</li><li>'Alice knows the secret.'</li></ul>">
-                p</div>
-              <div class="toolbar-item" style="flex:1;" data-type="operator" data-op="var" data-char="q"
-                data-tooltip="<strong>Variable q (Proposition)</strong><br><p>The variable <em>q</em> is the second standard atomic proposition. It is used to represent a fact distinct from <em>p</em>, often to model consequences, alternative conditions, or independent states.</p><strong>Conceptual Use:</strong> Often used as the consequent in an implication (p → q).</p><strong>Examples:</strong><ul><li>'I carry an umbrella.'</li><li>'The light turns red.'</li><li>'Bob is in the room.'</li></ul>">
-                q</div>
-              <div class="toolbar-item" style="flex:1;" data-type="operator" data-op="var" data-char="r"
-                data-tooltip="<strong>Variable r (Proposition)</strong><br><p>The variable <em>r</em> is the third atomic proposition. It allows for modeling more complex scenarios involving three distinct basic facts.</p><strong>Conceptual Use:</strong> Useful for tertiary conditions or mediating variables.</p><strong>Examples:</strong><ul><li>'The street is wet.'</li><li>'The alarm is sounding.'</li><li>'The message is delivered.'</li></ul>">
-                r</div>
-              <div class="toolbar-item" style="flex:1;" data-type="operator" data-op="var" data-char="s"
-                data-tooltip="<strong>Variable s (Proposition)</strong><br><p>The variable <em>s</em> is the fourth atomic proposition provided in this toolbox. It extends the expressivity of your model to include a fourth independent dimensions.</p><strong>Conceptual Use:</strong> Often used for background conditions or auxiliary states.</p><strong>Examples:</strong><ul><li>'I am late for work.'</li><li>'The system is rebooting.'</li><li>'The battery is low.'</li></ul>">
-                s</div>
+          <div id="building-blocks-toolbox"
+            style="margin-top: 8px; padding: 15px; background: var(--panel-bg-alt); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: var(--shadow-sm); flex-shrink: 0;">
+            <h2
+              style="margin: 0 0 5px 0; font-size: 1.25em; color: var(--accent-color); text-transform: uppercase; letter-spacing: 2px; border-bottom: 2px solid var(--accent-color); padding-bottom: 5px; display: flex; align-items: center; gap: 8px; font-weight: 800;">
+              <span>🛠️</span> ELEMENTS
+            </h2>
+
+            <!-- Variables Section -->
+            <div
+              style="font-size: 0.72em; font-weight: 700; text-transform: uppercase; color: var(--text-dim); margin: 10px 0 10px 0; letter-spacing: 0.5px;">
+              Variables (pqrs + tuvw)</div>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 0;">
+              <div class="toolbar-item" data-type="operator" data-op="var" data-char="p" data-tooltip="Variable p">p
+              </div>
+              <div class="toolbar-item" data-type="operator" data-op="var" data-char="q" data-tooltip="Variable q">q
+              </div>
+              <div class="toolbar-item" data-type="operator" data-op="var" data-char="r" data-tooltip="Variable r">r
+              </div>
+              <div class="toolbar-item" data-type="operator" data-op="var" data-char="s" data-tooltip="Variable s">s
+              </div>
+              <div class="toolbar-item" data-type="operator" data-op="var" data-char="t" data-tooltip="Variable t">t
+              </div>
+              <div class="toolbar-item" data-type="operator" data-op="var" data-char="u" data-tooltip="Variable u">u
+              </div>
+              <div class="toolbar-item" data-type="operator" data-op="var" data-char="v" data-tooltip="Variable v">v
+              </div>
+              <div class="toolbar-item" data-type="operator" data-op="var" data-char="w" data-tooltip="Variable w">w
+              </div>
             </div>
 
-            <h3>Logic</h3>
-            <div style="margin-bottom: 15px;">
-              <div class="toolbar-item" data-type="operator" data-op="not" data-char="¬"
-                data-tooltip="<strong>Negation (NOT)</strong><br>True if the formula is false.">¬ Not</div>
-              <div class="toolbar-item" data-type="operator" data-op="and" data-char="∧"
-                data-tooltip="<strong>Conjunction (AND)</strong><br>True if both operands are true.">∧ And</div>
-              <div class="toolbar-item" data-type="operator" data-op="or" data-char="∨"
-                data-tooltip="<strong>Disjunction (OR)</strong><br>True if at least one operand is true.">∨ Or</div>
+            <div
+              style="font-size: 0.72em; font-weight: 700; text-transform: uppercase; color: var(--text-dim); margin: 10px 0 10px 0; letter-spacing: 0.5px;">
+              Logic Operators</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 0;">
+              <div class="toolbar-item" data-type="operator" data-op="not" data-char="¬" data-tooltip="Negation (¬)">¬
+                Not</div>
+              <div class="toolbar-item" data-type="operator" data-op="and" data-char="∧" data-tooltip="Conjunction (∧)">
+                ∧ And</div>
+              <div class="toolbar-item" data-type="operator" data-op="or" data-char="∨" data-tooltip="Disjunction (∨)">∨
+                Or</div>
               <div class="toolbar-item" data-type="operator" data-op="implies" data-char="→"
-                data-tooltip="<strong>Implication</strong><br>False only if antecedent is true and consequent is false.">
-                →
-                Implies</div>
+                data-tooltip="Implication (→)">→ Implies</div>
               <div class="toolbar-item" data-type="operator" data-op="iff" data-char="↔"
-                data-tooltip="<strong>Biconditional (IFF)</strong><br>True if both operands have the same truth value.">
-                ↔
-                Iff
-              </div>
+                data-tooltip="Biconditional (↔)">↔ Iff</div>
               <div class="toolbar-item" data-type="operator" data-op="box" data-char="□"
-                data-tooltip="<strong>Box (Necessity)</strong><br>True if the formula is true in ALL accessible worlds.<br>In Epistemic logic: 'Agent knows that...'">
-                □ Box</div>
+                data-tooltip="Box (Necessity/Knowledge)">□ Box</div>
               <div class="toolbar-item" data-type="operator" data-op="diamond" data-char="◊"
-                data-tooltip="<strong>Diamond (Possibility)</strong><br>True if the formula is true in AT LEAST ONE accessible world.<br>In Epistemic logic: 'Agent considers it possible that...'">
-                ◊ Diamond</div>
+                data-tooltip="Diamond (Possibility)">◊ Diamond</div>
               <div class="toolbar-item" data-type="operator" data-op="forall" data-char="∀x "
-                data-tooltip="<strong>Universal Quantifier (First-Order)</strong><br>First-order logic extension (experimental).">
-                ∀ Forall</div>
+                data-tooltip="Universal Quantifier">∀ Forall</div>
               <div class="toolbar-item" data-type="operator" data-op="exists" data-char="∃x "
-                data-tooltip="<strong>Existential Quantifier (First-Order)</strong><br>First-order logic extension (experimental).">
-                ∃ Exists</div>
-              <div class="toolbar-item" data-type="operator" data-op="top" data-char="⊤"
-                data-tooltip="<strong>Top (Verum)</strong><br>Always True.">⊤ True</div>
-              <div class="toolbar-item" data-type="operator" data-op="bot" data-char="⊥"
-                data-tooltip="<strong>Bottom (Falsum)</strong><br>Always False.">⊥ False</div>
-              <div style="display: flex; gap: 5px;">
-                <div class="toolbar-item" style="flex:1;" data-type="operator" data-op="lparen" data-char="("
-                  data-tooltip="<strong>Left Parenthesis</strong><br>Grouping symbol.">(</div>
-                <div class="toolbar-item" style="flex:1;" data-type="operator" data-op="rparen" data-char=")"
-                  data-tooltip="<strong>Right Parenthesis</strong><br>Grouping symbol.">)</div>
-                <div class="toolbar-item" style="flex:1;" data-type="operator" data-op="comma" data-char=","
-                  data-tooltip="<strong>Comma</strong><br>Separator for predicate arguments. e.g. P(a,b)">,</div>
+                data-tooltip="Existential Quantifier">∃ Exists</div>
+              <div class="toolbar-item" data-type="operator" data-op="top" data-char="⊤" data-tooltip="Top (True)">⊤
+                True</div>
+              <div class="toolbar-item" data-type="operator" data-op="bot" data-char="⊥" data-tooltip="Bottom (False)">⊥
+                False</div>
+              <div class="toolbar-item" data-type="operator" data-op="comma" data-char=","
+                data-tooltip="Comma (Separator)">, Comma</div>
+              <div class="toolbar-item" data-type="operator" data-op="lparen" data-char="("
+                data-tooltip="Left Parenthesis">(</div>
+              <div class="toolbar-item" data-type="operator" data-op="rparen" data-char=")"
+                data-tooltip="Right Parenthesis">)</div>
+
+            </div>
+
+            <div
+              style="font-size: 0.72em; font-weight: 700; text-transform: uppercase; color: var(--text-dim); margin: 10px 0 10px 0; letter-spacing: 0.5px;">
+              Boolean Calculus</div>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 0;">
+              <button class="calc-btn" data-var="p"
+                style="padding: 6px 0; font-size: 0.8em; background: var(--btn-bg); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 4px; cursor: pointer;">∂/∂p</button>
+              <button class="calc-btn" data-var="q"
+                style="padding: 6px 0; font-size: 0.8em; background: var(--btn-bg); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 4px; cursor: pointer;">∂/∂q</button>
+              <button class="calc-btn" data-var="r"
+                style="padding: 6px 0; font-size: 0.8em; background: var(--btn-bg); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 4px; cursor: pointer;">∂/∂r</button>
+              <button class="calc-btn" data-var="s"
+                style="padding: 6px 0; font-size: 0.8em; background: var(--btn-bg); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 4px; cursor: pointer;">∂/∂s</button>
+            </div>
+
+            <div
+              style="font-size: 0.72em; font-weight: 700; text-transform: uppercase; color: var(--text-dim); margin: 10px 0 10px 0; letter-spacing: 0.5px;">
+              First-Order Logic (FOL)</div>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-bottom: 0;">
+              <div class="toolbar-item" data-type="operator" data-op="const" data-char="a" data-tooltip="Constant a">a
+              </div>
+              <div class="toolbar-item" data-type="operator" data-op="const" data-char="b" data-tooltip="Constant b">b
+              </div>
+              <div class="toolbar-item" data-type="operator" data-op="const" data-char="c" data-tooltip="Constant c">c
+              </div>
+              <div class="toolbar-item" data-type="operator" data-op="var" data-char="x" data-tooltip="Variable x">x
+              </div>
+              <div class="toolbar-item" data-type="operator" data-op="var" data-char="y" data-tooltip="Variable y">y
+              </div>
+              <div class="toolbar-item" data-type="operator" data-op="var" data-char="z" data-tooltip="Variable z">z
+              </div>
+              <div class="toolbar-item" data-type="operator" data-op="pred" data-char="P" data-tooltip="Predicate P">P
+              </div>
+              <div class="toolbar-item" data-type="operator" data-op="pred" data-char="Q" data-tooltip="Predicate Q">Q
+              </div>
+              <div class="toolbar-item" data-type="operator" data-op="pred" data-char="R" data-tooltip="Predicate R">R
               </div>
             </div>
 
-            <h3>Boolean Calculus</h3>
-            <div style="margin-bottom: 15px;">
-              <div style="font-size:0.8em; color:#aaa; margin-bottom:5px;">Partial Derivative (∂f/∂x)</div>
-              <div style="display: flex; gap: 5px; flex-wrap: wrap;">
-                <button class="calc-btn" data-var="p"
-                  style="flex:1; background:#333; border:1px solid #444; color:#ddd; padding:4px; border-radius:3px; cursor:pointer;"
-                  title="Differentiate w.r.t p">∂/∂p</button>
-                <button class="calc-btn" data-var="q"
-                  style="flex:1; background:#333; border:1px solid #444; color:#ddd; padding:4px; border-radius:3px; cursor:pointer;"
-                  title="Differentiate w.r.t q">∂/∂q</button>
-                <button class="calc-btn" data-var="r"
-                  style="flex:1; background:#333; border:1px solid #444; color:#ddd; padding:4px; border-radius:3px; cursor:pointer;"
-                  title="Differentiate w.r.t r">∂/∂r</button>
-                <button class="calc-btn" data-var="s"
-                  style="flex:1; background:#333; border:1px solid #444; color:#ddd; padding:4px; border-radius:3px; cursor:pointer;"
-                  title="Differentiate w.r.t s">∂/∂s</button>
-              </div>
-            </div>
-
-            <h3>First-Order Logic (FOL)</h3>
-            <!-- Constants -->
-            <div style="margin-bottom:5px; font-size:0.8em; color:#aaa;">Constants (Objects)</div>
-            <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px;">
-              <div class="toolbar-item" style="flex:1;" data-type="operator" data-op="const" data-char="a"
-                data-tooltip="<strong>Constant 'a'</strong><br><p>Represents a specific object in the domain.</p><strong>Example:</strong> 'Alice', 'Atom A'.<br>Used in predicates: P(a)">
-                a</div>
-              <div class="toolbar-item" style="flex:1;" data-type="operator" data-op="const" data-char="b"
-                data-tooltip="<strong>Constant 'b'</strong><br><p>Represents a second specific object.</p><strong>Example:</strong> 'Bob', 'Ball B'.<br>Used in predicates: R(a,b)">
-                b</div>
-              <div class="toolbar-item" style="flex:1;" data-type="operator" data-op="const" data-char="c"
-                data-tooltip="<strong>Constant 'c'</strong><br><p>Represents a third specific object.</p><strong>Example:</strong> 'Charlie', 'Cat'.">
-                c</div>
-            </div>
-
-            <!-- Variables -->
-            <div style="margin-bottom:5px; margin-top:5px; font-size:0.8em; color:#aaa;">Variables</div>
-            <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px;">
-              <div class="toolbar-item" style="flex:1;" data-type="operator" data-op="var" data-char="x"
-                data-tooltip="<strong>Variable 'x'</strong><br><p>A placeholder for an object, used with quantifiers.</p><strong>Example:</strong> ∀x. P(x) ('Everything is P')">
-                x</div>
-              <div class="toolbar-item" style="flex:1;" data-type="operator" data-op="var" data-char="y"
-                data-tooltip="<strong>Variable 'y'</strong><br><p>A second placeholder variable.</p><strong>Example:</strong> ∃y. R(x,y) ('There exists a y related to x')">
-                y</div>
-              <div class="toolbar-item" style="flex:1;" data-type="operator" data-op="var" data-char="z"
-                data-tooltip="<strong>Variable 'z'</strong><br><p>A third placeholder variable.</p>">z</div>
-            </div>
-
-            <!-- Predicates -->
-            <div style="margin-bottom:5px; margin-top:5px; font-size:0.8em; color:#aaa;">Predicates</div>
-            <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 15px;">
-              <div class="toolbar-item" style="flex:1;" data-type="operator" data-op="pred" data-char="P"
-                data-tooltip="<strong>Predicate P</strong><br><p>Represents a property or relation of objects.</p><strong>Syntax:</strong> P(x) or P(a,b)<br><strong>Example:</strong> P(a) = 'Alice is Polite'">
-                P</div>
-              <div class="toolbar-item" style="flex:1;" data-type="operator" data-op="pred" data-char="Q"
-                data-tooltip="<strong>Predicate Q</strong><br><p>A second predicate symbol.</p><strong>Example:</strong> Q(x) = 'x is Quiet'">
-                Q</div>
-              <div class="toolbar-item" style="flex:1;" data-type="operator" data-op="pred" data-char="R"
-                data-tooltip="<strong>Predicate R</strong><br><p>A third predicate symbol, often used for relations.</p><strong>Example:</strong> R(a,b) = 'a Respects b'">
-                R</div>
-            </div>
-
-            <h3>Domain Editor</h3>
-            <div id="domain-panel" style="background:#333; padding:10px; border-radius:4px; margin-bottom:10px;">
-              <div style="display:flex; gap:5px; margin-bottom:5px;">
-                <input type="text" id="new-object-input" placeholder="New object (e.g. d)"
-                  style="flex:1; padding:5px; width:50px; background:#222; border:1px solid #444; color:white;">
+            <div
+              style="font-size: 0.72em; font-weight: 700; text-transform: uppercase; color: var(--text-dim); margin: 10px 0 10px 0; letter-spacing: 0.5px;">
+              Domain Editor</div>
+            <div id="domain-panel"
+              style="background: rgba(0,0,0,0.1); padding: 10px; border-radius: 6px; border: 1px solid var(--border-color);">
+              <div style="display:flex; gap:5px; margin-bottom:8px; align-items: stretch;">
+                <input type="text" id="new-object-input" placeholder="Object..."
+                  style="flex:1; padding:6px 8px; background:var(--input-bg); border:1px solid var(--input-border); color:var(--text-color); font-size:0.85em; border-radius:4px; min-width: 0;">
                 <button id="add-object-btn"
-                  style="background:#28a745; color:white; border:none; border-radius:3px; cursor:pointer;">+</button>
+                  style="background:var(--accent-color); color:white; border:none; width: 32px; flex-shrink: 0; border-radius:4px; font-weight:bold; cursor: pointer; display: flex; align-items: center; justify-content: center;"
+                  title="Add object">+</button>
               </div>
-              <div id="domain-list" style="max-height:100px; overflow-y:auto; font-size:0.9em; color:#ddd;">
-                <!-- Domain items will go here -->
-                <div style="font-style:italic; color:#888;">No explicit objects.</div>
+              <div id="domain-list" style="max-height:80px; overflow-y:auto; font-size:0.85em; color:var(--text-dim);">
+                <div style="font-style:italic;">No explicit objects.</div>
               </div>
             </div>
           </div>
@@ -606,17 +614,22 @@
               <input type="text" id="formula-input" placeholder="Enter formula (e.g. p -> []q)"
                 data-tooltip="<strong>Formula Input</strong><br>Type your modal logic formula here. You can use the buttons on the left or type directly.">
 
-              <div style="display: flex; gap: 5px;">
+              <div style="display: flex; gap: 8px;">
                 <button id="prove-btn"
-                  style="flex: 1; padding: 8px; background: #007bff; border: none; color: white; cursor: pointer; border-radius: 4px;"
+                  style="flex: 1; padding: 8px 5px; background: var(--action-color); border: none; color: #000; cursor: pointer; border-radius: 6px; font-weight: bold; font-size: 0.9em; transition: all 0.2s; box-shadow: var(--shadow-sm);"
+                  onmouseover="this.style.background='var(--action-hover)'; this.style.transform='translateY(-1px)'"
+                  onmouseout="this.style.background='var(--action-color)'; this.style.transform='translateY(0)'"
                   data-tooltip="<strong>Prove Validity</strong><br>Checks if the formula is TRUE in ALL possible models of the selected Logic System.<br>Uses a Tableaux solver.">Prove</button>
                 <button id="satisfy-btn"
-                  style="flex: 1; padding: 8px; background: #555; border: none; color: white; cursor: pointer; border-radius: 4px;"
+                  style="flex: 1; padding: 8px 5px; background: var(--action-color); border: none; color: #000; cursor: pointer; border-radius: 6px; font-weight: bold; font-size: 0.9em; transition: all 0.2s; box-shadow: var(--shadow-sm);"
+                  onmouseover="this.style.background='var(--action-hover)'; this.style.transform='translateY(-1px)'"
+                  onmouseout="this.style.background='var(--action-color)'; this.style.transform='translateY(0)'"
                   data-tooltip="<strong>Satisfy Formula</strong><br>Attempts to generate a model that satisfies the given formula (SAT).">Satisfy</button>
                 <button id="announce-btn"
-                  style="flex: 1; padding: 8px; background: #28a745; border: none; color: white; cursor: pointer; border-radius: 4px;"
-                  data-tooltip="<strong>Public Announcement</strong><br>Updates the model by removing all worlds where the formula is currently FALSE.">Announce
-                  !</button>
+                  style="flex: 1; padding: 8px 5px; background: var(--action-color); border: none; color: #000; cursor: pointer; border-radius: 6px; font-weight: bold; font-size: 0.9em; transition: all 0.2s; box-shadow: var(--shadow-sm);"
+                  onmouseover="this.style.background='var(--action-hover)'; this.style.transform='translateY(-1px)'"
+                  onmouseout="this.style.background='var(--action-color)'; this.style.transform='translateY(0)'"
+                  data-tooltip="<strong>Public Announcement</strong><br>Updates the model by removing all worlds where the formula is currently FALSE.">Announce</button>
               </div>
 
               <div id="evaluation-result"
@@ -629,8 +642,7 @@
       </div> <!-- Close main flex container -->
 
       <!-- TURING MACHINE: Collapsible bottom panel, collapsed by default -->
-      <div id="turing-panel"
-        style="flex-shrink:0; border-top:2px solid var(--border-color); transition:max-height 0.4s ease-in-out, opacity 0.3s ease; overflow:hidden;">
+      <div id="turing-panel" style="flex-shrink:0; border-top:2px solid var(--border-color); overflow:hidden;">
         <!-- Header (clickable to collapse/expand) -->
         <div id="turing-header"
           style="display:flex; justify-content:space-between; align-items:center; padding:8px 15px; cursor:pointer; user-select:none; background:var(--header-bg);"
@@ -651,7 +663,7 @@
 
         <!-- Collapsible body (hidden by default) -->
         <div id="turing-body"
-          style="max-height:0; overflow:hidden; transition:max-height 0.4s ease-in-out, padding 0.3s ease; padding:0 12px; background: var(--panel-bg);">
+          style="max-height:0; overflow:hidden; transition:max-height 0.4s linear, padding 0.3s linear; padding:0 12px; background: var(--panel-bg);">
 
           <!-- TWO-COLUMN LAYOUT: Left (main) + Right (transitions) -->
           <div style="display:flex; gap:12px; padding-top:10px; padding-bottom:10px;">
@@ -751,9 +763,10 @@
             <div style="width:340px; flex-shrink:0; display:flex; flex-direction:column; gap:6px;">
 
               <!-- Preset Machines -->
-              <div style="background:#222; border:1px solid #333; border-radius:5px; padding:8px;">
+              <div
+                style="background:var(--panel-bg-alt); border:1px solid var(--border-color); border-radius:5px; padding:8px;">
                 <select id="turing-presets-select"
-                  style="width:100%; padding:6px; background:#333; border:1px solid #444; color:white; border-radius:4px; font-size:0.8em;"
+                  style="width:100%; padding:6px; background:var(--input-bg); border:1px solid var(--input-border); color:var(--input-text-color); border-radius:4px; font-size:0.8em;"
                   title="Load a pre-built Turing Machine.">
                   <option value="">📦 Load a Preset Machine...</option>
                   <optgroup label="Arithmetic">
@@ -784,30 +797,31 @@
               </div>
 
               <!-- Add Rule Form -->
-              <div style="background:#222; border:1px solid #333; border-radius:5px; padding:8px;"
+              <div
+                style="background:var(--panel-bg-alt); border:1px solid var(--border-color); border-radius:5px; padding:8px;"
                 title="Define a transition rule.">
                 <span
-                  style="color:#888; font-size:0.75em; font-weight:bold; text-transform:uppercase; letter-spacing:1px;">Add
+                  style="color:var(--text-dim); font-size:0.75em; font-weight:bold; text-transform:uppercase; letter-spacing:1px;">Add
                   Transition Rule</span>
                 <div style="display:flex; gap:4px; margin-top:6px; flex-wrap:wrap;">
                   <input id="rule-from" type="text" placeholder="From"
-                    style="flex:1; min-width:55px; padding:5px; background:#333; border:1px solid #444; color:white; border-radius:4px; font-family:monospace; font-size:0.8em;"
+                    style="flex:1; min-width:55px; padding:5px; background:var(--input-bg); border:1px solid var(--input-border); color:var(--input-text-color); border-radius:4px; font-family:monospace; font-size:0.8em;"
                     title="Source state.">
                   <input id="rule-read-input" type="text" placeholder="R" maxlength="1"
-                    style="width:35px; padding:5px; background:#333; border:1px solid #444; color:white; border-radius:4px; font-family:monospace; font-size:0.8em; text-align:center;"
+                    style="width:35px; padding:5px; background:var(--input-bg); border:1px solid var(--input-border); color:var(--input-text-color); border-radius:4px; font-family:monospace; font-size:0.8em; text-align:center;"
                     title="Symbol to read.">
                   <input id="rule-write-input" type="text" placeholder="W" maxlength="1"
-                    style="width:35px; padding:5px; background:#333; border:1px solid #444; color:white; border-radius:4px; font-family:monospace; font-size:0.8em; text-align:center;"
+                    style="width:35px; padding:5px; background:var(--input-bg); border:1px solid var(--input-border); color:var(--input-text-color); border-radius:4px; font-family:monospace; font-size:0.8em; text-align:center;"
                     title="Symbol to write.">
                   <select id="rule-move-input"
-                    style="width:45px; padding:5px; background:#333; border:1px solid #444; color:white; border-radius:4px; font-size:0.8em;"
+                    style="width:45px; padding:5px; background:var(--input-bg); border:1px solid var(--input-border); color:var(--input-text-color); border-radius:4px; font-size:0.8em;"
                     title="Head direction.">
                     <option value="R">R</option>
                     <option value="L">L</option>
                     <option value="S">S</option>
                   </select>
                   <input id="rule-to" type="text" placeholder="To"
-                    style="flex:1; min-width:55px; padding:5px; background:#333; border:1px solid #444; color:white; border-radius:4px; font-family:monospace; font-size:0.8em;"
+                    style="flex:1; min-width:55px; padding:5px; background:var(--input-bg); border:1px solid var(--input-border); color:var(--input-text-color); border-radius:4px; font-family:monospace; font-size:0.8em;"
                     title="Target state.">
                 </div>
                 <button id="turing-add-rule-btn"
@@ -836,8 +850,7 @@
       </div>
 
       <!-- LOGIC TO LAMBDA PANEL: Dedicated synthesis section -->
-      <div id="synthesis-panel"
-        style="flex-shrink:0; border-top:2px solid var(--border-color); transition:max-height 0.4s ease-in-out, opacity 0.3s ease; overflow:hidden;">
+      <div id="synthesis-panel" style="flex-shrink:0; border-top:2px solid var(--border-color); overflow:hidden;">
         <div id="synthesis-header"
           style="display:flex; justify-content:space-between; align-items:center; padding:8px 15px; cursor:pointer; user-select:none; background:var(--header-bg);"
           title="Synthesize lambda terms from logical formulas.">
@@ -853,17 +866,26 @@
             onclick="event.stopPropagation();">Help?</button>
         </div>
         <div id="synthesis-body"
-          style="max-height:0; overflow:hidden; transition:max-height 0.4s ease-in-out, padding 0.3s ease; padding:0 12px; background: var(--panel-bg);">
+          style="max-height:0; overflow:hidden; transition:max-height 0.4s linear, padding 0.3s linear; padding:0 12px; background: var(--panel-bg);">
           <div style="padding:15px; display:flex; flex-direction:column; gap:10px;">
             <div style="display:flex; gap:10px; align-items:center;">
               <input id="synthesis-input" type="text"
-                style="flex:1; background:#000; color:#4cd964; border:1px solid #333; border-radius:4px; padding:8px; font-family:'Fira Code', monospace;"
+                style="flex:1; background:var(--input-bg); color:var(--input-text-color); border:1px solid var(--input-border); border-radius:4px; padding:8px; font-family:'Fira Code', monospace;"
                 placeholder="Enter formula to synthesize (e.g. p -> p)">
+              <div
+                style="display:flex; align-items:center; gap:5px; background:var(--input-bg); border:1px solid var(--input-border); border-radius:4px; padding:0 8px;">
+                <span
+                  style="font-size:0.7em; color:var(--text-dim); text-transform:uppercase; font-weight:bold;">Depth:</span>
+                <input id="synthesis-depth" type="number" value="15" min="1" max="100"
+                  style="width:40px; background:transparent; color:var(--input-text-color); border:none; padding:8px 0; font-family:'Fira Code', monospace; font-size:0.9em; text-align:center;"
+                  title="Search depth. Higher values find more complex proofs but may take longer.">
+              </div>
               <button id="synthesis-btn"
                 style="padding:8px 15px; background:var(--accent-color); color:white; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">Synthesize</button>
             </div>
+
             <div id="synthesis-result-container"
-              style="display:none; background:#111; border:1px solid #333; border-radius:4px; padding:10px; flex-direction:column; gap:8px;">
+              style="display:none; background:var(--panel-bg-alt); border:1px solid var(--border-color); border-radius:4px; padding:10px; flex-direction:column; gap:8px;">
               <div style="border-bottom:1px solid #222; padding-bottom:5px; margin-bottom:5px;">
                 <span style="font-size:0.72em; color:#666; font-weight:bold; text-transform:uppercase;">STLC Target
                   Type:</span>
@@ -888,8 +910,7 @@
       </div>
 
       <!-- LAMBDA PROOF: Collapsible bottom panel -->
-      <div id="lambda-panel"
-        style="flex-shrink:0; border-top:2px solid var(--border-color); transition:max-height 0.4s ease-in-out, opacity 0.3s ease; overflow:hidden;">
+      <div id="lambda-panel" style="flex-shrink:0; border-top:2px solid var(--border-color); overflow:hidden;">
         <!-- Header -->
         <div id="lambda-header"
           style="display:flex; justify-content:space-between; align-items:center; padding:8px 15px; cursor:pointer; user-select:none; background:var(--header-bg);"
@@ -909,7 +930,7 @@
 
         <!-- Body -->
         <div id="lambda-body"
-          style="max-height:0; overflow:hidden; transition:max-height 0.4s ease-in-out, padding 0.3s ease; padding:0 12px; background: var(--panel-bg);">
+          style="max-height:0; overflow:hidden; transition:max-height 0.4s linear, padding 0.3s linear; padding:0 12px; background: var(--panel-bg);">
           <div
             style="display: grid; grid-template-columns: 1fr 400px; height: 250px; gap: 15px; padding-top:10px; padding-bottom:10px;">
             <div style="display: flex; flex-direction: column; gap: 12px; min-width: 0;">
@@ -945,13 +966,13 @@
                   </select>
                   <div style="display:flex; gap:4px;">
                     <button id="lambda-save-btn"
-                      style="padding:8px 12px; background:#222; border:1px solid #444; color:#ccc; border-radius:4px; cursor:pointer;"
+                      style="padding:8px 12px; background:var(--btn-bg); border:1px solid var(--border-color); color:var(--text-color); border-radius:4px; cursor:pointer;"
                       title="Save expression to file.">💾</button>
                     <button id="lambda-load-btn"
-                      style="padding:8px 12px; background:#222; border:1px solid #444; color:#ccc; border-radius:4px; cursor:pointer;"
+                      style="padding:8px 12px; background:var(--btn-bg); border:1px solid var(--border-color); color:var(--text-color); border-radius:4px; cursor:pointer;"
                       title="Load expression from file.">📂</button>
                     <button id="lambda-clear-btn"
-                      style="padding:8px 12px; background:#333; border:1px solid #444; color:#aaa; border-radius:4px; cursor:pointer; font-size:0.8em; font-weight:bold;"
+                      style="padding:8px 12px; background:var(--btn-bg); border:1px solid var(--border-color); color:var(--text-color); border-radius:4px; cursor:pointer; font-size:0.8em; font-weight:bold;"
                       title="Clear current expression.">CL</button>
                   </div>
                 </div>
@@ -966,7 +987,7 @@
                   <span style="font-size:0.7em; color:#555; font-family:monospace;">Syntax: \x.\y.x y</span>
                 </div>
                 <textarea id="lambda-input"
-                  style="flex: 1; background: #000; color: #4cd964; border: 1px solid #333; border-radius: 4px; padding: 12px; font-family: 'Fira Code', 'Consolas', monospace; font-size:0.95em; line-height:1.4; resize: none; outline:none;"
+                  style="flex: 1; background: var(--input-bg); color: var(--input-text-color); border: 1px solid var(--input-border); border-radius: 4px; padding: 12px; font-family: 'Fira Code', 'Consolas', monospace; font-size:0.95em; line-height:1.4; resize: none; outline:none;"
                   placeholder="Enter Lambda Expression (e.g. \x.\y.\z. x z (y z))"></textarea>
               </div>
               <!-- Type & Goal Section -->
@@ -976,7 +997,7 @@
                     style="color:#888; font-size:0.75em; font-weight:bold; text-transform:uppercase; letter-spacing:0.5px;">Target
                     Goal Formula (Optional)</label>
                   <input id="lambda-goal-input" type="text"
-                    style="background:#000; color:#4a90e2; border:1px solid #333; border-radius:4px; padding:10px; font-family:'Fira Code', monospace; font-size:0.9em;"
+                    style="background:var(--input-bg); color:var(--input-text-color); border:1px solid var(--input-border); border-radius:4px; padding:10px; font-family:'Fira Code', monospace; font-size:0.9em;"
                     placeholder="e.g. p -> p">
                 </div>
                 <div style="width:120px; display:flex; flex-direction:column; gap:6px;">
@@ -984,7 +1005,7 @@
                     style="color:#888; font-size:0.75em; font-weight:bold; text-transform:uppercase; letter-spacing:0.5px;">
                     Status</label>
                   <div id="lambda-status-badge"
-                    style="flex:1; background:#222; border:1px solid #333; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:0.8em; font-weight:bold; color:#555;">
+                    style="flex:1; background:var(--panel-bg-alt); border:1px solid var(--border-color); border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:0.8em; font-weight:bold; color:var(--text-dim);">
                     IDLE
                   </div>
                 </div>
@@ -1030,8 +1051,7 @@
         </div>
       </div>
       <!-- NATURAL DEDUCTION PANEL -->
-      <div id="nd-panel"
-        style="flex-shrink:0; border-top:2px solid var(--border-color); transition:max-height 0.4s ease-in-out, opacity 0.3s ease; overflow:hidden;">
+      <div id="nd-panel" style="flex-shrink:0; border-top:2px solid var(--border-color); overflow:hidden;">
         <div id="nd-header"
           style="display:flex; justify-content:space-between; align-items:center; padding:8px 15px; cursor:pointer; user-select:none; background:var(--header-bg);"
           title="Click to expand or collapse the Natural Deduction derivation tree.">
@@ -1056,7 +1076,7 @@
           </div>
         </div>
         <div id="nd-body"
-          style="max-height:0; overflow:hidden; transition:max-height 0.4s ease-in-out, padding 0.3s ease; padding:0 12px; background: var(--panel-bg);">
+          style="max-height:0; overflow:hidden; transition:max-height 0.4s linear, padding 0.3s linear; padding:0 12px; background: var(--panel-bg);">
           <div id="nd-tree-container"
             style="width:100%; min-height:240px; max-height:400px; overflow:auto; background:var(--code-bg); border:1px solid var(--border-color); border-radius:4px; padding:20px; display:flex; justify-content:center; align-items:flex-end; font-family:'Fira Code', monospace; font-size:0.9em; margin-bottom:15px;">
             <div style="color:var(--text-dim); font-style:italic;">No witness provided. Enter a lambda term in the panel
@@ -1067,8 +1087,7 @@
       </div>
 
       <!-- TEMPORAL LOGIC PANEL: Collapsible bottom panel -->
-      <div id="temporal-panel"
-        style="flex-shrink:0; border-top:2px solid var(--border-color); transition:max-height 0.4s ease-in-out, opacity 0.3s ease; overflow:hidden;">
+      <div id="temporal-panel" style="flex-shrink:0; border-top:2px solid var(--border-color); overflow:hidden;">
         <!-- Header -->
         <div id="temporal-header"
           style="display:flex; justify-content:space-between; align-items:center; padding:8px 15px; cursor:pointer; user-select:none; background:var(--header-bg);"
@@ -1087,7 +1106,7 @@
 
         <!-- Body -->
         <div id="temporal-body"
-          style="max-height:0; overflow:hidden; transition:max-height 0.4s ease-in-out, padding 0.3s ease; padding:0 12px; background: var(--panel-bg);">
+          style="max-height:0; overflow:hidden; transition:max-height 0.4s linear, padding 0.3s linear; padding:0 12px; background: var(--panel-bg);">
           <div style="padding:15px; display:flex; flex-direction:column; gap:12px;">
             <div style="display:flex; gap:10px; align-items:center;">
               <select id="temporal-presets"
@@ -1116,8 +1135,7 @@
       </div>
 
       <!-- SCRIPTING PANEL: Collapsible bottom panel -->
-      <div id="scripting-panel"
-        style="flex-shrink:0; border-top:2px solid var(--border-color); transition:max-height 0.4s ease-in-out, opacity 0.3s ease; overflow:hidden;">
+      <div id="scripting-panel" style="flex-shrink:0; border-top:2px solid var(--border-color); overflow:hidden;">
         <!-- Header (clickable to collapse/expand) -->
         <div id="scripting-header"
           style="display:flex; justify-content:space-between; align-items:center; padding:8px 15px; cursor:pointer; user-select:none; background:var(--header-bg);"
@@ -1137,7 +1155,7 @@
 
         <!-- Collapsible body (hidden by default) -->
         <div id="scripting-body"
-          style="max-height:0; overflow:hidden; transition:max-height 0.4s ease-in-out, padding 0.3s ease; padding:0 12px;">
+          style="max-height:0; overflow:hidden; transition:max-height 0.4s linear, padding 0.3s linear; padding:0 12px;">
 
           <div style="padding-top:10px; padding-bottom:10px; display:flex; flex-direction:column; gap:10px;">
             <!-- Toolbar -->
@@ -1257,43 +1275,56 @@
 
       <div
         style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; max-width: 1000px;">
-        <div style="background: rgba(30, 30, 35, 0.6); padding: 25px; border-radius: 12px; border: 1px solid #333;">
-          <h3 style="margin-top: 0; color: #eee; font-size: 1.1em;">Theme</h3>
-          <p style="color: #888; font-size: 0.85em; margin-bottom: 20px;">Choose a color palette that suits your
+        <div
+          style="background: var(--panel-bg-alt); padding: 25px; border-radius: 12px; border: 1px solid var(--border-color);">
+          <h3 style="margin-top: 0; color: var(--accent-color); font-size: 1.1em;">Theme</h3>
+          <p style="color: var(--text-dim); font-size: 0.85em; margin-bottom: 20px;">Choose a color palette that suits
+            your
             workflow.</p>
           <div style="display: flex; flex-direction: column; gap: 15px;">
-            <label style="cursor: pointer; display: flex; align-items: center; gap: 12px; font-size: 1.05em;">
-              <input type="radio" name="theme" value="dark" checked style="accent-color: #4a90e2;">
+            <label
+              style="cursor: pointer; display: flex; align-items: center; gap: 12px; font-size: 1.05em; color: var(--text-color);">
+              <input type="radio" name="theme" value="dark" checked style="accent-color: var(--accent-color);">
               <span>Classic Dark (Default)</span>
             </label>
-            <label style="cursor: pointer; display: flex; align-items: center; gap: 12px; font-size: 1.05em;">
-              <input type="radio" name="theme" value="light" style="accent-color: #4a90e2;">
+            <label
+              style="cursor: pointer; display: flex; align-items: center; gap: 12px; font-size: 1.05em; color: var(--text-color);">
+              <input type="radio" name="theme" value="light" style="accent-color: var(--accent-color);">
               <span>Modern Light (Clean)</span>
             </label>
-            <label style="cursor: pointer; display: flex; align-items: center; gap: 12px; font-size: 1.05em;">
-              <input type="radio" name="theme" value="high-contrast" style="accent-color: #4a90e2;">
+            <label
+              style="cursor: pointer; display: flex; align-items: center; gap: 12px; font-size: 1.05em; color: var(--text-color);">
+              <input type="radio" name="theme" value="high-contrast" style="accent-color: var(--accent-color);">
               <span>High Contrast (Accessible)</span>
             </label>
-            <label style="cursor: pointer; display: flex; align-items: center; gap: 12px; font-size: 1.05em;">
-              <input type="radio" name="theme" value="monokai" style="accent-color: #4a90e2;">
+            <label
+              style="cursor: pointer; display: flex; align-items: center; gap: 12px; font-size: 1.05em; color: var(--text-color);">
+              <input type="radio" name="theme" value="monokai" style="accent-color: var(--accent-color);">
               <span>Monokai (Hacker)</span>
             </label>
           </div>
         </div>
 
-        <div style="background: rgba(30, 30, 35, 0.6); padding: 25px; border-radius: 12px; border: 1px solid #333;">
-          <h3 style="margin-top: 0; color: #eee; font-size: 1.1em;">Typography & Layout</h3>
-          <p style="color: #888; font-size: 0.85em; margin-bottom: 20px;">Adjust fonts and interface scaling.</p>
+        <div
+          style="background: var(--panel-bg-alt); padding: 25px; border-radius: 12px; border: 1px solid var(--border-color);">
+          <h3 style="margin-top: 0; color: var(--accent-color); font-size: 1.1em;">Typography & Layout</h3>
+          <p style="color: var(--text-dim); font-size: 0.85em; margin-bottom: 20px;">Adjust fonts and interface scaling.
+          </p>
 
           <div style="margin-bottom: 20px;">
-            <label style="display: block; margin-bottom: 8px; font-weight: bold; font-size: 0.9em; color: #aaa;">Font
+            <label
+              style="display: block; margin-bottom: 8px; font-weight: bold; font-size: 0.9em; color: var(--text-dim);">Font
               Family</label>
             <select id="font-family-select"
-              style="width: 100%; padding: 10px; background: #222; border: 1px solid #444; color: white; border-radius: 6px; font-size: 1em;">
+              style="width: 100%; padding: 10px; background: var(--input-bg); border: 1px solid var(--input-border); color: var(--input-text-color); border-radius: 6px; font-size: 1em;">
               <option value="'Inter', sans-serif">Inter (Modern Sans)</option>
-              <option value="'Roboto', sans-serif">Roboto (Clean)</option>
               <option value="'Outfit', sans-serif">Outfit (Professional)</option>
-              <option value="'Fira Code', monospace">Fira Code (Monospace)</option>
+              <option value="'Roboto', sans-serif">Roboto (Clean)</option>
+              <option value="'Montserrat', sans-serif">Montserrat (Geometric)</option>
+              <option value="'Playfair Display', serif">Playfair Display (Elegant Serif)</option>
+              <option value="'Libre+Baskerville', serif">Libre Baskerville (Classic Serif)</option>
+              <option value="'Fira Code', monospace">Fira Code (Ligatures Mono)</option>
+              <option value="'JetBrains Mono', monospace">JetBrains Mono (Developer Mono)</option>
               <option value="system-ui, sans-serif">System Default</option>
             </select>
           </div>
