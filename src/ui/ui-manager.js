@@ -718,7 +718,8 @@ export class UiManager {
                 color: w.color,
                 textColor: w.textColor,
                 description: w.description,
-                valuation: Array.from(w.valuation.entries())
+                valuation: Array.from(w.valuation.entries()),
+                domain: Array.from(w.domain || [])
             })),
             relations: this.model.relations.map(r => ({ ...r })),
             domain: Array.from(this.model.domain)
@@ -871,6 +872,9 @@ export class UiManager {
                 wData.valuation.forEach(([key, val]) => {
                     if (val) w.setAtom(key, true);
                 });
+            }
+            if (wData.domain) {
+                w.domain = new Set(wData.domain);
             }
             this.model.addWorld(w);
         });
@@ -2015,7 +2019,13 @@ export class UiManager {
         this.model.worlds.clear();
         this.model.relations = [];
         this.model.domain.clear();
-        this.model.domain.add('d1');
+
+        // Load Global Domain
+        if (data.domain && Array.isArray(data.domain)) {
+            data.domain.forEach(obj => this.model.domain.add(obj));
+        } else {
+            this.model.domain.add('d1'); // Default if none provided
+        }
 
         // Load Worlds
         data.worlds.forEach(w => {
@@ -2024,6 +2034,12 @@ export class UiManager {
             world.color = w.color || '#333'; // Default fallback
             world.textColor = w.textColor || '#fff';
             world.description = w.description || "";
+
+            // Load Local Domain
+            if (w.domain && Array.isArray(w.domain)) {
+                world.domain = new Set(w.domain);
+            }
+
             if (w.valuation) {
                 w.valuation.forEach(([atom, val]) => {
                     if (val) world.setAtom(atom, true);
@@ -2644,7 +2660,8 @@ export class UiManager {
                     name: w.name,
                     color: w.color,
                     textColor: w.textColor,
-                    valuation: Array.from(w.valuation.entries())
+                    valuation: Array.from(w.valuation.entries()),
+                    domain: Array.from(w.domain || [])
                 })),
                 relations: this.model.relations.map(r => ({
                     source: r.sourceId,
@@ -2653,6 +2670,12 @@ export class UiManager {
                     data: r.data
                 })),
                 domain: Array.from(this.model.domain)
+            },
+            ui: {
+                activeTab: document.querySelector('.tab-content.active')?.id || 'tab-editor',
+                synthesisDepth: document.getElementById('synthesis-depth')?.value || '15',
+                wormInput: document.getElementById('worm-input')?.value || '',
+                calculusExpression: document.getElementById('calc-input')?.value || ''
             },
             formula: {
                 raw: this.formulaInput ? this.formulaInput.value : ''
@@ -2716,6 +2739,9 @@ export class UiManager {
                             w.name = wData.name;
                             w.color = wData.color;
                             w.textColor = wData.textColor;
+                            if (wData.domain) {
+                                w.domain = new Set(wData.domain);
+                            }
                             if (wData.valuation) {
                                 w.valuation = new Map(wData.valuation);
                             }
@@ -2793,6 +2819,25 @@ export class UiManager {
                     }
                 } else {
                     this.applyTheme('dark');
+                }
+
+                // 4. Restore UI Fields
+                if (session.ui) {
+                    if (session.ui.synthesisDepth) {
+                        const sd = document.getElementById('synthesis-depth');
+                        if (sd) sd.value = session.ui.synthesisDepth;
+                    }
+                    if (session.ui.wormInput) {
+                        const wi = document.getElementById('worm-input');
+                        if (wi) wi.value = session.ui.wormInput;
+                    }
+                    if (session.ui.calculusExpression) {
+                        const ci = document.getElementById('calc-input');
+                        if (ci) ci.value = session.ui.calculusExpression;
+                    }
+                    if (session.ui.activeTab) {
+                        this.switchTab(session.ui.activeTab);
+                    }
                 }
 
                 // Refresh UI

@@ -348,5 +348,153 @@ export const PRESETS = [
                 { sourceId: "d3", targetId: "d3", agent: "t" }
             ]
         }
+    },
+    {
+        name: "Existential Tension",
+        desc: "Varying Domains: Object 'a' exists everywhere, but 'b' only exists in the right world. Affects 'all x' quantification.",
+        complexity: 3, worldsCount: 2, agentsCount: 1,
+        tags: ["FOL", "Metaphysics"],
+        data: {
+            domain: ["a", "b"],
+            worlds: [
+                { id: "w1", x: 200, y: 200, name: "The Small World", domain: ["a"], valuation: [["p", true], ["P(a)", true]] },
+                { id: "w2", x: 500, y: 200, name: "The Large World", domain: ["a", "b"], valuation: [["p", true], ["P(a)", true]] }
+            ],
+            relations: [{ sourceId: "w1", targetId: "w2", agent: "t" }]
+        }
+    },
+    {
+        name: "The Knowledge of One",
+        desc: "Epistemic FOL: Agent 'a' knows that someone has property P, but doesn't know WHO.",
+        complexity: 4, worldsCount: 2, agentsCount: 1,
+        tags: ["FOL", "Epistemic"],
+        data: {
+            domain: ["obj1", "obj2"],
+            worlds: [
+                { id: "w1", x: 200, y: 200, name: "Fact: Obj1", valuation: [["p", true], ["P(obj1)", true]] },
+                { id: "w2", x: 500, y: 200, name: "Fact: Obj2", valuation: [["p", true], ["P(obj2)", true]] }
+            ],
+            relations: [
+                { sourceId: "w1", targetId: "w2", agent: "a" },
+                { sourceId: "w2", targetId: "w1", agent: "a" }
+            ]
+        }
+    },
+    {
+        name: "Syllogism: Baroco",
+        desc: "Visualizing a classic valid syllogism: 'All P are M, Some S are not M, therefore Some S are not P'.",
+        complexity: 2, worldsCount: 1, agentsCount: 0,
+        tags: ["FOL", "Classical"],
+        data: {
+            domain: ["s1", "s2", "p1", "m1"],
+            worlds: [
+                {
+                    id: "w1", x: 350, y: 300, name: "Model",
+                    valuation: [
+                        ["p", true], ["q", true],
+                        ["P(p1)", true], ["M(p1)", true],
+                        ["P(m1)", true], ["M(m1)", true],
+                        ["S(s1)", true], ["M(s1)", false],
+                        ["S(s2)", true], ["M(s2)", true], ["P(s2)", true]
+                    ]
+                }
+            ],
+            relations: []
+        }
+    },
+    {
+        name: "Identity of Indiscernibles",
+        desc: "Metaphysics: Two objects 'obj1' and 'obj2' that share all properties (P, Q). Are they really distinct?",
+        complexity: 2, worldsCount: 1, agentsCount: 0,
+        tags: ["FOL", "Metaphysics"],
+        data: {
+            domain: ["obj1", "obj2"],
+            worlds: [{ id: "w1", x: 350, y: 300, name: "The Model", valuation: [["p", true], ["P(obj1)", true], ["P(obj2)", true], ["Q(obj1)", true], ["Q(obj2)", true]] }]
+        }
+    },
+    {
+        name: "The Solipsist",
+        desc: "A world where only one object 'me' exists. Affects 'all' and 'exists' in unique ways.",
+        complexity: 1, worldsCount: 1, agentsCount: 0,
+        tags: ["FOL", "Philosophy"],
+        data: {
+            domain: ["me"],
+            worlds: [{ id: "w1", x: 350, y: 300, name: "Ego", valuation: [["p", true], ["P(me)", true]] }]
+        }
+    },
+    {
+        name: "Expanding Universe",
+        desc: "Growth: World A has only 1 object, World B has 2. Models how truth changes as objects are discovered.",
+        complexity: 3, worldsCount: 2, agentsCount: 1,
+        tags: ["FOL", "Metaphysics"],
+        data: {
+            domain: ["a", "b"],
+            worlds: [
+                { id: "w1", x: 200, y: 200, name: "Past", domain: ["a"], valuation: [["p", true], ["P(a)", true]] },
+                { id: "w2", x: 500, y: 200, name: "Future", domain: ["a", "b"], valuation: [["p", true], ["P(a)", true], ["P(b)", true]] }
+            ],
+            relations: [{ sourceId: "w1", targetId: "w2", agent: "t" }]
+        }
+    },
+    {
+        name: "Social Network",
+        desc: "Relations: Modeling 'Friend(x, y)'. Shows transitivity/symmetry in FOL properties.",
+        complexity: 3, worldsCount: 1, agentsCount: 0,
+        tags: ["FOL", "Sociology"],
+        data: {
+            domain: ["alice", "bob", "charlie"],
+            worlds: [{
+                id: "w1", x: 350, y: 300, name: "Network",
+                valuation: [
+                    ["p", true],
+                    ["Friend(alice, bob)", true], ["Friend(bob, alice)", true],
+                    ["Friend(bob, charlie)", true], ["Friend(charlie, bob)", true]
+                ]
+            }]
+        }
+    },
+    {
+        name: "The Secret (Epistemic FOL)",
+        desc: "Agent 'a' knows that Neo (obj1) is the one (P), but Agent 'b' is uncertain.",
+        complexity: 4, worldsCount: 2, agentsCount: 2,
+        tags: ["FOL", "Epistemic"],
+        data: {
+            domain: ["obj1", "obj2"],
+            worlds: [
+                { id: "w1", x: 200, y: 200, name: "Fact", valuation: [["p", true], ["P(obj1)", true]] },
+                { id: "w2", x: 500, y: 200, name: "Possibility", valuation: [["P(obj2)", true]] }
+            ],
+            relations: [
+                { sourceId: "w1", targetId: "w1", agent: "a" }, // a knows
+                { sourceId: "w1", targetId: "w2", agent: "b" }, // b is uncertain
+                { sourceId: "w2", targetId: "w1", agent: "b" }
+            ]
+        }
+    },
+    {
+        name: "Square of Opposition",
+        desc: "Aristotle: A (All S are P) vs O (Some S are not P). Contradictories and contraries.",
+        complexity: 4, worldsCount: 4, agentsCount: 1,
+        tags: ["FOL", "Classical"],
+        data: {
+            domain: ["s1", "s2"],
+            worlds: [
+                { id: "A", x: 150, y: 150, name: "All S are P", valuation: [["p", true], ["S(s1)", true], ["P(s1)", true], ["S(s2)", true], ["P(s2)", true]] },
+                { id: "E", x: 450, y: 150, name: "No S is P", valuation: [["p", true], ["S(s1)", true], ["P(s1)", false], ["S(s2)", true], ["P(s2)", false]] },
+                { id: "I", x: 150, y: 350, name: "Some S is P", valuation: [["q", true], ["S(s1)", true], ["P(s1)", true], ["S(s2)", true], ["P(s2)", false]] },
+                { id: "O", x: 450, y: 350, name: "Some S is not P", valuation: [["q", true], ["S(s1)", true], ["P(s1)", false], ["S(s2)", true], ["P(s2)", true]] }
+            ],
+            relations: []
+        }
+    },
+    {
+        name: "Empty World (Non-Empty Domain Rule)",
+        desc: "Standard FOL requires one object. This 'Empty' world shows why 'exists x. top' is usually a tautology.",
+        complexity: 2, worldsCount: 1, agentsCount: 0,
+        tags: ["FOL", "Logic"],
+        data: {
+            domain: [], // Purely empty
+            worlds: [{ id: "empty", x: 350, y: 300, name: "The Void", domain: [], valuation: [["v", true]] }]
+        }
     }
 ];
